@@ -124,13 +124,13 @@ public class CategoryDaoImpl implements CategoryDao {
 
     @Override
     public List<Category> findFavorites() {
-        return jdbcTemplate.query("SELECT * FROM categories WHERE is_favorite = 1", categoryRowMapper);
+        return jdbcTemplate.query("SELECT * FROM categories WHERE is_favorite = TRUE", categoryRowMapper);
     }
 
     @Override
     public List<Category> findFavoritesByNameContaining(String name) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", "%" + name + "%");
-        return namedParameterJdbcTemplate.query("SELECT * FROM categories WHERE is_favorite = 1 AND name LIKE :name", parameters, categoryRowMapper);
+        return namedParameterJdbcTemplate.query("SELECT * FROM categories WHERE is_favorite = TRUE AND name LIKE :name", parameters, categoryRowMapper);
     }
 }
