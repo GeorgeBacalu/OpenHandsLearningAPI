@@ -32,7 +32,7 @@ public class UserDto {
     private String email;
 
     @NotBlank(message = "Password must not be blank")
-    @Size(min = 8, max = 128, message = "Password is invalid")
+    @Size(min = 8, max = 72, message = "Password is invalid")
     @lombok.ToString.Exclude
     private String password;
 

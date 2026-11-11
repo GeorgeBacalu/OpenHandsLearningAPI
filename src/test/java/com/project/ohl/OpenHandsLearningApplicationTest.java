@@ -66,6 +66,22 @@ class OpenHandsLearningApplicationTest {
         assertThat(client.send(request, HttpResponse.BodyHandlers.ofString()).statusCode()).isEqualTo(415);
     }
 
+    @Test
+    void returnsBadRequestForPasswordsExceedingBcryptUtf8Limit() throws Exception {
+        var request = json.createObjectNode();
+        request.put("name", "Test User");
+        request.put("email", "test@example.test");
+        request.put("password", "\u00e9".repeat(37));
+        request.put("mobile", "0712345678");
+        request.put("address", "Bucharest");
+        request.put("institutionId", 1);
+        request.put("roleId", 1);
+        var response = send("POST", "/api/users", json.writeValueAsString(request));
+        assertThat(response.statusCode()).isEqualTo(400);
+        assertThat(json.readTree(response.body()).path("detail").asText())
+                .isEqualTo("Password must not exceed 72 UTF-8 bytes.");
+    }
+
     private HttpResponse<String> send(String method, String path, String body) throws Exception {
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
                 .timeout(Duration.ofSeconds(30)).header("Content-Type", "application/json")

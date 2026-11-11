@@ -57,8 +57,11 @@ controllers. There is no runtime Swagger UI or springdoc dependency.
 
 Errors use RFC 9457 problem details (`application/problem+json`), including field
 validation errors. Database conflicts return 409 without exposing SQL details.
-New and updated user passwords are hashed with Argon2id; user HTTP responses
-exclude passwords. Existing plaintext database values are not silently rewritten.
+New and updated user passwords are hashed with BCrypt (`$2b$`, cost factor 12),
+using a fresh random salt for each hash. User HTTP responses exclude passwords.
+Passwords must contain 8 to 72 characters and fit within 72 UTF-8 bytes; oversized
+values return HTTP 400. Existing credentials are not silently rewritten; password
+updates store BCrypt.
 
 ## Structure
 
@@ -78,8 +81,8 @@ recursive entity loading. ArchUnit tests enforce these boundaries.
 The Java 25 baseline uses Spring Boot 4.1.2, Maven 3.10.0, and Maven Wrapper 3.3.4.
 Spring Boot manages the compatible Spring Framework, Hibernate, Jackson 3,
 PostgreSQL driver, Spring Security Crypto, and Lombok versions. Explicit overrides
-keep H2, JUnit, Mockito, and Maven plugins current. ArchUnit 1.5.1 and Bouncy Castle
-1.86 support architecture checks and Argon2id respectively. MapStruct 1.6.3
+keep H2, JUnit, Mockito, and Maven plugins current. ArchUnit 1.5.1 enforces
+architecture boundaries. MapStruct 1.6.3
 provides compile-time DTO mapping; its processor and Lombok binding 0.2.0 are
 configured explicitly for Java 25. Unmapped target fields fail compilation.
 Generated mapper implementations stay in `target/`; stateless mappers are wired

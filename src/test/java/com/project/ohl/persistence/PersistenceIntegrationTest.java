@@ -77,8 +77,8 @@ class PersistenceIntegrationTest {
                 .address("Bucharest").institutionId(institution.getId()).roleId(role.getId()).build();
         var created = userService.saveUser(request);
         var stored = users.findById(created.getId()).orElseThrow().getPassword();
-        assertThat(stored).startsWith("$argon2id$").doesNotContain(request.getPassword());
-        var encoder = new org.springframework.security.crypto.argon2.Argon2PasswordEncoder(16, 32, 1, 19456, 2);
+        assertThat(stored).startsWith("$2b$12$").doesNotContain(request.getPassword());
+        var encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
         assertThat(encoder.matches(request.getPassword(), stored)).isTrue();
         request.setPassword("another-test-password");
         userService.updateUserById(request, created.getId());

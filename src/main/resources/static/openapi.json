@@ -2039,8 +2039,9 @@
           "password": {
             "type": "string",
             "minLength": 8,
-            "maxLength": 128,
-            "writeOnly": true
+            "maxLength": 72,
+            "writeOnly": true,
+            "description": "8 to 72 characters, with a maximum of 72 UTF-8 bytes."
           },
           "mobile": {
             "type": "string",
