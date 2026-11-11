@@ -1,7 +1,7 @@
 package com.project.ohl.mock;
 
-import com.project.ohl.feedback.Feedback;
-import com.project.ohl.feedback.enums.FeedbackType;
+import com.project.ohl.domain.model.Feedback;
+import com.project.ohl.domain.model.FeedbackType;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AccessLevel;

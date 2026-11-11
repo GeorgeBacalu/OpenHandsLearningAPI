@@ -1,8 +1,13 @@
 package com.project.ohl.feedback;
 
-import com.project.ohl.exception.ResourceNotFoundException;
-import com.project.ohl.user.User;
-import com.project.ohl.user.UserService;
+import com.project.ohl.application.model.FeedbackDto;
+import com.project.ohl.application.port.out.FeedbackRepositoryPort;
+import com.project.ohl.application.service.FeedbackServiceImpl;
+import com.project.ohl.domain.model.Feedback;
+
+import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.User;
+import com.project.ohl.application.port.in.UserService;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -15,14 +20,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
-import static com.project.ohl.constants.ExceptionMessageConstants.FEEDBACK_NOT_FOUND;
+import static com.project.ohl.application.error.ExceptionMessageConstants.FEEDBACK_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.FeedbackMapper.convertToDto;
+import static com.project.ohl.application.mapper.FeedbackMapper.convertToDto;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedback1;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedback2;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedbacks;
@@ -42,13 +45,10 @@ class FeedbackServiceImplTest {
     private FeedbackServiceImpl feedbackService;
 
     @Mock
-    private FeedbackDao feedbackDao;
+    private FeedbackRepositoryPort feedbackRepository;
 
     @Mock
     private UserService userService;
-
-    @Spy
-    private ModelMapper modelMapper;
 
     @Mock
     private Clock clock;
@@ -72,21 +72,21 @@ class FeedbackServiceImplTest {
         feedback2 = getMockedFeedback2();
         feedbacks = getMockedFeedbacks();
         user = getMockedUser2();
-        feedbackDto1 = convertToDto(modelMapper, feedback1);
-        feedbackDto2 = convertToDto(modelMapper, feedback2);
-        feedbackDtos = feedbacks.stream().map(feedback -> convertToDto(modelMapper, feedback)).toList();
+        feedbackDto1 = convertToDto(feedback1);
+        feedbackDto2 = convertToDto(feedback2);
+        feedbackDtos = feedbacks.stream().map(feedback -> convertToDto(feedback)).toList();
     }
 
     @Test
     void getAllFeedbacks_shouldReturnListOfFeedbacks() {
-        given(feedbackDao.findAll()).willReturn(feedbacks);
+        given(feedbackRepository.findAll()).willReturn(feedbacks);
         List<FeedbackDto> result = feedbackService.getAllFeedbacks();
         assertThat(result).isEqualTo(feedbackDtos);
     }
 
     @Test
     void getFeedbackById_withValidId_shouldReturnFeedbackWithGivenId() {
-        given(feedbackDao.findById(anyLong())).willReturn(Optional.ofNullable(feedback1));
+        given(feedbackRepository.findById(anyLong())).willReturn(Optional.ofNullable(feedback1));
         FeedbackDto result = feedbackService.getFeedbackById(VALID_ID);
         assertThat(result).isEqualTo(feedbackDto1);
     }
@@ -103,22 +103,22 @@ class FeedbackServiceImplTest {
         given(clock.getZone()).willReturn(zonedDateTime.getZone());
         given(clock.instant()).willReturn(zonedDateTime.toInstant());
         feedback1.setSentAt(zonedDateTime.toLocalDateTime());
-        given(feedbackDao.save(any(Feedback.class))).willReturn(feedback1);
+        given(feedbackRepository.save(any(Feedback.class))).willReturn(feedback1);
         FeedbackDto result = feedbackService.saveFeedback(feedbackDto1);
-        verify(feedbackDao).save(feedbackCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, feedbackCaptor.getValue()));
+        verify(feedbackRepository).save(feedbackCaptor.capture());
+        assertThat(result).isEqualTo(convertToDto(feedbackCaptor.getValue()));
     }
 
     @Test
     void updateFeedbackById_withValidId_shouldUpdateFeedbackWithGivenId() {
         Feedback feedback = feedback2; feedback.setId(VALID_ID);
         feedback.setSentAt(feedback1.getSentAt());
-        given(feedbackDao.findById(anyLong())).willReturn(Optional.ofNullable(feedback1));
+        given(feedbackRepository.findById(anyLong())).willReturn(Optional.ofNullable(feedback1));
         given(userService.getUserEntityById(anyLong())).willReturn(user);
-        given(feedbackDao.update(any(Feedback.class))).willReturn(feedback);
+        given(feedbackRepository.update(any(Feedback.class))).willReturn(feedback);
         FeedbackDto result = feedbackService.updateFeedbackById(feedbackDto2, VALID_ID);
-        verify(feedbackDao).update(feedbackCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, feedbackCaptor.getValue()));
+        verify(feedbackRepository).update(feedbackCaptor.capture());
+        assertThat(result).isEqualTo(convertToDto(feedbackCaptor.getValue()));
     }
 
     @Test
@@ -126,14 +126,14 @@ class FeedbackServiceImplTest {
         assertThatThrownBy(() -> feedbackService.updateFeedbackById(feedbackDto2, INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(FEEDBACK_NOT_FOUND, INVALID_ID));
-        verify(feedbackDao, never()).update(any(Feedback.class));
+        verify(feedbackRepository, never()).update(any(Feedback.class));
     }
 
     @Test
     void deleteFeedbackById_withValidId_shouldRemoveFeedbackWithGivenIdFromList() {
-        given(feedbackDao.findById(anyLong())).willReturn(Optional.ofNullable(feedback1));
+        given(feedbackRepository.findById(anyLong())).willReturn(Optional.ofNullable(feedback1));
         feedbackService.deleteFeedbackById(VALID_ID);
-        verify(feedbackDao).delete(feedback1);
+        verify(feedbackRepository).delete(feedback1);
     }
 
     @Test
@@ -141,6 +141,6 @@ class FeedbackServiceImplTest {
         assertThatThrownBy(() -> feedbackService.deleteFeedbackById(INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(FEEDBACK_NOT_FOUND, INVALID_ID));
-        verify(feedbackDao, never()).delete(any(Feedback.class));
+        verify(feedbackRepository, never()).delete(any(Feedback.class));
     }
 }

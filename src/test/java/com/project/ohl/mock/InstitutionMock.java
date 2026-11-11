@@ -1,6 +1,6 @@
 package com.project.ohl.mock;
 
-import com.project.ohl.institution.Institution;
+import com.project.ohl.domain.model.Institution;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

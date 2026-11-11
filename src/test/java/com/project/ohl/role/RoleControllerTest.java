@@ -1,19 +1,22 @@
 package com.project.ohl.role;
 
+import com.project.ohl.adapter.web.RoleController;
+import com.project.ohl.application.model.RoleDto;
+import com.project.ohl.application.port.in.RoleService;
+import com.project.ohl.domain.model.Role;
+
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.RoleMapper.convertToDto;
+import static com.project.ohl.application.mapper.RoleMapper.convertToDto;
 import static com.project.ohl.mock.RoleMock.getMockedRole1;
 import static com.project.ohl.mock.RoleMock.getMockedRole2;
 import static com.project.ohl.mock.RoleMock.getMockedRoles;
@@ -33,18 +36,15 @@ class RoleControllerTest {
     @Mock
     private RoleService roleService;
 
-    @Spy
-    private ModelMapper modelMapper;
-
     private RoleDto roleDto1;
     private RoleDto roleDto2;
     private List<RoleDto> roleDtos;
 
     @BeforeEach
     void setUp() {
-        roleDto1 = convertToDto(modelMapper, getMockedRole1());
-        roleDto2 = convertToDto(modelMapper, getMockedRole2());
-        roleDtos = getMockedRoles().stream().map(Role -> convertToDto(modelMapper, Role)).toList();
+        roleDto1 = convertToDto(getMockedRole1());
+        roleDto2 = convertToDto(getMockedRole2());
+        roleDtos = getMockedRoles().stream().map(Role -> convertToDto(Role)).toList();
     }
 
     @Test

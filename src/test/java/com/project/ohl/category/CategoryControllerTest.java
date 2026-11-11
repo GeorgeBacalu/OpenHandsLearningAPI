@@ -1,20 +1,22 @@
 package com.project.ohl.category;
 
+import com.project.ohl.adapter.web.CategoryController;
+import com.project.ohl.application.model.CategoryDto;
+import com.project.ohl.application.port.in.CategoryService;
+
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.CategoryMapper.convertToDto;
-import static com.project.ohl.mapper.CategoryMapper.convertToDtoList;
+import static com.project.ohl.application.mapper.CategoryMapper.convertToDto;
+import static com.project.ohl.application.mapper.CategoryMapper.convertToDtoList;
 import static com.project.ohl.mock.CategoryMock.getMockedCategories;
 import static com.project.ohl.mock.CategoryMock.getMockedCategoryAlphabet;
 import static com.project.ohl.mock.CategoryMock.getMockedCategoryNumbers;
@@ -38,9 +40,6 @@ class CategoryControllerTest {
     @Mock
     private CategoryService categoryService;
 
-    @Spy
-    private ModelMapper modelMapper;
-
     private CategoryDto categoryDtoOne;
     private CategoryDto categoryDtoTwo;
     private List<CategoryDto> categoryDtos;
@@ -50,12 +49,12 @@ class CategoryControllerTest {
 
     @BeforeEach
     void setUp() {
-        categoryDtoOne = convertToDto(modelMapper, getMockedCategoryAlphabet());
-        categoryDtoTwo = convertToDto(modelMapper, getMockedCategoryNumbers());
-        categoryDtos = convertToDtoList(modelMapper, getMockedCategories());
-        filteredCategoryDtos = convertToDtoList(modelMapper, getMockedParentCategoriesFilteredByName());
-        favoriteCategoryDtos = convertToDtoList(modelMapper, getMockedFavoriteCategories());
-        filteredFavoriteCategoryDtos = convertToDtoList(modelMapper, getMockedFavoriteCategoriesFilteredByName());
+        categoryDtoOne = convertToDto(getMockedCategoryAlphabet());
+        categoryDtoTwo = convertToDto(getMockedCategoryNumbers());
+        categoryDtos = convertToDtoList(getMockedCategories());
+        filteredCategoryDtos = convertToDtoList(getMockedParentCategoriesFilteredByName());
+        favoriteCategoryDtos = convertToDtoList(getMockedFavoriteCategories());
+        filteredFavoriteCategoryDtos = convertToDtoList(getMockedFavoriteCategoriesFilteredByName());
     }
 
     @Test

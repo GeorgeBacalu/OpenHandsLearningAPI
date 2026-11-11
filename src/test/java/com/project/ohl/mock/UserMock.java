@@ -1,6 +1,6 @@
 package com.project.ohl.mock;
 
-import com.project.ohl.user.User;
+import com.project.ohl.domain.model.User;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AccessLevel;

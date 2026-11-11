@@ -1,6 +1,6 @@
 package com.project.ohl.mock;
 
-import com.project.ohl.letter_sign_pair.LetterSignPair;
+import com.project.ohl.domain.model.LetterSignPair;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

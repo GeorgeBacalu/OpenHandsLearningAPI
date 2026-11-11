@@ -1,0 +1,120 @@
+package com.project.ohl.application.service;
+
+import com.project.ohl.application.model.CategoryDto;
+import com.project.ohl.application.port.in.CategoryService;
+import com.project.ohl.application.port.out.CategoryRepositoryPort;
+import com.project.ohl.domain.model.Category;
+
+import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.application.port.in.SectionService;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+
+import static com.project.ohl.application.error.ExceptionMessageConstants.CATEGORY_NOT_FOUND;
+import static com.project.ohl.application.mapper.CategoryMapper.convertToDto;
+import static com.project.ohl.application.mapper.CategoryMapper.convertToDtoList;
+import static com.project.ohl.application.mapper.CategoryMapper.convertToEntity;
+
+@RequiredArgsConstructor
+public class CategoryServiceImpl implements CategoryService {
+
+    private final CategoryRepositoryPort categoryRepository;
+    private final SectionService sectionService;
+
+    @Override
+    public List<CategoryDto> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        return convertToDtoList(categories);
+    }
+
+    @Override
+    public CategoryDto getCategoryById(Long id) {
+        Category category = getCategoryEntityById(id);
+        return convertToDto(category);
+    }
+
+    @Override
+    public CategoryDto saveCategory(CategoryDto categoryDto) {
+        Category category = convertToEntity(categoryDto);
+        Category savedCategory = categoryRepository.save(category);
+        return convertToDto(savedCategory);
+    }
+
+    @Override
+    public CategoryDto updateCategoryById(CategoryDto categoryDto, Long id) {
+        Category categoryToUpdate = getCategoryEntityById(id);
+        validateParent(id, categoryDto.getParentId());
+        categoryToUpdate.setName(categoryDto.getName());
+        categoryToUpdate.setImageId(categoryDto.getImageId());
+        categoryToUpdate.setIsExpanded(categoryDto.getIsExpanded());
+        categoryToUpdate.setIsFavorite(categoryDto.getIsFavorite());
+        categoryToUpdate.setParent(categoryDto.getParentId() == null ? null : getCategoryEntityById(categoryDto.getParentId()));
+        categoryToUpdate.setSection(sectionService.getSectionEntityById(categoryDto.getSectionId()));
+        Category updatedCategory = categoryRepository.update(categoryToUpdate);
+        return convertToDto(updatedCategory);
+    }
+
+    @Override
+    public void deleteCategoryById(Long id) {
+        Category categoryToDelete = getCategoryEntityById(id);
+        categoryRepository.delete(categoryToDelete);
+    }
+
+    @Override
+    public List<CategoryDto> getCategoriesByParentIdAndSectionIdAndName(Long parentId, Long sectionId, String name) {
+        List<Category> categories;
+        if(parentId == null) {
+            categories = name == null || name.isBlank()
+                  ? categoryRepository.findByParentIdNullAndSectionId(sectionId)
+                  : categoryRepository.findByParentIdNullAndSectionIdAndNameContaining(sectionId, name);
+        } else {
+            categories = name == null || name.isBlank()
+                  ? categoryRepository.findByParentIdAndSectionId(parentId, sectionId)
+                  : categoryRepository.findByParentIdAndSectionIdAndNameContaining(parentId, sectionId, name);
+        }
+        return convertToDtoList(categories);
+    }
+
+    @Override
+    public List<CategoryDto> getFavoriteCategories() {
+        List<Category> favorites = categoryRepository.findFavorites();
+        return convertToDtoList(favorites);
+    }
+
+    @Override
+    public List<CategoryDto> getFavoritesByName(String name) {
+        List<Category> filteredFavorites = name == null || name.isBlank()
+              ? categoryRepository.findFavorites()
+              : categoryRepository.findFavoritesByNameContaining(name);
+        return convertToDtoList(filteredFavorites);
+    }
+
+    @Override
+    public CategoryDto saveFavorite(Long categoryId) {
+        Category favoriteToSave = getCategoryEntityById(categoryId);
+        favoriteToSave.setIsFavorite(true);
+        return convertToDto(categoryRepository.update(favoriteToSave));
+    }
+
+    @Override
+    public CategoryDto deleteFavorite(Long categoryId) {
+        Category favoriteToDelete = getCategoryEntityById(categoryId);
+        favoriteToDelete.setIsFavorite(false);
+        return convertToDto(categoryRepository.update(favoriteToDelete));
+    }
+
+    private void validateParent(Long categoryId, Long parentId) {
+        var visited = new java.util.HashSet<Long>();
+        while (parentId != null) {
+            if (parentId.equals(categoryId) || !visited.add(parentId)) {
+                throw new com.project.ohl.domain.exception.InvalidRequestException("Category hierarchy must not contain cycles.");
+            }
+            var parent = getCategoryEntityById(parentId).getParent();
+            parentId = parent == null ? null : parent.getId();
+        }
+    }
+
+    private Category getCategoryEntityById(Long id) {
+        return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(CATEGORY_NOT_FOUND, id)));
+    }
+}

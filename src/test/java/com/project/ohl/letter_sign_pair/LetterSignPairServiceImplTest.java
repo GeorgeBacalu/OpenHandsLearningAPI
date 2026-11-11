@@ -1,6 +1,11 @@
 package com.project.ohl.letter_sign_pair;
 
-import com.project.ohl.exception.ResourceNotFoundException;
+import com.project.ohl.application.model.LetterSignPairDto;
+import com.project.ohl.application.port.out.LetterSignPairRepositoryPort;
+import com.project.ohl.application.service.LetterSignPairServiceImpl;
+import com.project.ohl.domain.model.LetterSignPair;
+
+import com.project.ohl.domain.exception.ResourceNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,14 +15,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
-import static com.project.ohl.constants.ExceptionMessageConstants.LETTER_SIGN_PAIR_NOT_FOUND;
+import static com.project.ohl.application.error.ExceptionMessageConstants.LETTER_SIGN_PAIR_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.LetterSignPairMapper.convertToDto;
+import static com.project.ohl.application.mapper.LetterSignPairMapper.convertToDto;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPair1;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPair2;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPairs;
@@ -36,10 +39,7 @@ class LetterSignPairServiceImplTest {
     private LetterSignPairServiceImpl letterSignPairService;
 
     @Mock
-    private LetterSignPairDao letterSignPairDao;
-
-    @Spy
-    private ModelMapper modelMapper;
+    private LetterSignPairRepositoryPort letterSignPairRepository;
 
     @Captor
     private ArgumentCaptor<LetterSignPair> letterSignPairCaptor;
@@ -56,21 +56,21 @@ class LetterSignPairServiceImplTest {
         letterSignPair1 = getMockedLetterSignPair1();
         letterSignPair2 = getMockedLetterSignPair2();
         letterSignPairs = getMockedLetterSignPairs();
-        letterSignPairDto1 = convertToDto(modelMapper, letterSignPair1);
-        letterSignPairDto2 = convertToDto(modelMapper, letterSignPair2);
-        letterSignPairDtos = letterSignPairs.stream().map(letterSignPair -> convertToDto(modelMapper, letterSignPair)).toList();
+        letterSignPairDto1 = convertToDto(letterSignPair1);
+        letterSignPairDto2 = convertToDto(letterSignPair2);
+        letterSignPairDtos = letterSignPairs.stream().map(letterSignPair -> convertToDto(letterSignPair)).toList();
     }
 
     @Test
     void getAllLetterSignPairs_shouldReturnListOfLetterSignPairs() {
-        given(letterSignPairDao.findAll()).willReturn(letterSignPairs);
+        given(letterSignPairRepository.findAll()).willReturn(letterSignPairs);
         List<LetterSignPairDto> result = letterSignPairService.getAllLetterSignPairs();
         assertThat(result).isEqualTo(letterSignPairDtos);
     }
 
     @Test
     void getLetterSignPairById_withValidId_shouldReturnLetterSignPairWithGivenId() {
-        given(letterSignPairDao.findById(anyLong())).willReturn(Optional.ofNullable(letterSignPair1));
+        given(letterSignPairRepository.findById(anyLong())).willReturn(Optional.ofNullable(letterSignPair1));
         LetterSignPairDto result = letterSignPairService.getLetterSignPairById(VALID_ID);
         assertThat(result).isEqualTo(letterSignPairDto1);
     }
@@ -84,20 +84,20 @@ class LetterSignPairServiceImplTest {
 
     @Test
     void saveLetterSignPair_shouldAddLetterSignPairToList() {
-        given(letterSignPairDao.save(any(LetterSignPair.class))).willReturn(letterSignPair1);
+        given(letterSignPairRepository.save(any(LetterSignPair.class))).willReturn(letterSignPair1);
         LetterSignPairDto result = letterSignPairService.saveLetterSignPair(letterSignPairDto1);
-        verify(letterSignPairDao).save(letterSignPairCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, letterSignPairCaptor.getValue()));
+        verify(letterSignPairRepository).save(letterSignPairCaptor.capture());
+        assertThat(result).isEqualTo(convertToDto(letterSignPairCaptor.getValue()));
     }
 
     @Test
     void updateLetterSignPairById_withValidId_shouldUpdateLetterSignPairWithGivenId() {
         LetterSignPair letterSignPair = letterSignPair2; letterSignPair.setId(VALID_ID);
-        given(letterSignPairDao.findById(anyLong())).willReturn(Optional.ofNullable(letterSignPair1));
-        given(letterSignPairDao.update(any(LetterSignPair.class))).willReturn(letterSignPair);
+        given(letterSignPairRepository.findById(anyLong())).willReturn(Optional.ofNullable(letterSignPair1));
+        given(letterSignPairRepository.update(any(LetterSignPair.class))).willReturn(letterSignPair);
         LetterSignPairDto result = letterSignPairService.updateLetterSignPairById(letterSignPairDto2, VALID_ID);
-        verify(letterSignPairDao).update(letterSignPairCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, letterSignPairCaptor.getValue()));
+        verify(letterSignPairRepository).update(letterSignPairCaptor.capture());
+        assertThat(result).isEqualTo(convertToDto(letterSignPairCaptor.getValue()));
     }
 
     @Test
@@ -105,14 +105,14 @@ class LetterSignPairServiceImplTest {
         assertThatThrownBy(() -> letterSignPairService.updateLetterSignPairById(letterSignPairDto2, INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(LETTER_SIGN_PAIR_NOT_FOUND, INVALID_ID));
-        verify(letterSignPairDao, never()).update(any(LetterSignPair.class));
+        verify(letterSignPairRepository, never()).update(any(LetterSignPair.class));
     }
 
     @Test
     void deleteLetterSignPairById_withValidId_shouldRemoveLetterSignPairWithGivenIdFromList() {
-        given(letterSignPairDao.findById(anyLong())).willReturn(Optional.ofNullable(letterSignPair1));
+        given(letterSignPairRepository.findById(anyLong())).willReturn(Optional.ofNullable(letterSignPair1));
         letterSignPairService.deleteLetterSignPairById(VALID_ID);
-        verify(letterSignPairDao).delete(letterSignPair1);
+        verify(letterSignPairRepository).delete(letterSignPair1);
     }
 
     @Test
@@ -120,6 +120,6 @@ class LetterSignPairServiceImplTest {
         assertThatThrownBy(() -> letterSignPairService.deleteLetterSignPairById(INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(LETTER_SIGN_PAIR_NOT_FOUND, INVALID_ID));
-        verify(letterSignPairDao, never()).delete(any(LetterSignPair.class));
+        verify(letterSignPairRepository, never()).delete(any(LetterSignPair.class));
     }
 }

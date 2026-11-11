@@ -1,7 +1,7 @@
 package com.project.ohl.mock;
 
-import com.project.ohl.role.Role;
-import com.project.ohl.role.enums.Authority;
+import com.project.ohl.domain.model.Role;
+import com.project.ohl.domain.model.Authority;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

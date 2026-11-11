@@ -1,19 +1,22 @@
 package com.project.ohl.notification;
 
+import com.project.ohl.adapter.web.NotificationController;
+import com.project.ohl.application.model.NotificationDto;
+import com.project.ohl.application.port.in.NotificationService;
+import com.project.ohl.domain.model.Notification;
+
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.NotificationMapper.convertToDto;
+import static com.project.ohl.application.mapper.NotificationMapper.convertToDto;
 import static com.project.ohl.mock.NotificationMock.getMockedNotification1;
 import static com.project.ohl.mock.NotificationMock.getMockedNotification2;
 import static com.project.ohl.mock.NotificationMock.getMockedNotifications;
@@ -33,18 +36,15 @@ class NotificationControllerTest {
     @Mock
     private NotificationService notificationService;
 
-    @Spy
-    private ModelMapper modelMapper;
-
     private NotificationDto notificationDto1;
     private NotificationDto notificationDto2;
     private List<NotificationDto> notificationDtos;
 
     @BeforeEach
     void setUp() {
-        notificationDto1 = convertToDto(modelMapper, getMockedNotification1());
-        notificationDto2 = convertToDto(modelMapper, getMockedNotification2());
-        notificationDtos = getMockedNotifications().stream().map(Notification -> convertToDto(modelMapper, Notification)).toList();
+        notificationDto1 = convertToDto(getMockedNotification1());
+        notificationDto2 = convertToDto(getMockedNotification2());
+        notificationDtos = getMockedNotifications().stream().map(Notification -> convertToDto(Notification)).toList();
     }
 
     @Test

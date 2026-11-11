@@ -1,19 +1,21 @@
 package com.project.ohl.letter_sign_pair;
 
+import com.project.ohl.adapter.web.LetterSignPairController;
+import com.project.ohl.application.model.LetterSignPairDto;
+import com.project.ohl.application.port.in.LetterSignPairService;
+
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.LetterSignPairMapper.convertToDto;
+import static com.project.ohl.application.mapper.LetterSignPairMapper.convertToDto;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPair1;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPair2;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPairs;
@@ -33,18 +35,15 @@ class LetterSignPairControllerTest {
     @Mock
     private LetterSignPairService letterSignPairService;
 
-    @Spy
-    private ModelMapper modelMapper;
-
     private LetterSignPairDto letterSignPairDto1;
     private LetterSignPairDto letterSignPairDto2;
     private List<LetterSignPairDto> letterSignPairDtos;
 
     @BeforeEach
     void setUp() {
-        letterSignPairDto1 = convertToDto(modelMapper, getMockedLetterSignPair1());
-        letterSignPairDto2 = convertToDto(modelMapper, getMockedLetterSignPair2());
-        letterSignPairDtos = getMockedLetterSignPairs().stream().map(letterSignPair -> convertToDto(modelMapper, letterSignPair)).toList();
+        letterSignPairDto1 = convertToDto(getMockedLetterSignPair1());
+        letterSignPairDto2 = convertToDto(getMockedLetterSignPair2());
+        letterSignPairDtos = getMockedLetterSignPairs().stream().map(letterSignPair -> convertToDto(letterSignPair)).toList();
     }
 
     @Test

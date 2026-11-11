@@ -1,6 +1,6 @@
 package com.project.ohl.mock;
 
-import com.project.ohl.notification.Notification;
+import com.project.ohl.domain.model.Notification;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AccessLevel;

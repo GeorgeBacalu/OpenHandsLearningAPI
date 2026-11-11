@@ -1,8 +1,13 @@
 package com.project.ohl.user;
 
-import com.project.ohl.exception.ResourceNotFoundException;
-import com.project.ohl.institution.InstitutionService;
-import com.project.ohl.role.RoleService;
+import com.project.ohl.application.model.UserDto;
+import com.project.ohl.application.port.out.UserRepositoryPort;
+import com.project.ohl.application.service.UserServiceImpl;
+import com.project.ohl.domain.model.User;
+
+import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.application.port.in.InstitutionService;
+import com.project.ohl.application.port.in.RoleService;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,14 +17,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
-import static com.project.ohl.constants.ExceptionMessageConstants.USER_NOT_FOUND;
+import static com.project.ohl.application.error.ExceptionMessageConstants.USER_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.UserMapper.convertToDto;
+import static com.project.ohl.application.mapper.UserMapper.convertToDto;
 import static com.project.ohl.mock.UserMock.getMockedUser1;
 import static com.project.ohl.mock.UserMock.getMockedUser2;
 import static com.project.ohl.mock.UserMock.getMockedUsers;
@@ -38,7 +41,7 @@ class UserServiceImplTest {
     private UserServiceImpl userService;
 
     @Mock
-    private UserDao userDao;
+    private UserRepositoryPort userRepository;
 
     @Mock
     private InstitutionService institutionService;
@@ -46,8 +49,8 @@ class UserServiceImplTest {
     @Mock
     private RoleService roleService;
 
-    @Spy
-    private ModelMapper modelMapper;
+    @Mock
+    private com.project.ohl.application.port.out.PasswordHasher passwordHasher;
 
     @Captor
     private ArgumentCaptor<User> userCaptor;
@@ -64,21 +67,21 @@ class UserServiceImplTest {
         user1 = getMockedUser1();
         user2 = getMockedUser2();
         users = getMockedUsers();
-        userDto1 = convertToDto(modelMapper, user1);
-        userDto2 = convertToDto(modelMapper, user2);
-        userDtos = users.stream().map(user -> convertToDto(modelMapper, user)).toList();
+        userDto1 = convertToDto(user1);
+        userDto2 = convertToDto(user2);
+        userDtos = users.stream().map(user -> convertToDto(user)).toList();
     }
 
     @Test
     void getAllUsers_shouldReturnListOfUsers() {
-        given(userDao.findAll()).willReturn(users);
+        given(userRepository.findAll()).willReturn(users);
         List<UserDto> result = userService.getAllUsers();
         assertThat(result).isEqualTo(userDtos);
     }
 
     @Test
     void getUserById_withValidId_shouldReturnUserWithGivenId() {
-        given(userDao.findById(anyLong())).willReturn(Optional.ofNullable(user1));
+        given(userRepository.findById(anyLong())).willReturn(Optional.ofNullable(user1));
         UserDto result = userService.getUserById(VALID_ID);
         assertThat(result).isEqualTo(userDto1);
     }
@@ -92,20 +95,24 @@ class UserServiceImplTest {
 
     @Test
     void saveUser_shouldAddUserToList() {
-        given(userDao.save(any(User.class))).willReturn(user1);
+        given(passwordHasher.hash(userDto1.getPassword())).willReturn("encoded-password");
+        given(userRepository.save(any(User.class))).willAnswer(invocation -> invocation.getArgument(0));
         UserDto result = userService.saveUser(userDto1);
-        verify(userDao).save(userCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, userCaptor.getValue()));
+        verify(userRepository).save(userCaptor.capture());
+        assertThat(userCaptor.getValue().getPassword()).isEqualTo("encoded-password");
+        assertThat(result).isEqualTo(convertToDto(userCaptor.getValue()));
     }
 
     @Test
     void updateUserById_withValidId_shouldUpdateUserWithGivenId() {
         User user = user2; user.setId(VALID_ID);
-        given(userDao.findById(anyLong())).willReturn(Optional.ofNullable(user1));
-        given(userDao.update(any(User.class))).willReturn(user1);
+        given(userRepository.findById(anyLong())).willReturn(Optional.ofNullable(user1));
+        given(passwordHasher.hash(userDto2.getPassword())).willReturn("encoded-password");
+        given(userRepository.update(any(User.class))).willReturn(user1);
         UserDto result = userService.updateUserById(userDto2, VALID_ID);
-        verify(userDao).update(userCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, userCaptor.getValue()));
+        verify(userRepository).update(userCaptor.capture());
+        assertThat(userCaptor.getValue().getPassword()).isEqualTo("encoded-password");
+        assertThat(result).isEqualTo(convertToDto(userCaptor.getValue()));
     }
 
     @Test
@@ -113,14 +120,14 @@ class UserServiceImplTest {
         assertThatThrownBy(() -> userService.updateUserById(userDto2, INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(USER_NOT_FOUND, INVALID_ID));
-        verify(userDao, never()).update(any(User.class));
+        verify(userRepository, never()).update(any(User.class));
     }
 
     @Test
     void deleteUserById_withValidId_shouldRemoveUserWithGivenIdFromList() {
-        given(userDao.findById(anyLong())).willReturn(Optional.ofNullable(user1));
+        given(userRepository.findById(anyLong())).willReturn(Optional.ofNullable(user1));
         userService.deleteUserById(VALID_ID);
-        verify(userDao).delete(user1);
+        verify(userRepository).delete(user1);
     }
 
     @Test
@@ -128,6 +135,6 @@ class UserServiceImplTest {
         assertThatThrownBy(() -> userService.deleteUserById(INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(USER_NOT_FOUND, INVALID_ID));
-        verify(userDao, never()).delete(any(User.class));
+        verify(userRepository, never()).delete(any(User.class));
     }
 }

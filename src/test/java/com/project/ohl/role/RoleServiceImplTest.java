@@ -1,6 +1,11 @@
 package com.project.ohl.role;
 
-import com.project.ohl.exception.ResourceNotFoundException;
+import com.project.ohl.application.model.RoleDto;
+import com.project.ohl.application.port.out.RoleRepositoryPort;
+import com.project.ohl.application.service.RoleServiceImpl;
+import com.project.ohl.domain.model.Role;
+
+import com.project.ohl.domain.exception.ResourceNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,14 +15,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
-import static com.project.ohl.constants.ExceptionMessageConstants.ROLE_NOT_FOUND;
+import static com.project.ohl.application.error.ExceptionMessageConstants.ROLE_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.RoleMapper.convertToDto;
+import static com.project.ohl.application.mapper.RoleMapper.convertToDto;
 import static com.project.ohl.mock.RoleMock.getMockedRole1;
 import static com.project.ohl.mock.RoleMock.getMockedRole2;
 import static com.project.ohl.mock.RoleMock.getMockedRoles;
@@ -36,10 +39,7 @@ class RoleServiceImplTest {
     private RoleServiceImpl roleService;
 
     @Mock
-    private RoleDao roleDao;
-
-    @Spy
-    private ModelMapper modelMapper;
+    private RoleRepositoryPort roleRepository;
 
     @Captor
     private ArgumentCaptor<Role> roleCaptor;
@@ -56,21 +56,21 @@ class RoleServiceImplTest {
         role1 = getMockedRole1();
         role2 = getMockedRole2();
         roles = getMockedRoles();
-        roleDto1 = convertToDto(modelMapper, role1);
-        roleDto2 = convertToDto(modelMapper, role2);
-        roleDtos = roles.stream().map(role -> convertToDto(modelMapper, role)).toList();
+        roleDto1 = convertToDto(role1);
+        roleDto2 = convertToDto(role2);
+        roleDtos = roles.stream().map(role -> convertToDto(role)).toList();
     }
 
     @Test
     void getAllRoles_shouldReturnListOfRoles() {
-        given(roleDao.findAll()).willReturn(roles);
+        given(roleRepository.findAll()).willReturn(roles);
         List<RoleDto> result = roleService.getAllRoles();
         assertThat(result).isEqualTo(roleDtos);
     }
 
     @Test
     void getRoleById_withValidId_shouldReturnRoleWithGivenId() {
-        given(roleDao.findById(anyLong())).willReturn(Optional.ofNullable(role1));
+        given(roleRepository.findById(anyLong())).willReturn(Optional.ofNullable(role1));
         RoleDto result = roleService.getRoleById(VALID_ID);
         assertThat(result).isEqualTo(roleDto1);
     }
@@ -84,20 +84,20 @@ class RoleServiceImplTest {
 
     @Test
     void saveRole_shouldAddRoleToList() {
-        given(roleDao.save(any(Role.class))).willReturn(role1);
+        given(roleRepository.save(any(Role.class))).willReturn(role1);
         RoleDto result = roleService.saveRole(roleDto1);
-        verify(roleDao).save(roleCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, roleCaptor.getValue()));
+        verify(roleRepository).save(roleCaptor.capture());
+        assertThat(result).isEqualTo(convertToDto(roleCaptor.getValue()));
     }
 
     @Test
     void updateRoleById_withValidId_shouldUpdateRoleWithGivenId() {
         Role role = role2; role.setId(VALID_ID);
-        given(roleDao.findById(anyLong())).willReturn(Optional.ofNullable(role1));
-        given(roleDao.update(any(Role.class))).willReturn(role);
+        given(roleRepository.findById(anyLong())).willReturn(Optional.ofNullable(role1));
+        given(roleRepository.update(any(Role.class))).willReturn(role);
         RoleDto result = roleService.updateRoleById(roleDto2, VALID_ID);
-        verify(roleDao).update(roleCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, roleCaptor.getValue()));
+        verify(roleRepository).update(roleCaptor.capture());
+        assertThat(result).isEqualTo(convertToDto(roleCaptor.getValue()));
     }
 
     @Test
@@ -105,14 +105,14 @@ class RoleServiceImplTest {
         assertThatThrownBy(() -> roleService.updateRoleById(roleDto2, INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(ROLE_NOT_FOUND, INVALID_ID));
-        verify(roleDao, never()).update(any(Role.class));
+        verify(roleRepository, never()).update(any(Role.class));
     }
 
     @Test
     void deleteRoleById_withValidId_shouldRemoveRoleWithGivenIdFromList() {
-        given(roleDao.findById(anyLong())).willReturn(Optional.ofNullable(role1));
+        given(roleRepository.findById(anyLong())).willReturn(Optional.ofNullable(role1));
         roleService.deleteRoleById(VALID_ID);
-        verify(roleDao).delete(role1);
+        verify(roleRepository).delete(role1);
     }
 
     @Test
@@ -120,6 +120,6 @@ class RoleServiceImplTest {
         assertThatThrownBy(() -> roleService.deleteRoleById(INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(ROLE_NOT_FOUND, INVALID_ID));
-        verify(roleDao, never()).delete(any(Role.class));
+        verify(roleRepository, never()).delete(any(Role.class));
     }
 }

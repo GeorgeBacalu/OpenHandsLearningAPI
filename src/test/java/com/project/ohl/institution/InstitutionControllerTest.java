@@ -1,19 +1,22 @@
 package com.project.ohl.institution;
 
+import com.project.ohl.adapter.web.InstitutionController;
+import com.project.ohl.application.model.InstitutionDto;
+import com.project.ohl.application.port.in.InstitutionService;
+import com.project.ohl.domain.model.Institution;
+
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.InstitutionMapper.convertToDto;
+import static com.project.ohl.application.mapper.InstitutionMapper.convertToDto;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitution1;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitution2;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitutions;
@@ -33,18 +36,15 @@ class InstitutionControllerTest {
     @Mock
     private InstitutionService institutionService;
 
-    @Spy
-    private ModelMapper modelMapper;
-
     private InstitutionDto institutionDto1;
     private InstitutionDto institutionDto2;
     private List<InstitutionDto> institutionDtos;
 
     @BeforeEach
     void setUp() {
-        institutionDto1 = convertToDto(modelMapper, getMockedInstitution1());
-        institutionDto2 = convertToDto(modelMapper, getMockedInstitution2());
-        institutionDtos = getMockedInstitutions().stream().map(Institution -> convertToDto(modelMapper, Institution)).toList();
+        institutionDto1 = convertToDto(getMockedInstitution1());
+        institutionDto2 = convertToDto(getMockedInstitution2());
+        institutionDtos = getMockedInstitutions().stream().map(Institution -> convertToDto(Institution)).toList();
     }
 
     @Test

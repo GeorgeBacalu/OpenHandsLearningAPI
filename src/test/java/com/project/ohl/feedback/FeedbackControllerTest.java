@@ -1,19 +1,22 @@
 package com.project.ohl.feedback;
 
+import com.project.ohl.adapter.web.FeedbackController;
+import com.project.ohl.application.model.FeedbackDto;
+import com.project.ohl.application.port.in.FeedbackService;
+import com.project.ohl.domain.model.Feedback;
+
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.FeedbackMapper.convertToDto;
+import static com.project.ohl.application.mapper.FeedbackMapper.convertToDto;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedback1;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedback2;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedbacks;
@@ -33,18 +36,15 @@ class FeedbackControllerTest {
     @Mock
     private FeedbackService feedbackService;
 
-    @Spy
-    private ModelMapper modelMapper;
-
     private FeedbackDto feedbackDto1;
     private FeedbackDto feedbackDto2;
     private List<FeedbackDto> feedbackDtos;
 
     @BeforeEach
     void setUp() {
-        feedbackDto1 = convertToDto(modelMapper, getMockedFeedback1());
-        feedbackDto2 = convertToDto(modelMapper, getMockedFeedback2());
-        feedbackDtos = getMockedFeedbacks().stream().map(Feedback -> convertToDto(modelMapper, Feedback)).toList();
+        feedbackDto1 = convertToDto(getMockedFeedback1());
+        feedbackDto2 = convertToDto(getMockedFeedback2());
+        feedbackDtos = getMockedFeedbacks().stream().map(Feedback -> convertToDto(Feedback)).toList();
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.project.ohl.mock;
 
-import com.project.ohl.category.Category;
+import com.project.ohl.domain.model.Category;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

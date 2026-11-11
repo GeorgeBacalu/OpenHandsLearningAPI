@@ -1,8 +1,13 @@
 package com.project.ohl.notification;
 
-import com.project.ohl.exception.ResourceNotFoundException;
-import com.project.ohl.user.User;
-import com.project.ohl.user.UserService;
+import com.project.ohl.application.model.NotificationDto;
+import com.project.ohl.application.port.out.NotificationRepositoryPort;
+import com.project.ohl.application.service.NotificationServiceImpl;
+import com.project.ohl.domain.model.Notification;
+
+import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.User;
+import com.project.ohl.application.port.in.UserService;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -15,14 +20,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
-import static com.project.ohl.constants.ExceptionMessageConstants.NOTIFICATION_NOT_FOUND;
+import static com.project.ohl.application.error.ExceptionMessageConstants.NOTIFICATION_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.NotificationMapper.convertToDto;
+import static com.project.ohl.application.mapper.NotificationMapper.convertToDto;
 import static com.project.ohl.mock.NotificationMock.getMockedNotification1;
 import static com.project.ohl.mock.NotificationMock.getMockedNotification2;
 import static com.project.ohl.mock.NotificationMock.getMockedNotifications;
@@ -43,13 +46,10 @@ class NotificationServiceImplTest {
     private NotificationServiceImpl notificationService;
 
     @Mock
-    private NotificationDao notificationDao;
+    private NotificationRepositoryPort notificationRepository;
 
     @Mock
     private UserService userService;
-
-    @Spy
-    private ModelMapper modelMapper;
 
     @Mock
     private Clock clock;
@@ -75,21 +75,21 @@ class NotificationServiceImplTest {
         notifications = getMockedNotifications();
         user1 = getMockedUser1();
         user2 = getMockedUser2();
-        notificationDto1 = convertToDto(modelMapper, notification1);
-        notificationDto2 = convertToDto(modelMapper, notification2);
-        notificationDtos = notifications.stream().map(notification -> convertToDto(modelMapper, notification)).toList();
+        notificationDto1 = convertToDto(notification1);
+        notificationDto2 = convertToDto(notification2);
+        notificationDtos = notifications.stream().map(notification -> convertToDto(notification)).toList();
     }
 
     @Test
     void getAllNotifications_shouldReturnListOfNotifications() {
-        given(notificationDao.findAll()).willReturn(notifications);
+        given(notificationRepository.findAll()).willReturn(notifications);
         List<NotificationDto> result = notificationService.getAllNotifications();
         assertThat(result).isEqualTo(notificationDtos);
     }
 
     @Test
     void getNotificationById_withValidId_shouldReturnNotificationWithGivenId() {
-        given(notificationDao.findById(anyLong())).willReturn(Optional.ofNullable(notification1));
+        given(notificationRepository.findById(anyLong())).willReturn(Optional.ofNullable(notification1));
         NotificationDto result = notificationService.getNotificationById(VALID_ID);
         assertThat(result).isEqualTo(notificationDto1);
     }
@@ -106,23 +106,23 @@ class NotificationServiceImplTest {
         given(clock.getZone()).willReturn(zonedDateTime.getZone());
         given(clock.instant()).willReturn(zonedDateTime.toInstant());
         notification1.setSentAt(zonedDateTime.toLocalDateTime());
-        given(notificationDao.save(any(Notification.class))).willReturn(notification1);
+        given(notificationRepository.save(any(Notification.class))).willReturn(notification1);
         NotificationDto result = notificationService.saveNotification(notificationDto1);
-        verify(notificationDao).save(notificationCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, notificationCaptor.getValue()));
+        verify(notificationRepository).save(notificationCaptor.capture());
+        assertThat(result).isEqualTo(convertToDto(notificationCaptor.getValue()));
     }
 
     @Test
     void updateNotificationById_withValidId_shouldUpdateNotificationWithGivenId() {
         Notification notification = notification2; notification.setId(VALID_ID);
         notification.setSentAt(notification1.getSentAt());
-        given(notificationDao.findById(anyLong())).willReturn(Optional.ofNullable(notification1));
+        given(notificationRepository.findById(anyLong())).willReturn(Optional.ofNullable(notification1));
         given(userService.getUserEntityById(notificationDto2.getSenderId())).willReturn(user2);
         given(userService.getUserEntityById(notificationDto2.getReceiverId())).willReturn(user1);
-        given(notificationDao.update(any(Notification.class))).willReturn(notification);
+        given(notificationRepository.update(any(Notification.class))).willReturn(notification);
         NotificationDto result = notificationService.updateNotificationById(notificationDto2, VALID_ID);
-        verify(notificationDao).update(notificationCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, notificationCaptor.getValue()));
+        verify(notificationRepository).update(notificationCaptor.capture());
+        assertThat(result).isEqualTo(convertToDto(notificationCaptor.getValue()));
     }
 
     @Test
@@ -130,14 +130,14 @@ class NotificationServiceImplTest {
         assertThatThrownBy(() -> notificationService.getNotificationById(INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(NOTIFICATION_NOT_FOUND, INVALID_ID));
-        verify(notificationDao, never()).update(any(Notification.class));
+        verify(notificationRepository, never()).update(any(Notification.class));
     }
 
     @Test
     void deleteNotificationById_withValidId_shouldRemoveNotificationWithGivenIdFromList() {
-        given(notificationDao.findById(anyLong())).willReturn(Optional.ofNullable(notification1));
+        given(notificationRepository.findById(anyLong())).willReturn(Optional.ofNullable(notification1));
         notificationService.deleteNotificationById(VALID_ID);
-        verify(notificationDao).delete(notification1);
+        verify(notificationRepository).delete(notification1);
     }
 
     @Test
@@ -145,6 +145,6 @@ class NotificationServiceImplTest {
         assertThatThrownBy(() -> notificationService.deleteNotificationById(INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(NOTIFICATION_NOT_FOUND, INVALID_ID));
-        verify(notificationDao, never()).delete(any(Notification.class));
+        verify(notificationRepository, never()).delete(any(Notification.class));
     }
 }

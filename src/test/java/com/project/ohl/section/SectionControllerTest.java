@@ -1,19 +1,22 @@
 package com.project.ohl.section;
 
+import com.project.ohl.adapter.web.SectionController;
+import com.project.ohl.application.model.SectionDto;
+import com.project.ohl.application.port.in.SectionService;
+import com.project.ohl.domain.model.Section;
+
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.SectionMapper.convertToDto;
+import static com.project.ohl.application.mapper.SectionMapper.convertToDto;
 import static com.project.ohl.mock.SectionMock.getMockedSection1;
 import static com.project.ohl.mock.SectionMock.getMockedSection2;
 import static com.project.ohl.mock.SectionMock.getMockedSections;
@@ -33,18 +36,15 @@ class SectionControllerTest {
     @Mock
     private SectionService sectionService;
 
-    @Spy
-    private ModelMapper modelMapper;
-
     private SectionDto sectionDto1;
     private SectionDto sectionDto2;
     private List<SectionDto> sectionDtos;
 
     @BeforeEach
     void setUp() {
-        sectionDto1 = convertToDto(modelMapper, getMockedSection1());
-        sectionDto2 = convertToDto(modelMapper, getMockedSection2());
-        sectionDtos = getMockedSections().stream().map(Section -> convertToDto(modelMapper, Section)).toList();
+        sectionDto1 = convertToDto(getMockedSection1());
+        sectionDto2 = convertToDto(getMockedSection2());
+        sectionDtos = getMockedSections().stream().map(Section -> convertToDto(Section)).toList();
     }
 
     @Test

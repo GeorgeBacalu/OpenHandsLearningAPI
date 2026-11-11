@@ -1,6 +1,11 @@
 package com.project.ohl.institution;
 
-import com.project.ohl.exception.ResourceNotFoundException;
+import com.project.ohl.application.model.InstitutionDto;
+import com.project.ohl.application.port.out.InstitutionRepositoryPort;
+import com.project.ohl.application.service.InstitutionServiceImpl;
+import com.project.ohl.domain.model.Institution;
+
+import com.project.ohl.domain.exception.ResourceNotFoundException;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,14 +15,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
-import static com.project.ohl.constants.ExceptionMessageConstants.INSTITUTION_NOT_FOUND;
+import static com.project.ohl.application.error.ExceptionMessageConstants.INSTITUTION_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.mapper.InstitutionMapper.convertToDto;
+import static com.project.ohl.application.mapper.InstitutionMapper.convertToDto;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitution1;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitution2;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitutions;
@@ -36,10 +39,8 @@ class InstitutionServiceImplTest {
     private InstitutionServiceImpl institutionService;
     
     @Mock
-    private InstitutionDao institutionDao;
+    private InstitutionRepositoryPort institutionRepository;
     
-    @Spy
-    private ModelMapper modelMapper;
     
     @Captor
     private ArgumentCaptor<Institution> institutionCaptor;
@@ -56,21 +57,21 @@ class InstitutionServiceImplTest {
         institution1 = getMockedInstitution1();
         institution2 = getMockedInstitution2();
         institutions = getMockedInstitutions();
-        institutionDto1 = convertToDto(modelMapper, institution1);
-        institutionDto2 = convertToDto(modelMapper, institution2);
-        institutionDtos = institutions.stream().map(institution -> convertToDto(modelMapper, institution)).toList();
+        institutionDto1 = convertToDto(institution1);
+        institutionDto2 = convertToDto(institution2);
+        institutionDtos = institutions.stream().map(institution -> convertToDto(institution)).toList();
     }
 
     @Test
     void getAllInstitutions_shouldReturnListOfInstitutions() {
-        given(institutionDao.findAll()).willReturn(institutions);
+        given(institutionRepository.findAll()).willReturn(institutions);
         List<InstitutionDto> result = institutionService.getAllInstitutions();
         assertThat(result).isEqualTo(institutionDtos);
     }
 
     @Test
     void getInstitutionById_withValidId_shouldReturnInstitutionWithGivenId() {
-        given(institutionDao.findById(anyLong())).willReturn(Optional.ofNullable(institution1));
+        given(institutionRepository.findById(anyLong())).willReturn(Optional.ofNullable(institution1));
         InstitutionDto result = institutionService.getInstitutionById(VALID_ID);
         assertThat(result).isEqualTo(institutionDto1);
     }
@@ -84,20 +85,20 @@ class InstitutionServiceImplTest {
 
     @Test
     void saveInstitution_shouldAddInstitutionToList() {
-        given(institutionDao.save(any(Institution.class))).willReturn(institution1);
+        given(institutionRepository.save(any(Institution.class))).willReturn(institution1);
         InstitutionDto result = institutionService.saveInstitution(institutionDto1);
-        verify(institutionDao).save(institutionCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, institutionCaptor.getValue()));
+        verify(institutionRepository).save(institutionCaptor.capture());
+        assertThat(result).isEqualTo(convertToDto(institutionCaptor.getValue()));
     }
 
     @Test
     void updateInstitutionById_withValidId_shouldUpdateInstitutionWithGivenId() {
         Institution institution = institution2; institution.setId(VALID_ID);
-        given(institutionDao.findById(anyLong())).willReturn(Optional.ofNullable(institution1));
-        given(institutionDao.update(any(Institution.class))).willReturn(institution);
+        given(institutionRepository.findById(anyLong())).willReturn(Optional.ofNullable(institution1));
+        given(institutionRepository.update(any(Institution.class))).willReturn(institution);
         InstitutionDto result = institutionService.updateInstitutionById(institutionDto2, VALID_ID);
-        verify(institutionDao).update(institutionCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(modelMapper, institutionCaptor.getValue()));
+        verify(institutionRepository).update(institutionCaptor.capture());
+        assertThat(result).isEqualTo(convertToDto(institutionCaptor.getValue()));
     }
 
     @Test
@@ -105,14 +106,14 @@ class InstitutionServiceImplTest {
         assertThatThrownBy(() -> institutionService.updateInstitutionById(institutionDto2, INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(INSTITUTION_NOT_FOUND, INVALID_ID));
-        verify(institutionDao, never()).update(any(Institution.class));
+        verify(institutionRepository, never()).update(any(Institution.class));
     }
 
     @Test
     void deleteInstitutionById_withValidId_shouldRemoveInstitutionWithGivenIdFromList() {
-        given(institutionDao.findById(anyLong())).willReturn(Optional.ofNullable(institution1));
+        given(institutionRepository.findById(anyLong())).willReturn(Optional.ofNullable(institution1));
         institutionService.deleteInstitutionById(VALID_ID);
-        verify(institutionDao).delete(institution1);
+        verify(institutionRepository).delete(institution1);
     }
 
     @Test
@@ -120,6 +121,6 @@ class InstitutionServiceImplTest {
         assertThatThrownBy(() -> institutionService.deleteInstitutionById(INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(INSTITUTION_NOT_FOUND, INVALID_ID));
-        verify(institutionDao, never()).delete(any(Institution.class));
+        verify(institutionRepository, never()).delete(any(Institution.class));
     }
 }
