@@ -26,6 +26,13 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
 
     private UUID user(String name) { return database.queryForObject("SELECT id FROM users WHERE name = ?", UUID.class, name); }
 
+    @Test void favoritesKeepOnlyTheirUserAndCategoryPair() {
+        var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'favorites'", String.class);
+        assertThat(columns).containsExactlyInAnyOrder("user_id", "category_id");
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'user_favorites'", Long.class)).isZero();
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM favorites", Long.class)).isEqualTo(2L);
+    }
+
     @Test void favoritesAreIndependentAndRepeatedSavesDoNotDuplicateThem() {
         UUID ana = user("Ana"), dan = user("Dan");
         assertThat(categories.getFavoriteCategories(ana)).extracting(value -> value.getId()).containsExactly(CATEGORY_CHILD);

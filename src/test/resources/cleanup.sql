@@ -1,4 +1,4 @@
-DELETE FROM user_favorites;
+DELETE FROM favorites;
 UPDATE categories SET parent_id = NULL;
 DELETE FROM categories;
 DELETE FROM users;

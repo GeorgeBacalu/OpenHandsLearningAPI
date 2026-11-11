@@ -21,7 +21,7 @@ public class FavoritePersistenceAdapter implements FavoriteRepositoryPort {
     @Transactional public void save(UUID userId, UUID categoryId) {
         var id = new FavoriteId(userId, categoryId);
         if (!favorites.existsById(id)) {
-            var entity = new UserFavoriteEntity(); entity.setId(id); favorites.saveAndFlush(entity);
+            var entity = new FavoriteEntity(); entity.setId(id); favorites.saveAndFlush(entity);
         }
     }
     @Transactional public void delete(UUID userId, UUID categoryId) { favorites.deleteById(new FavoriteId(userId, categoryId)); }
