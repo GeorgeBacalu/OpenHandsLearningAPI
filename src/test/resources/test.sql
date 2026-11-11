@@ -1,0 +1,31 @@
+INSERT INTO institutions (id, version, school, classroom) VALUES
+    ('e882d373-7f2f-44b2-8c87-530cd04964d4', 0, 'School A', 'A'),
+    ('5d958f7d-3407-49ff-b7c1-91098cc5e9e0', 0, 'School B', 'B');
+
+INSERT INTO roles (id, version, authority) VALUES
+    ('99d0dd27-ea57-42b3-8fd8-64e3973a05d3', 0, 'USER'),
+    ('4c517662-ab55-47ea-b758-84c1af759525', 0, 'ADMIN');
+
+INSERT INTO sections (id, version, name, icon_id, image_id, display_order) VALUES
+    ('7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 0, 'Video', 1, 1, 1),
+    ('d65b741b-1b28-451f-9faa-51763b236348', 0, 'Expressions', 2, 2, 2);
+
+INSERT INTO categories (id, version, name, image_id, is_expanded, is_favorite, parent_id, section_id, display_order) VALUES
+    ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 0, 'Alphabet', 1, FALSE, FALSE, NULL, '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 1),
+    ('f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185', 0, 'Letter A', 2, FALSE, TRUE, '176ccfb5-fe9b-484c-a799-310eb72a02a5', '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 2);
+
+INSERT INTO letter_sign_pairs (id, version, letter, image_id, display_order) VALUES
+    ('ce98a927-206e-4e7e-8039-1c696792a988', 0, 'A', 1, 1),
+    ('468c6514-a939-458d-8caa-9a999c6e4956', 0, 'B', 2, 2);
+
+INSERT INTO users (id, version, name, email, password, mobile, address, birthday, institution_id, role_id) VALUES
+    ('4b16f89f-f513-4723-9d19-5750cf7199d6', 0, 'Ana', 'ana@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0712345678', 'Bucharest', '2000-01-01', 'e882d373-7f2f-44b2-8c87-530cd04964d4', '99d0dd27-ea57-42b3-8fd8-64e3973a05d3'),
+    ('0f7cc0da-f19f-48b7-ae3b-5139cdfbd690', 0, 'Dan', 'dan@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0798765432', 'Cluj', '2001-02-02', '5d958f7d-3407-49ff-b7c1-91098cc5e9e0', '4c517662-ab55-47ea-b758-84c1af759525');
+
+INSERT INTO feedbacks (id, version, type, description, sent_at, user_id) VALUES
+    ('bc1ff3a7-cbd1-4972-a335-1ba02e3c4bea', 0, 'ISSUE', 'Test issue', '2026-01-01 10:00:00', '4b16f89f-f513-4723-9d19-5750cf7199d6'),
+    ('a01325a0-2987-4e48-8020-301cde9971d3', 0, 'IMPROVEMENT', 'Test suggestion', '2026-01-02 10:00:00', '0f7cc0da-f19f-48b7-ae3b-5139cdfbd690');
+
+INSERT INTO notifications (id, version, message, sent_at, is_read, sender_id, receiver_id) VALUES
+    ('03f3a65b-bb5c-4920-b7df-8eb43d116e38', 0, 'Welcome Ana', '2026-01-01 10:00:00', FALSE, '0f7cc0da-f19f-48b7-ae3b-5139cdfbd690', '4b16f89f-f513-4723-9d19-5750cf7199d6'),
+    ('4863fd89-f275-4079-bebd-4456592c2aa1', 0, 'Welcome Dan', '2026-01-02 10:00:00', TRUE, '4b16f89f-f513-4723-9d19-5750cf7199d6', '0f7cc0da-f19f-48b7-ae3b-5139cdfbd690');
