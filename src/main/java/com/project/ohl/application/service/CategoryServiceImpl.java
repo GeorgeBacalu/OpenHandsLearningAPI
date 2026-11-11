@@ -55,7 +55,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryToUpdate.setCode(categoryDto.getCode());
         categoryToUpdate.setMediaKey(categoryDto.getMediaKey());
         categoryToUpdate.setName(categoryDto.getName());
-        categoryToUpdate.setImageId(categoryDto.getImageId());
+
         categoryToUpdate.setIsExpanded(categoryDto.getIsExpanded());
         categoryToUpdate.setIsFavorite(categoryDto.getIsFavorite());
         categoryToUpdate.setParent(categoryDto.getParentId() == null ? null : getCategoryEntityById(categoryDto.getParentId()));

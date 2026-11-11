@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface FeedbackRepositoryPort {
 
-    List<Feedback> findAll();
+    List<Feedback> findPage(UUID userId, int page, int size);
 
     Optional<Feedback> findById(UUID id);
 

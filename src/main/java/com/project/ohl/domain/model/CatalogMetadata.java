@@ -23,7 +23,8 @@ public final class CatalogMetadata {
             return requested;
         }
         if (current != null) return current;
-        return Normalizer.normalize(name, Normalizer.Form.NFD).replaceAll("\\p{M}+", "")
+        String key = Normalizer.normalize(name, Normalizer.Form.NFD).replaceAll("\\p{M}+", "")
                 .toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_]+", "_");
+        return key.equals("a") ? "dactilema_a" : key;
     }
 }

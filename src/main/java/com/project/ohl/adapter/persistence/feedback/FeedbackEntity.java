@@ -12,7 +12,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,10 +28,10 @@ public class FeedbackEntity extends PersistentEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private FeedbackType type;
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, columnDefinition = "text")
     private String description;
     @Column(name = "sent_at", nullable = false)
-    private LocalDateTime sentAt;
+    private Instant sentAt;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;

@@ -30,10 +30,8 @@ public class CategoryEntity extends PersistentEntity {
     private String name;
     @Column(name = "code", nullable = false, unique = true, length = 120)
     private String code;
-    @Column(name = "media_key")
+    @Column(name = "media_key", nullable = false)
     private String mediaKey;
-    @Column(name = "image_id")
-    private Integer imageId;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private CategoryEntity parent;

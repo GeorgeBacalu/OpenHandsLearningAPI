@@ -38,17 +38,17 @@ class InstitutionServiceImplTest {
 
     @Spy
     private final InstitutionMapper mapper = Mappers.getMapper(InstitutionMapper.class);
-    
+
     @InjectMocks
     private InstitutionServiceImpl institutionService;
-    
+
     @Mock
     private InstitutionRepositoryPort institutionRepository;
-    
-    
+
+
     @Captor
     private ArgumentCaptor<Institution> institutionCaptor;
-    
+
     private Institution institution1;
     private Institution institution2;
     private List<Institution> institutions;

@@ -51,8 +51,8 @@ class NotificationControllerTest {
 
     @Test
     void getAllNotifications_shouldReturnListOfNotifications() {
-        given(notificationService.getAllNotifications()).willReturn(notificationDtos);
-        ResponseEntity<List<NotificationDto>> response = notificationController.getAllNotifications();
+        given(notificationService.getAllNotifications(null, 0, 50)).willReturn(notificationDtos);
+        ResponseEntity<List<NotificationDto>> response = notificationController.getAllNotifications(null, 0, 50);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(notificationDtos);

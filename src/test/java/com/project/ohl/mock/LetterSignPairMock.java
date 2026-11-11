@@ -18,7 +18,7 @@ public class LetterSignPairMock {
         return LetterSignPair.builder()
               .id(id(1))
               .letter("a")
-              .imageId(1)
+              .mediaKey("dactilema_a")
               .build();
     }
 
@@ -26,7 +26,7 @@ public class LetterSignPairMock {
         return LetterSignPair.builder()
               .id(id(2))
               .letter("b")
-              .imageId(2)
+              .mediaKey("dactilema_b")
               .build();
     }
 }

@@ -25,7 +25,7 @@ class MapperTest {
 
     @Test
     void categoryMappingPreservesParentIdWithoutCopyingTheParentGraph() {
-        var model = Category.builder().id(id(17)).name("Child").imageId(42)
+        var model = Category.builder().id(id(17)).name("Child")
                 .isExpanded(true).isFavorite(false)
                 .parent(Category.builder().id(id(3)).name("Parent").build())
                 .section(Section.builder().id(id(9)).name("Video").build()).build();

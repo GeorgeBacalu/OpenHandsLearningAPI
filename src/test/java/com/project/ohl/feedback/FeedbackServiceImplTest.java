@@ -83,8 +83,8 @@ class FeedbackServiceImplTest {
 
     @Test
     void getAllFeedbacks_shouldReturnListOfFeedbacks() {
-        given(feedbackRepository.findAll()).willReturn(feedbacks);
-        List<FeedbackDto> result = feedbackService.getAllFeedbacks();
+        given(feedbackRepository.findPage(null, 0, 50)).willReturn(feedbacks);
+        List<FeedbackDto> result = feedbackService.getAllFeedbacks(null, 0, 50);
         assertThat(result).isEqualTo(feedbackDtos);
     }
 
@@ -104,9 +104,8 @@ class FeedbackServiceImplTest {
 
     @Test
     void saveFeedback_shouldAddFeedbackToList() {
-        given(clock.getZone()).willReturn(zonedDateTime.getZone());
         given(clock.instant()).willReturn(zonedDateTime.toInstant());
-        feedback1.setSentAt(zonedDateTime.toLocalDateTime());
+        feedback1.setSentAt(zonedDateTime.toInstant());
         given(feedbackRepository.save(any(Feedback.class))).willReturn(feedback1);
         FeedbackDto result = feedbackService.saveFeedback(feedbackDto1);
         verify(feedbackRepository).save(feedbackCaptor.capture());

@@ -2,7 +2,7 @@ package com.project.ohl.mock;
 
 import com.project.ohl.domain.model.Feedback;
 import com.project.ohl.domain.model.FeedbackType;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -23,7 +23,7 @@ public class FeedbackMock {
               .id(id(1))
               .type(FeedbackType.IMPROVEMENT)
               .description("test_feedback_description1")
-              .sentAt(LocalDateTime.of(2000, 1, 1, 0, 0, 0))
+              .sentAt(Instant.parse("2000-01-01T00:00:00Z"))
               .user(getMockedUser1())
               .build();
     }
@@ -33,7 +33,7 @@ public class FeedbackMock {
               .id(id(2))
               .type(FeedbackType.OPTIMIZATION)
               .description("test_feedback_description2")
-              .sentAt(LocalDateTime.of(2000, 1, 2, 0, 0, 0))
+              .sentAt(Instant.parse("2000-01-02T00:00:00Z"))
               .user(getMockedUser2())
               .build();
     }

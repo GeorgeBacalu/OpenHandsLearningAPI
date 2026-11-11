@@ -45,8 +45,7 @@ public class SectionServiceImpl implements SectionService {
         sectionToUpdate.setMediaKey(sectionDto.getMediaKey());
         sectionToUpdate.setIconKey(sectionDto.getIconKey());
         sectionToUpdate.setName(sectionDto.getName());
-        sectionToUpdate.setIconId(sectionDto.getIconId());
-        sectionToUpdate.setImageId(sectionDto.getImageId());
+
         Section updatedSection = sectionRepository.update(sectionToUpdate);
         return mapper.convertToDto(updatedSection);
     }

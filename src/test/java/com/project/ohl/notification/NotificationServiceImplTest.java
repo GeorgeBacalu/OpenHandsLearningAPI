@@ -86,8 +86,8 @@ class NotificationServiceImplTest {
 
     @Test
     void getAllNotifications_shouldReturnListOfNotifications() {
-        given(notificationRepository.findAll()).willReturn(notifications);
-        List<NotificationDto> result = notificationService.getAllNotifications();
+        given(notificationRepository.findPage(null, 0, 50)).willReturn(notifications);
+        List<NotificationDto> result = notificationService.getAllNotifications(null, 0, 50);
         assertThat(result).isEqualTo(notificationDtos);
     }
 
@@ -107,9 +107,8 @@ class NotificationServiceImplTest {
 
     @Test
     void saveNotification_shouldAddNotificationToList() {
-        given(clock.getZone()).willReturn(zonedDateTime.getZone());
         given(clock.instant()).willReturn(zonedDateTime.toInstant());
-        notification1.setSentAt(zonedDateTime.toLocalDateTime());
+        notification1.setSentAt(zonedDateTime.toInstant());
         given(notificationRepository.save(any(Notification.class))).willReturn(notification1);
         NotificationDto result = notificationService.saveNotification(notificationDto1);
         verify(notificationRepository).save(notificationCaptor.capture());

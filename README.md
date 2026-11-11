@@ -37,12 +37,12 @@ validation, and timezone settings. Hibernate validates the existing development
 schema; startup does not create tables or seed data. No dev profile is required.
 
 All entity IDs and foreign keys use UUIDs. New records receive random UUIDs;
-HTTP IDs are UUID strings. Resource image/icon numbers remain integers.
+HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Android resource IDs remain local to the client.
 
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 and V3 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
@@ -54,10 +54,25 @@ the previous UUID schema. V2 adds:
 
 V2 transforms existing records and memberships; it seeds no users or catalog
 content. Space characters remain valid sign entries. New empty databases contain
-no application records after V1 and V2. Back up and rehearse upgrades on a copy
+no application records after V1 through V3. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails or ambiguous
 classroom names must be resolved explicitly; migration failures roll back V2.
-The new backend requires V2 before it can validate its schema.
+The new backend requires V3 before it can validate its schema.
+
+V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
+`Ă` sign, and replaces resource integers with media keys throughout the catalog.
+The retained `dactilema_a` illustration matches the text/voice sign collection;
+the alphabet category uses that asset too. Letters are unique with case preserved,
+and normalized category names are unique within their section and parent, including
+root categories. Shared media keys remain allowed.
+
+Feedback descriptions and notification messages use PostgreSQL `text`, with a
+10,000-character API limit. Their event times use `timestamptz` and Java `Instant`;
+V3 interprets existing local timestamps in `Europe/Bucharest`, the application
+timezone, and preserves those instants. New responses use UTC ISO timestamps.
+Notification lists accept `receiverId`, feedback lists accept `userId`, and both
+accept `page` (default 0) and `size` (default 50, maximum 100), ordered by newest
+event then UUID. Existing user/time indexes support the filtered reads.
 
 For a separate empty PostgreSQL database:
 
@@ -67,7 +82,7 @@ $env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/open-hands-learni
 ```
 
 For an audited copy already matching V1 with no Flyway history, explicitly
-baseline it at version 1 before applying V2. Automatic baselining remains disabled
+baseline it at version 1 before applying subsequent migrations. Automatic baselining remains disabled
 in the application's default configuration. Never edit applied migrations.
 
 Regular tests use Hibernate-created H2 schemas and two records per table. The

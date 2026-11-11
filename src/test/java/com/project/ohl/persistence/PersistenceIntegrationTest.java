@@ -26,8 +26,8 @@ import com.project.ohl.domain.model.Notification;
 import com.project.ohl.domain.model.Section;
 import com.project.ohl.domain.model.User;
 import jakarta.persistence.EntityManagerFactory;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Test;
@@ -97,7 +97,7 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
 
     @Test
     void persistsAndUpdatesEveryResourceUsingTheHibernateSchema() {
-        var section = sections.save(Section.builder().name("Video").iconId(1).imageId(2).build());
+        var section = sections.save(Section.builder().name("Video").build());
         var institution = institutions.save(Institution.builder().school("School").build());
         var role = roles.findById(ROLE_USER).orElseThrow();
         var user = users.save(User.builder().name("Ana").email("created@example.test")
@@ -106,8 +106,8 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
         var child = categories.save(Category.builder().name("C").parent(parent)
                 .section(sections.findById(SECTION_VIDEO).orElseThrow()).build());
-        var letter = letters.save(LetterSignPair.builder().letter("A").imageId(3).build());
-        var sentAt = LocalDateTime.of(2026, 1, 1, 10, 0);
+        var letter = letters.save(LetterSignPair.builder().letter("X").build());
+        var sentAt = Instant.parse("2026-01-01T08:00:00Z");
         var feedback = feedbacks.save(Feedback.builder().description("Useful lesson")
               .type(FeedbackType.IMPROVEMENT).sentAt(sentAt).user(user).build());
         var notification = notifications.save(Notification.builder().message("Welcome")
@@ -122,14 +122,14 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         assertThat(categories.findById(child.getId()).orElseThrow().getParent().getId()).isEqualTo(parent.getId());
         assertThat(feedbacks.findById(feedback.getId()).orElseThrow().getUser().getId()).isEqualTo(user.getId());
         assertThat(notifications.findById(notification.getId()).orElseThrow().getReceiver().getId()).isEqualTo(user.getId());
-        assertThat(letters.findById(letter.getId()).orElseThrow().getLetter()).isEqualTo("A");
+        assertThat(letters.findById(letter.getId()).orElseThrow().getLetter()).isEqualTo("X");
 
         section.setName("Updated video");
         institution.setSchool("Updated School");
         role.setAuthority(Authority.USER);
         user.setName("Updated Ana");
         child.setName("Updated category");
-        letter.setLetter("B");
+        letter.setLetter("Y");
         feedback.setDescription("Updated feedback");
         notification.setIsRead(true);
 
@@ -138,7 +138,7 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         assertThat(roles.update(role).getAuthority()).isEqualTo(Authority.USER);
         assertThat(users.update(user).getName()).isEqualTo("Updated Ana");
         assertThat(categories.update(child).getName()).isEqualTo("Updated category");
-        assertThat(letters.update(letter).getLetter()).isEqualTo("B");
+        assertThat(letters.update(letter).getLetter()).isEqualTo("Y");
         assertThat(feedbacks.update(feedback).getDescription()).isEqualTo("Updated feedback");
         assertThat(notifications.update(notification).getIsRead()).isTrue();
 

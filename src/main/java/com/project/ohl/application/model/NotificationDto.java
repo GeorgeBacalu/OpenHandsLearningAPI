@@ -2,7 +2,8 @@ package com.project.ohl.application.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,7 @@ public class NotificationDto {
     private UUID id;
 
     @NotBlank(message = "Message must not be blank")
+    @Size(max = 10000, message = "Message must not exceed 10000 characters")
     private String message;
 
     @NotNull(message = "User sender ID must not be null")
@@ -29,5 +31,5 @@ public class NotificationDto {
     @Builder.Default
     private Boolean isRead = false;
 
-    private LocalDateTime sentAt;
+    private Instant sentAt;
 }

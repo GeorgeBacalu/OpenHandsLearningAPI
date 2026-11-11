@@ -2,6 +2,7 @@ package com.project.ohl.adapter.persistence.letter_sign_pair;
 
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.application.port.out.LetterSignPairRepositoryPort;
+import com.project.ohl.domain.model.CatalogMetadata;
 import com.project.ohl.domain.model.LetterSignPair;
 import java.util.UUID;
 import org.springframework.data.domain.Sort;
@@ -33,13 +34,13 @@ public class LetterSignPairPersistenceAdapter extends JpaPersistenceAdapter<Lett
     protected LetterSignPair toDomain(LetterSignPairEntity entity) {
         return LetterSignPair.builder().id(entity.getId())
               .letter(entity.getLetter())
-              .imageId(entity.getImageId())
+              .mediaKey(entity.getMediaKey())
               .build();
     }
 
     @Override
     protected void apply(LetterSignPair model, LetterSignPairEntity entity) {
         entity.setLetter(model.getLetter());
-        entity.setImageId(model.getImageId());
+        entity.setMediaKey(CatalogMetadata.mediaKey(model.getMediaKey(), entity.getMediaKey(), " ".equals(model.getLetter()) ? "space" : "dactilema_" + model.getLetter()));
     }
 }

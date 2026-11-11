@@ -40,8 +40,7 @@ public class SectionPersistenceAdapter extends JpaPersistenceAdapter<Section, Se
     public Section toDomain(SectionEntity entity) {
         return Section.builder().id(entity.getId())
               .name(entity.getName()).code(entity.getCode()).mediaKey(entity.getMediaKey()).iconKey(entity.getIconKey())
-              .iconId(entity.getIconId())
-              .imageId(entity.getImageId())
+
               .build();
     }
 
@@ -51,7 +50,6 @@ public class SectionPersistenceAdapter extends JpaPersistenceAdapter<Section, Se
         entity.setCode(CatalogMetadata.code(model.getCode(), entity.getCode(), "SECTION"));
         entity.setMediaKey(CatalogMetadata.mediaKey(model.getMediaKey(), entity.getMediaKey(), model.getName()));
         entity.setIconKey(CatalogMetadata.mediaKey(model.getIconKey(), entity.getIconKey(), "ic_" + model.getName()));
-        entity.setIconId(model.getIconId());
-        entity.setImageId(model.getImageId());
+
     }
 }

@@ -18,8 +18,8 @@ public class SectionMock {
         return Section.builder()
               .id(id(1))
               .name("test_section_name1")
-              .iconId(1)
-              .imageId(1)
+
+
               .build();
     }
 
@@ -27,8 +27,8 @@ public class SectionMock {
         return Section.builder()
               .id(id(2))
               .name("test_section_name2")
-              .iconId(2)
-              .imageId(2)
+
+
               .build();
     }
 }

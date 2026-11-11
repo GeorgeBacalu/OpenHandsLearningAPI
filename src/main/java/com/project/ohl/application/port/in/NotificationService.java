@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public interface NotificationService {
 
-    List<NotificationDto> getAllNotifications();
+    List<NotificationDto> getAllNotifications(UUID receiverId, int page, int size);
 
     NotificationDto getNotificationById(UUID id);
 

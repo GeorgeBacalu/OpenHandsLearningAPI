@@ -51,8 +51,8 @@ class FeedbackControllerTest {
 
     @Test
     void getAllFeedbacks_shouldReturnListOfFeedbacks() {
-        given(feedbackService.getAllFeedbacks()).willReturn(feedbackDtos);
-        ResponseEntity<List<FeedbackDto>> response = feedbackController.getAllFeedbacks();
+        given(feedbackService.getAllFeedbacks(null, 0, 50)).willReturn(feedbackDtos);
+        ResponseEntity<List<FeedbackDto>> response = feedbackController.getAllFeedbacks(null, 0, 50);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(feedbackDtos);

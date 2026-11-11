@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public interface FeedbackService {
 
-    List<FeedbackDto> getAllFeedbacks();
+    List<FeedbackDto> getAllFeedbacks(UUID userId, int page, int size);
 
     FeedbackDto getFeedbackById(UUID id);
 

@@ -9,7 +9,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,7 +23,7 @@ import lombok.Setter;
       @Index(name = "idx_notifications_sender", columnList = "sender_id")
 })
 public class NotificationEntity extends PersistentEntity {
-    @Column(name = "message", nullable = false)
+    @Column(name = "message", nullable = false, columnDefinition = "text")
     private String message;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
@@ -34,5 +34,5 @@ public class NotificationEntity extends PersistentEntity {
     @Column(name = "is_read", nullable = false)
     private Boolean isRead;
     @Column(name = "sent_at", nullable = false)
-    private LocalDateTime sentAt;
+    private Instant sentAt;
 }

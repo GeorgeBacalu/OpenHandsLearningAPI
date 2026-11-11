@@ -517,7 +517,37 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ]
       },
       "post": {
         "operationId": "saveFeedback",
@@ -1096,7 +1126,37 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "receiverId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ]
       },
       "post": {
         "operationId": "saveNotification",
@@ -2045,14 +2105,6 @@
             "type": "string",
             "minLength": 1
           },
-          "imageId": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int32",
-            "minimum": 1
-          },
           "parentId": {
             "type": [
               "string",
@@ -2073,11 +2125,9 @@
             "maxLength": 120
           },
           "mediaKey": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[a-z0-9_]+$"
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "maxLength": 255
           },
           "isFavorite": {
             "type": "boolean",
@@ -2111,7 +2161,8 @@
           },
           "description": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 10000
           },
           "sentAt": {
             "type": [
@@ -2158,13 +2209,10 @@
             "type": "string",
             "minLength": 1
           },
-          "imageId": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int32",
-            "minimum": 1
+          "mediaKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "maxLength": 255
           }
         },
         "required": [
@@ -2180,7 +2228,8 @@
           },
           "message": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 10000
           },
           "senderId": {
             "type": "string",
@@ -2234,22 +2283,6 @@
             "type": "string",
             "minLength": 1
           },
-          "iconId": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int32",
-            "minimum": 1
-          },
-          "imageId": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int32",
-            "minimum": 1
-          },
           "code": {
             "type": [
               "string",
@@ -2259,18 +2292,14 @@
             "maxLength": 120
           },
           "mediaKey": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[a-z0-9_]+$"
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "maxLength": 255
           },
           "iconKey": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[a-z0-9_]+$"
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "maxLength": 255
           }
         },
         "required": [

@@ -47,7 +47,7 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
     public Category toDomain(CategoryEntity entity) {
         return Category.builder().id(entity.getId())
               .name(entity.getName()).code(entity.getCode()).mediaKey(entity.getMediaKey())
-              .imageId(entity.getImageId())
+
               .isExpanded(false)
               .isFavorite(false)
               .parent(entity.getParent() == null ? null : Category.builder().id(entity.getParent().getId()).build())
@@ -60,7 +60,7 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
         entity.setName(model.getName());
         entity.setCode(CatalogMetadata.code(model.getCode(), entity.getCode(), "CATEGORY"));
         entity.setMediaKey(CatalogMetadata.mediaKey(model.getMediaKey(), entity.getMediaKey(), model.getName()));
-        entity.setImageId(model.getImageId());
+
         entity.setParent(reference(CategoryEntity.class, model.getParent() == null ? null : model.getParent().getId()));
         entity.setSection(reference(SectionEntity.class, model.getSection() == null ? null : model.getSection().getId()));
     }

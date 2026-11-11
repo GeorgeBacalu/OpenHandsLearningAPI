@@ -42,7 +42,7 @@ public class LetterSignPairServiceImpl implements LetterSignPairService {
     public LetterSignPairDto updateLetterSignPairById(LetterSignPairDto letterSignPairDto, UUID id) {
         LetterSignPair letterSignPairToUpdate = getLetterSignPairEntityById(id);
         letterSignPairToUpdate.setLetter(letterSignPairDto.getLetter());
-        letterSignPairToUpdate.setImageId(letterSignPairDto.getImageId());
+        letterSignPairToUpdate.setMediaKey(letterSignPairDto.getMediaKey());
         LetterSignPair updatedLetterSignPair = letterSignPairRepository.update(letterSignPairToUpdate);
         return mapper.convertToDto(updatedLetterSignPair);
     }

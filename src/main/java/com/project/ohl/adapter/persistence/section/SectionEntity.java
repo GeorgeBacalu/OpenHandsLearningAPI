@@ -22,12 +22,8 @@ public class SectionEntity extends PersistentEntity {
     private String name;
     @Column(name = "code", nullable = false, unique = true, length = 120)
     private String code;
-    @Column(name = "media_key")
+    @Column(name = "media_key", nullable = false)
     private String mediaKey;
-    @Column(name = "icon_key")
+    @Column(name = "icon_key", nullable = false)
     private String iconKey;
-    @Column(name = "icon_id")
-    private Integer iconId;
-    @Column(name = "image_id")
-    private Integer imageId;
 }

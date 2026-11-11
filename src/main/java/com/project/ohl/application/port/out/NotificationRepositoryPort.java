@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface NotificationRepositoryPort {
 
-    List<Notification> findAll();
+    List<Notification> findPage(UUID receiverId, int page, int size);
 
     Optional<Notification> findById(UUID id);
 

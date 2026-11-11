@@ -5,14 +5,27 @@ import com.project.ohl.adapter.persistence.user.UserEntity;
 import com.project.ohl.application.port.out.NotificationRepositoryPort;
 import com.project.ohl.domain.model.Notification;
 import com.project.ohl.domain.model.User;
+import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class NotificationPersistenceAdapter extends JpaPersistenceAdapter<Notification, NotificationEntity> implements NotificationRepositoryPort {
 
     public NotificationPersistenceAdapter(NotificationJpaRepository repository) {
         super(repository);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Notification> findPage(UUID receiverId, int page, int size) {
+        var paging = PageRequest.of(page, size, Sort.by(Sort.Order.desc("sentAt"), Sort.Order.asc("id")));
+        var records = receiverId == null ? repository.findAll(paging).getContent()
+                : ((NotificationJpaRepository) repository).findByReceiver_Id(receiverId, paging).getContent();
+        return records.stream().map(this::toDomain).toList();
     }
 
     @Override

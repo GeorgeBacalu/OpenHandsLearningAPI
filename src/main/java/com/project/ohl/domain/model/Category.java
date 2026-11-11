@@ -16,7 +16,6 @@ public class Category {
     private String name;
     private String code;
     private String mediaKey;
-    private Integer imageId;
     private Boolean isExpanded;
     private Boolean isFavorite;
     private Category parent;

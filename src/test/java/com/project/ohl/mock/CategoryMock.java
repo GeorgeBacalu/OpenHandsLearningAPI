@@ -59,7 +59,7 @@ public class CategoryMock {
         return Category.builder()
               .id(id(1))
               .name("Alfabet")
-              .imageId(1)
+
               .isExpanded(false)
               .isFavorite(true)
               .parent(null)
@@ -71,7 +71,7 @@ public class CategoryMock {
         return Category.builder()
               .id(id(2))
               .name("Numere")
-              .imageId(2)
+
               .isExpanded(false)
               .isFavorite(false)
               .parent(null)
@@ -83,7 +83,7 @@ public class CategoryMock {
         return Category.builder()
               .id(id(3))
               .name("Culori")
-              .imageId(3)
+
               .isExpanded(false)
               .isFavorite(true)
               .parent(null)
@@ -95,7 +95,7 @@ public class CategoryMock {
         return Category.builder()
               .id(id(10))
               .name("a")
-              .imageId(10)
+
               .isExpanded(false)
               .isFavorite(true)
               .parent(getMockedCategoryAlphabet())
@@ -107,7 +107,7 @@ public class CategoryMock {
         return Category.builder()
               .id(id(13))
               .name("b")
-              .imageId(13)
+
               .isExpanded(false)
               .isFavorite(false)
               .parent(getMockedCategoryAlphabet())
@@ -119,7 +119,7 @@ public class CategoryMock {
         return Category.builder()
               .id(id(41))
               .name("unu")
-              .imageId(41)
+
               .isExpanded(false)
               .isFavorite(false)
               .parent(getMockedCategoryNumbers())
@@ -131,7 +131,7 @@ public class CategoryMock {
         return Category.builder()
               .id(id(42))
               .name("doi")
-              .imageId(42)
+
               .isExpanded(false)
               .isFavorite(true)
               .parent(getMockedCategoryNumbers())
@@ -143,7 +143,7 @@ public class CategoryMock {
         return Category.builder()
               .id(id(51))
               .name("rosu")
-              .imageId(51)
+
               .isExpanded(false)
               .isFavorite(false)
               .parent(getMockedCategoryColors())
@@ -155,7 +155,7 @@ public class CategoryMock {
         return Category.builder()
               .id(id(52))
               .name("portocaliu")
-              .imageId(52)
+
               .isExpanded(false)
               .isFavorite(true)
               .parent(getMockedCategoryColors())
