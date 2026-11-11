@@ -28,7 +28,7 @@ import static com.project.ohl.mock.SectionMock.getMockedSections;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -74,7 +74,7 @@ class SectionServiceImplTest {
 
     @Test
     void getSectionById_withValidId_shouldReturnSectionWithGivenId() {
-        given(sectionRepository.findById(anyLong())).willReturn(Optional.ofNullable(section1));
+        given(sectionRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(section1));
         SectionDto result = sectionService.getSectionById(VALID_ID);
         assertThat(result).isEqualTo(sectionDto1);
     }
@@ -97,7 +97,7 @@ class SectionServiceImplTest {
     @Test
     void updateSectionById_withValidId_shouldUpdateSectionWithGivenId() {
         Section section = section2; section.setId(VALID_ID);
-        given(sectionRepository.findById(anyLong())).willReturn(Optional.ofNullable(section1));
+        given(sectionRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(section1));
         given(sectionRepository.update(any(Section.class))).willReturn(section);
         SectionDto result = sectionService.updateSectionById(sectionDto2, VALID_ID);
         verify(sectionRepository).update(sectionCaptor.capture());
@@ -114,7 +114,7 @@ class SectionServiceImplTest {
 
     @Test
     void deleteSectionById_withValidId_shouldRemoveSectionWithGivenIdFromList() {
-        given(sectionRepository.findById(anyLong())).willReturn(Optional.ofNullable(section1));
+        given(sectionRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(section1));
         sectionService.deleteSectionById(VALID_ID);
         verify(sectionRepository).delete(section1);
     }

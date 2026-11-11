@@ -28,7 +28,7 @@ import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPairs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -74,7 +74,7 @@ class LetterSignPairServiceImplTest {
 
     @Test
     void getLetterSignPairById_withValidId_shouldReturnLetterSignPairWithGivenId() {
-        given(letterSignPairRepository.findById(anyLong())).willReturn(Optional.ofNullable(letterSignPair1));
+        given(letterSignPairRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(letterSignPair1));
         LetterSignPairDto result = letterSignPairService.getLetterSignPairById(VALID_ID);
         assertThat(result).isEqualTo(letterSignPairDto1);
     }
@@ -97,7 +97,7 @@ class LetterSignPairServiceImplTest {
     @Test
     void updateLetterSignPairById_withValidId_shouldUpdateLetterSignPairWithGivenId() {
         LetterSignPair letterSignPair = letterSignPair2; letterSignPair.setId(VALID_ID);
-        given(letterSignPairRepository.findById(anyLong())).willReturn(Optional.ofNullable(letterSignPair1));
+        given(letterSignPairRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(letterSignPair1));
         given(letterSignPairRepository.update(any(LetterSignPair.class))).willReturn(letterSignPair);
         LetterSignPairDto result = letterSignPairService.updateLetterSignPairById(letterSignPairDto2, VALID_ID);
         verify(letterSignPairRepository).update(letterSignPairCaptor.capture());
@@ -114,7 +114,7 @@ class LetterSignPairServiceImplTest {
 
     @Test
     void deleteLetterSignPairById_withValidId_shouldRemoveLetterSignPairWithGivenIdFromList() {
-        given(letterSignPairRepository.findById(anyLong())).willReturn(Optional.ofNullable(letterSignPair1));
+        given(letterSignPairRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(letterSignPair1));
         letterSignPairService.deleteLetterSignPairById(VALID_ID);
         verify(letterSignPairRepository).delete(letterSignPair1);
     }

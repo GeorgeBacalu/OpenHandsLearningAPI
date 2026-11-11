@@ -28,7 +28,7 @@ import static com.project.ohl.mock.InstitutionMock.getMockedInstitutions;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -75,7 +75,7 @@ class InstitutionServiceImplTest {
 
     @Test
     void getInstitutionById_withValidId_shouldReturnInstitutionWithGivenId() {
-        given(institutionRepository.findById(anyLong())).willReturn(Optional.ofNullable(institution1));
+        given(institutionRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(institution1));
         InstitutionDto result = institutionService.getInstitutionById(VALID_ID);
         assertThat(result).isEqualTo(institutionDto1);
     }
@@ -98,7 +98,7 @@ class InstitutionServiceImplTest {
     @Test
     void updateInstitutionById_withValidId_shouldUpdateInstitutionWithGivenId() {
         Institution institution = institution2; institution.setId(VALID_ID);
-        given(institutionRepository.findById(anyLong())).willReturn(Optional.ofNullable(institution1));
+        given(institutionRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(institution1));
         given(institutionRepository.update(any(Institution.class))).willReturn(institution);
         InstitutionDto result = institutionService.updateInstitutionById(institutionDto2, VALID_ID);
         verify(institutionRepository).update(institutionCaptor.capture());
@@ -115,7 +115,7 @@ class InstitutionServiceImplTest {
 
     @Test
     void deleteInstitutionById_withValidId_shouldRemoveInstitutionWithGivenIdFromList() {
-        given(institutionRepository.findById(anyLong())).willReturn(Optional.ofNullable(institution1));
+        given(institutionRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(institution1));
         institutionService.deleteInstitutionById(VALID_ID);
         verify(institutionRepository).delete(institution1);
     }

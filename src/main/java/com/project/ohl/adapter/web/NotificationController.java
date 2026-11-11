@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.web;
 
+import java.util.UUID;
 import com.project.ohl.application.model.NotificationDto;
 import com.project.ohl.application.port.in.NotificationService;
 
@@ -32,7 +33,7 @@ public class NotificationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<NotificationDto> getNotificationById(@PathVariable Long id) {
+    public ResponseEntity<NotificationDto> getNotificationById(@PathVariable UUID id) {
         return ResponseEntity.ok(notificationService.getNotificationById(id));
     }
 
@@ -42,12 +43,12 @@ public class NotificationController {
     }
 
     @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<NotificationDto> updateNotificationById(@RequestBody @Valid NotificationDto notificationDto, @PathVariable Long id) {
+    public ResponseEntity<NotificationDto> updateNotificationById(@RequestBody @Valid NotificationDto notificationDto, @PathVariable UUID id) {
         return ResponseEntity.ok(notificationService.updateNotificationById(notificationDto, id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNotificationById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteNotificationById(@PathVariable UUID id) {
         notificationService.deleteNotificationById(id);
         return ResponseEntity.noContent().build();
     }

@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.web;
 
+import java.util.UUID;
 import com.project.ohl.application.model.FeedbackDto;
 import com.project.ohl.application.port.in.FeedbackService;
 
@@ -32,7 +33,7 @@ public class FeedbackController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FeedbackDto> getFeedbackById(@PathVariable Long id) {
+    public ResponseEntity<FeedbackDto> getFeedbackById(@PathVariable UUID id) {
         return ResponseEntity.ok(feedbackService.getFeedbackById(id));
     }
 
@@ -42,12 +43,12 @@ public class FeedbackController {
     }
 
     @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<FeedbackDto> updateFeedbackById(@RequestBody @Valid FeedbackDto feedbackDto, @PathVariable Long id) {
+    public ResponseEntity<FeedbackDto> updateFeedbackById(@RequestBody @Valid FeedbackDto feedbackDto, @PathVariable UUID id) {
         return ResponseEntity.ok(feedbackService.updateFeedbackById(feedbackDto, id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFeedbackById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteFeedbackById(@PathVariable UUID id) {
         feedbackService.deleteFeedbackById(id);
         return ResponseEntity.noContent().build();
     }

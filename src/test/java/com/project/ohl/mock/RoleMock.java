@@ -1,5 +1,6 @@
 package com.project.ohl.mock;
 
+import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.Role;
 import com.project.ohl.domain.model.Authority;
 import java.util.List;
@@ -14,10 +15,10 @@ public class RoleMock {
     }
 
     public static Role getMockedRole1() {
-        return Role.builder().id(1L).authority(Authority.USER).build();
+        return Role.builder().id(id(1)).authority(Authority.USER).build();
     }
 
     public static Role getMockedRole2() {
-        return Role.builder().id(2L).authority(Authority.ADMIN).build();
+        return Role.builder().id(id(2)).authority(Authority.ADMIN).build();
     }
 }

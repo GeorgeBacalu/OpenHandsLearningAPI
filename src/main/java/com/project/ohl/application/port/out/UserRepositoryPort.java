@@ -1,5 +1,6 @@
 package com.project.ohl.application.port.out;
 
+import java.util.UUID;
 import com.project.ohl.domain.model.User;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public interface UserRepositoryPort {
 
     List<User> findAll();
 
-    Optional<User> findById(Long id);
+    Optional<User> findById(UUID id);
 
     User save(User user);
 

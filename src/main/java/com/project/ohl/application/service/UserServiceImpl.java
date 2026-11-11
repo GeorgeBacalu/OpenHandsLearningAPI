@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import java.util.UUID;
 import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.application.port.in.UserService;
@@ -32,7 +33,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserById(Long id) {
+    public UserDto getUserById(UUID id) {
         User user = getUserEntityById(id);
         return mapper.convertToDto(user);
     }
@@ -46,7 +47,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUserById(UserDto userDto, Long id) {
+    public UserDto updateUserById(UserDto userDto, UUID id) {
         User userToUpdate = getUserEntityById(id);
         userToUpdate.setName(userDto.getName());
         userToUpdate.setEmail(userDto.getEmail());
@@ -61,13 +62,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUserById(Long id) {
+    public void deleteUserById(UUID id) {
         User userToDelete = getUserEntityById(id);
         userRepository.delete(userToDelete);
     }
 
     @Override
-    public User getUserEntityById(Long id) {
+    public User getUserEntityById(UUID id) {
         return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(USER_NOT_FOUND, id)));
     }
 }

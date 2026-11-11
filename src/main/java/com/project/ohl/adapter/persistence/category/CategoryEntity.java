@@ -22,6 +22,8 @@ import lombok.Setter;
       @Index(name = "idx_categories_favorites", columnList = "is_favorite,id")
 })
 public class CategoryEntity extends PersistentEntity {
+    @Column(name = "display_order", nullable = false)
+    private Integer displayOrder = Integer.MAX_VALUE;
     @Column(name = "name")
     private String name;
     @Column(name = "image_id")

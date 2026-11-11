@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import java.util.UUID;
 import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.model.FeedbackDto;
 import com.project.ohl.application.port.in.FeedbackService;
@@ -31,7 +32,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public FeedbackDto getFeedbackById(Long id) {
+    public FeedbackDto getFeedbackById(UUID id) {
         Feedback feedback = getFeedbackEntityById(id);
         return mapper.convertToDto(feedback);
     }
@@ -45,7 +46,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public FeedbackDto updateFeedbackById(FeedbackDto feedbackDto, Long id) {
+    public FeedbackDto updateFeedbackById(FeedbackDto feedbackDto, UUID id) {
         Feedback feedbackToUpdate = getFeedbackEntityById(id);
         feedbackToUpdate.setType(feedbackDto.getType());
         feedbackToUpdate.setDescription(feedbackDto.getDescription());
@@ -55,12 +56,12 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public void deleteFeedbackById(Long id) {
+    public void deleteFeedbackById(UUID id) {
         Feedback feedbackToDelete = getFeedbackEntityById(id);
         feedbackRepository.delete(feedbackToDelete);
     }
 
-    private Feedback getFeedbackEntityById(Long id) {
+    private Feedback getFeedbackEntityById(UUID id) {
         return feedbackRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(FEEDBACK_NOT_FOUND, id)));
     }
 }

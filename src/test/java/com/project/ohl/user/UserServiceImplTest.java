@@ -30,7 +30,7 @@ import static com.project.ohl.mock.UserMock.getMockedUsers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -85,7 +85,7 @@ class UserServiceImplTest {
 
     @Test
     void getUserById_withValidId_shouldReturnUserWithGivenId() {
-        given(userRepository.findById(anyLong())).willReturn(Optional.ofNullable(user1));
+        given(userRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(user1));
         UserDto result = userService.getUserById(VALID_ID);
         assertThat(result).isEqualTo(userDto1);
     }
@@ -110,7 +110,7 @@ class UserServiceImplTest {
     @Test
     void updateUserById_withValidId_shouldUpdateUserWithGivenId() {
         User user = user2; user.setId(VALID_ID);
-        given(userRepository.findById(anyLong())).willReturn(Optional.ofNullable(user1));
+        given(userRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(user1));
         given(passwordHasher.hash(userDto2.getPassword())).willReturn("encoded-password");
         given(userRepository.update(any(User.class))).willReturn(user1);
         UserDto result = userService.updateUserById(userDto2, VALID_ID);
@@ -129,7 +129,7 @@ class UserServiceImplTest {
 
     @Test
     void deleteUserById_withValidId_shouldRemoveUserWithGivenIdFromList() {
-        given(userRepository.findById(anyLong())).willReturn(Optional.ofNullable(user1));
+        given(userRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(user1));
         userService.deleteUserById(VALID_ID);
         verify(userRepository).delete(user1);
     }

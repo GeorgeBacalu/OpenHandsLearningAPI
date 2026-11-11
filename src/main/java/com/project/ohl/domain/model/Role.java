@@ -1,5 +1,6 @@
 package com.project.ohl.domain.model;
 
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Role {
 
-    private Long id;
+    private UUID id;
     private Authority authority;
 }

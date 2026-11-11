@@ -33,6 +33,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(users.size()).isEqualTo(2);
         assertThat(users.get(0).path("name").asText()).isEqualTo("Ana");
         assertThat(users.get(1).path("name").asText()).isEqualTo("Dan");
+        assertThat(users.get(0).path("mobile").asText()).isEqualTo("0712345678");
         assertThat(users.get(0).has("password")).isFalse();
     }
 
@@ -57,10 +58,11 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
 
     @Test
     void returnsProblemDetailsForMissingResourcesAndInvalidRequests() throws Exception {
-        var missing = send("GET", "/api/users/999999", null);
+        var missing = send("GET", "/api/users/00000000-0000-4000-8000-0000000f423f", null);
         assertThat(missing.statusCode()).isEqualTo(404);
         assertThat(missing.headers().firstValue("Content-Type").orElse("")).contains("application/problem+json");
         assertThat(json.readTree(missing.body()).path("status").asInt()).isEqualTo(404);
+        assertThat(send("GET", "/api/users/not-a-uuid", null).statusCode()).isEqualTo(400);
         var invalid = send("POST", "/api/users", "{}");
         assertThat(invalid.statusCode()).isEqualTo(400);
         assertThat(json.readTree(invalid.body()).path("errors").has("password")).isTrue();
@@ -78,8 +80,8 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         request.put("password", "\u00e9".repeat(37));
         request.put("mobile", "0712345678");
         request.put("address", "Bucharest");
-        request.put("institutionId", 1);
-        request.put("roleId", 1);
+        request.put("institutionId", "00000000-0000-4000-8000-000000000001");
+        request.put("roleId", "00000000-0000-4000-8000-000000000001");
         var response = send("POST", "/api/users", json.writeValueAsString(request));
         assertThat(response.statusCode()).isEqualTo(400);
         assertThat(json.readTree(response.body()).path("detail").asText())

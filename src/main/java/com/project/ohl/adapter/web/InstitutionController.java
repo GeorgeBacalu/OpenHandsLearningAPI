@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.web;
 
+import java.util.UUID;
 import com.project.ohl.application.model.InstitutionDto;
 import com.project.ohl.application.port.in.InstitutionService;
 
@@ -32,7 +33,7 @@ public class InstitutionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<InstitutionDto> getInstitutionById(@PathVariable Long id) {
+    public ResponseEntity<InstitutionDto> getInstitutionById(@PathVariable UUID id) {
         return ResponseEntity.ok(institutionService.getInstitutionById(id));
     }
 
@@ -42,12 +43,12 @@ public class InstitutionController {
     }
 
     @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<InstitutionDto> updateInstitutionById(@RequestBody @Valid InstitutionDto institutionDto, @PathVariable Long id) {
+    public ResponseEntity<InstitutionDto> updateInstitutionById(@RequestBody @Valid InstitutionDto institutionDto, @PathVariable UUID id) {
         return ResponseEntity.ok(institutionService.updateInstitutionById(institutionDto, id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteInstitutionById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteInstitutionById(@PathVariable UUID id) {
         institutionService.deleteInstitutionById(id);
         return ResponseEntity.noContent().build();
     }

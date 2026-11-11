@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.web;
 
+import java.util.UUID;
 import com.project.ohl.application.model.LetterSignPairDto;
 import com.project.ohl.application.port.in.LetterSignPairService;
 
@@ -32,7 +33,7 @@ public class LetterSignPairController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LetterSignPairDto> getLetterSignPairById(@PathVariable Long id) {
+    public ResponseEntity<LetterSignPairDto> getLetterSignPairById(@PathVariable UUID id) {
         return ResponseEntity.ok(letterSignPairService.getLetterSignPairById(id));
     }
 
@@ -42,12 +43,12 @@ public class LetterSignPairController {
     }
 
     @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<LetterSignPairDto> updateLetterSignPairById(@RequestBody @Valid LetterSignPairDto letterSignPairDto, @PathVariable Long id) {
+    public ResponseEntity<LetterSignPairDto> updateLetterSignPairById(@RequestBody @Valid LetterSignPairDto letterSignPairDto, @PathVariable UUID id) {
         return ResponseEntity.ok(letterSignPairService.updateLetterSignPairById(letterSignPairDto, id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLetterSignPairById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteLetterSignPairById(@PathVariable UUID id) {
         letterSignPairService.deleteLetterSignPairById(id);
         return ResponseEntity.noContent().build();
     }

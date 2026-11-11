@@ -1,5 +1,6 @@
 package com.project.ohl.application.model;
 
+import java.util.UUID;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -13,8 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class LetterSignPairDto {
 
-    @Positive(message = "Letter-sign pair ID must be positive")
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "Letter must not be blank")
     private String letter;

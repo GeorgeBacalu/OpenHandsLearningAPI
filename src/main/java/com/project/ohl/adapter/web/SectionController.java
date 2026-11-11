@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.web;
 
+import java.util.UUID;
 import com.project.ohl.application.model.SectionDto;
 import com.project.ohl.application.port.in.SectionService;
 
@@ -32,7 +33,7 @@ public class SectionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SectionDto> getSectionById(@PathVariable Long id) {
+    public ResponseEntity<SectionDto> getSectionById(@PathVariable UUID id) {
         return ResponseEntity.ok(sectionService.getSectionById(id));
     }
 
@@ -42,12 +43,12 @@ public class SectionController {
     }
 
     @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<SectionDto> updateSectionById(@RequestBody @Valid SectionDto sectionDto, @PathVariable Long id) {
+    public ResponseEntity<SectionDto> updateSectionById(@RequestBody @Valid SectionDto sectionDto, @PathVariable UUID id) {
         return ResponseEntity.ok(sectionService.updateSectionById(sectionDto, id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSectionById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteSectionById(@PathVariable UUID id) {
         sectionService.deleteSectionById(id);
         return ResponseEntity.noContent().build();
     }

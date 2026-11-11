@@ -23,7 +23,7 @@ import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPairs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -60,7 +60,7 @@ class LetterSignPairControllerTest {
 
     @Test
     void getLetterSignPairById_shouldReturnLetterSignPairWithGivenId() {
-        given(letterSignPairService.getLetterSignPairById(anyLong())).willReturn(letterSignPairDto1);
+        given(letterSignPairService.getLetterSignPairById(any(UUID.class))).willReturn(letterSignPairDto1);
         ResponseEntity<LetterSignPairDto> response = letterSignPairController.getLetterSignPairById(VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -79,7 +79,7 @@ class LetterSignPairControllerTest {
     @Test
     void updateLetterSignPairById_shouldUpdateLetterSignPairWithGivenId() {
         LetterSignPairDto letterSignPairDto = letterSignPairDto2; letterSignPairDto.setId(VALID_ID);
-        given(letterSignPairService.updateLetterSignPairById(any(LetterSignPairDto.class), anyLong())).willReturn(letterSignPairDto);
+        given(letterSignPairService.updateLetterSignPairById(any(LetterSignPairDto.class), any(UUID.class))).willReturn(letterSignPairDto);
         ResponseEntity<LetterSignPairDto> response = letterSignPairController.updateLetterSignPairById(letterSignPairDto2, VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

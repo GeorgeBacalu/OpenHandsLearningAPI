@@ -1,5 +1,6 @@
 package com.project.ohl.application.port.out;
 
+import java.util.UUID;
 import com.project.ohl.domain.model.Notification;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public interface NotificationRepositoryPort {
 
     List<Notification> findAll();
 
-    Optional<Notification> findById(Long id);
+    Optional<Notification> findById(UUID id);
 
     Notification save(Notification notification);
 

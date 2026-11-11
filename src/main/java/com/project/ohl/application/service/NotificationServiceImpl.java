@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import java.util.UUID;
 import com.project.ohl.application.mapper.NotificationMapper;
 import com.project.ohl.application.model.NotificationDto;
 import com.project.ohl.application.port.in.NotificationService;
@@ -31,7 +32,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public NotificationDto getNotificationById(Long id) {
+    public NotificationDto getNotificationById(UUID id) {
         Notification notification = getNotificationEntityById(id);
         return mapper.convertToDto(notification);
     }
@@ -45,7 +46,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public NotificationDto updateNotificationById(NotificationDto notificationDto, Long id) {
+    public NotificationDto updateNotificationById(NotificationDto notificationDto, UUID id) {
         Notification notificationToUpdate = getNotificationEntityById(id);
         notificationToUpdate.setMessage(notificationDto.getMessage());
         notificationToUpdate.setIsRead(notificationDto.getIsRead());
@@ -56,12 +57,12 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void deleteNotificationById(Long id) {
+    public void deleteNotificationById(UUID id) {
         Notification notificationToDelete = getNotificationEntityById(id);
         notificationRepository.delete(notificationToDelete);
     }
 
-    private Notification getNotificationEntityById(Long id) {
+    private Notification getNotificationEntityById(UUID id) {
         return notificationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(NOTIFICATION_NOT_FOUND, id)));
     }
 }

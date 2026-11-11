@@ -28,7 +28,7 @@ import static com.project.ohl.mock.RoleMock.getMockedRoles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -74,7 +74,7 @@ class RoleServiceImplTest {
 
     @Test
     void getRoleById_withValidId_shouldReturnRoleWithGivenId() {
-        given(roleRepository.findById(anyLong())).willReturn(Optional.ofNullable(role1));
+        given(roleRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(role1));
         RoleDto result = roleService.getRoleById(VALID_ID);
         assertThat(result).isEqualTo(roleDto1);
     }
@@ -97,7 +97,7 @@ class RoleServiceImplTest {
     @Test
     void updateRoleById_withValidId_shouldUpdateRoleWithGivenId() {
         Role role = role2; role.setId(VALID_ID);
-        given(roleRepository.findById(anyLong())).willReturn(Optional.ofNullable(role1));
+        given(roleRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(role1));
         given(roleRepository.update(any(Role.class))).willReturn(role);
         RoleDto result = roleService.updateRoleById(roleDto2, VALID_ID);
         verify(roleRepository).update(roleCaptor.capture());
@@ -114,7 +114,7 @@ class RoleServiceImplTest {
 
     @Test
     void deleteRoleById_withValidId_shouldRemoveRoleWithGivenIdFromList() {
-        given(roleRepository.findById(anyLong())).willReturn(Optional.ofNullable(role1));
+        given(roleRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(role1));
         roleService.deleteRoleById(VALID_ID);
         verify(roleRepository).delete(role1);
     }

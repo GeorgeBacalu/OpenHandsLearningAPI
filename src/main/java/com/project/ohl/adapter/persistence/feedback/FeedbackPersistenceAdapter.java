@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.persistence.feedback;
 
+import java.util.UUID;
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.adapter.persistence.user.UserEntity;
 import com.project.ohl.domain.model.Feedback;
@@ -20,7 +21,7 @@ public class FeedbackPersistenceAdapter extends JpaPersistenceAdapter<Feedback, 
     }
 
     @Override
-    protected Long idOf(Feedback model) {
+    protected UUID idOf(Feedback model) {
         return model.getId();
     }
 

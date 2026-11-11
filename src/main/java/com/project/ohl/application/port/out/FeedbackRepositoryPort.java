@@ -1,5 +1,6 @@
 package com.project.ohl.application.port.out;
 
+import java.util.UUID;
 import com.project.ohl.domain.model.Feedback;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public interface FeedbackRepositoryPort {
 
     List<Feedback> findAll();
 
-    Optional<Feedback> findById(Long id);
+    Optional<Feedback> findById(UUID id);
 
     Feedback save(Feedback feedback);
 

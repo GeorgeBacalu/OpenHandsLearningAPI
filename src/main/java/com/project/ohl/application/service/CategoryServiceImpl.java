@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import java.util.UUID;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.in.CategoryService;
@@ -28,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto getCategoryById(Long id) {
+    public CategoryDto getCategoryById(UUID id) {
         Category category = getCategoryEntityById(id);
         return mapper.convertToDto(category);
     }
@@ -41,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto updateCategoryById(CategoryDto categoryDto, Long id) {
+    public CategoryDto updateCategoryById(CategoryDto categoryDto, UUID id) {
         Category categoryToUpdate = getCategoryEntityById(id);
         validateParent(id, categoryDto.getParentId());
         categoryToUpdate.setName(categoryDto.getName());
@@ -55,13 +56,13 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void deleteCategoryById(Long id) {
+    public void deleteCategoryById(UUID id) {
         Category categoryToDelete = getCategoryEntityById(id);
         categoryRepository.delete(categoryToDelete);
     }
 
     @Override
-    public List<CategoryDto> getCategoriesByParentIdAndSectionIdAndName(Long parentId, Long sectionId, String name) {
+    public List<CategoryDto> getCategoriesByParentIdAndSectionIdAndName(UUID parentId, UUID sectionId, String name) {
         List<Category> categories;
         if(parentId == null) {
             categories = name == null || name.isBlank()
@@ -90,21 +91,21 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto saveFavorite(Long categoryId) {
+    public CategoryDto saveFavorite(UUID categoryId) {
         Category favoriteToSave = getCategoryEntityById(categoryId);
         favoriteToSave.setIsFavorite(true);
         return mapper.convertToDto(categoryRepository.update(favoriteToSave));
     }
 
     @Override
-    public CategoryDto deleteFavorite(Long categoryId) {
+    public CategoryDto deleteFavorite(UUID categoryId) {
         Category favoriteToDelete = getCategoryEntityById(categoryId);
         favoriteToDelete.setIsFavorite(false);
         return mapper.convertToDto(categoryRepository.update(favoriteToDelete));
     }
 
-    private void validateParent(Long categoryId, Long parentId) {
-        var visited = new java.util.HashSet<Long>();
+    private void validateParent(UUID categoryId, UUID parentId) {
+        var visited = new java.util.HashSet<UUID>();
         while (parentId != null) {
             if (parentId.equals(categoryId) || !visited.add(parentId)) {
                 throw new com.project.ohl.domain.exception.InvalidRequestException("Category hierarchy must not contain cycles.");
@@ -114,7 +115,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private Category getCategoryEntityById(Long id) {
+    private Category getCategoryEntityById(UUID id) {
         return categoryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(CATEGORY_NOT_FOUND, id)));
     }
 }

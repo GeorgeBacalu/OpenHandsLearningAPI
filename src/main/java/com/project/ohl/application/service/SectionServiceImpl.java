@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import java.util.UUID;
 import com.project.ohl.application.mapper.SectionMapper;
 import com.project.ohl.application.model.SectionDto;
 import com.project.ohl.application.port.in.SectionService;
@@ -26,7 +27,7 @@ public class SectionServiceImpl implements SectionService {
     }
 
     @Override
-    public SectionDto getSectionById(Long id) {
+    public SectionDto getSectionById(UUID id) {
         Section section = getSectionEntityById(id);
         return mapper.convertToDto(section);
     }
@@ -39,7 +40,7 @@ public class SectionServiceImpl implements SectionService {
     }
 
     @Override
-    public SectionDto updateSectionById(SectionDto sectionDto, Long id) {
+    public SectionDto updateSectionById(SectionDto sectionDto, UUID id) {
         Section sectionToUpdate = getSectionEntityById(id);
         sectionToUpdate.setName(sectionDto.getName());
         sectionToUpdate.setIconId(sectionDto.getIconId());
@@ -49,13 +50,13 @@ public class SectionServiceImpl implements SectionService {
     }
 
     @Override
-    public void deleteSectionById(Long id) {
+    public void deleteSectionById(UUID id) {
         Section sectionToDelete = getSectionEntityById(id);
         sectionRepository.delete(sectionToDelete);
     }
 
     @Override
-    public Section getSectionEntityById(Long id) {
+    public Section getSectionEntityById(UUID id) {
         return sectionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(SECTION_NOT_FOUND, id)));
     }
 }

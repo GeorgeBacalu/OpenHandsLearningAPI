@@ -24,7 +24,7 @@ import static com.project.ohl.mock.SectionMock.getMockedSections;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -61,7 +61,7 @@ class SectionControllerTest {
 
     @Test
     void getSectionById_shouldReturnSectionWithGivenId() {
-        given(sectionService.getSectionById(anyLong())).willReturn(sectionDto1);
+        given(sectionService.getSectionById(any(UUID.class))).willReturn(sectionDto1);
         ResponseEntity<SectionDto> response = sectionController.getSectionById(VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -80,7 +80,7 @@ class SectionControllerTest {
     @Test
     void updateSectionById_shouldUpdateSectionWithGivenId() {
         SectionDto sectionDto = sectionDto2; sectionDto.setId(VALID_ID);
-        given(sectionService.updateSectionById(any(SectionDto.class), anyLong())).willReturn(sectionDto);
+        given(sectionService.updateSectionById(any(SectionDto.class), any(UUID.class))).willReturn(sectionDto);
         ResponseEntity<SectionDto> response = sectionController.updateSectionById(sectionDto2, VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

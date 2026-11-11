@@ -1,5 +1,6 @@
 package com.project.ohl.mapper;
 
+import static com.project.ohl.TestIds.id;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.mapper.NotificationMapper;
@@ -23,20 +24,20 @@ class MapperTest {
 
     @Test
     void categoryMappingPreservesParentIdWithoutCopyingTheParentGraph() {
-        var model = Category.builder().id(17L).name("Child").imageId(42)
+        var model = Category.builder().id(id(17)).name("Child").imageId(42)
                 .isExpanded(true).isFavorite(false)
-                .parent(Category.builder().id(3L).name("Parent").build())
-                .section(Section.builder().id(9L).name("Video").build()).build();
+                .parent(Category.builder().id(id(3)).name("Parent").build())
+                .section(Section.builder().id(id(9)).name("Video").build()).build();
         var dto = categories.convertToDtoList(List.of(model)).getFirst();
-        assertThat(dto.getId()).isEqualTo(17L);
-        assertThat(dto.getParentId()).isEqualTo(3L);
-        assertThat(dto.getSectionId()).isEqualTo(9L);
+        assertThat(dto.getId()).isEqualTo(id(17));
+        assertThat(dto.getParentId()).isEqualTo(id(3));
+        assertThat(dto.getSectionId()).isEqualTo(id(9));
         assertThat(dto.getIsExpanded()).isTrue();
         assertThat(dto.getIsFavorite()).isFalse();
         var restored = categories.convertToEntity(dto);
-        assertThat(restored.getParent().getId()).isEqualTo(3L);
+        assertThat(restored.getParent().getId()).isEqualTo(id(3));
         assertThat(restored.getParent().getName()).isNull();
-        assertThat(restored.getSection().getId()).isEqualTo(9L);
+        assertThat(restored.getSection().getId()).isEqualTo(id(9));
         assertThat(restored.getSection().getName()).isNull();
     }
 
@@ -52,20 +53,20 @@ class MapperTest {
         assertThat(notification.getSender()).isNull();
         assertThat(notification.getReceiver()).isNull();
         assertThat(feedback.convertToEntity(new FeedbackDto()).getUser()).isNull();
-        assertThat(categories.convertToDto(Category.builder().id(17L).build()).getParentId()).isNull();
+        assertThat(categories.convertToDto(Category.builder().id(id(17)).build()).getParentId()).isNull();
     }
 
     @Test
     void distinctRelatedIdsAreMappedToTheCorrectReferences() {
-        var user = users.convertToEntity(UserDto.builder().institutionId(19L).roleId(4L).build());
-        assertThat(user.getInstitution().getId()).isEqualTo(19L);
-        assertThat(user.getRole().getId()).isEqualTo(4L);
-        var notification = notifications.convertToEntity(NotificationDto.builder().senderId(43L).receiverId(56L).build());
-        assertThat(notification.getSender().getId()).isEqualTo(43L);
-        assertThat(notification.getReceiver().getId()).isEqualTo(56L);
+        var user = users.convertToEntity(UserDto.builder().institutionId(id(19)).roleId(id(4)).build());
+        assertThat(user.getInstitution().getId()).isEqualTo(id(19));
+        assertThat(user.getRole().getId()).isEqualTo(id(4));
+        var notification = notifications.convertToEntity(NotificationDto.builder().senderId(id(43)).receiverId(id(56)).build());
+        assertThat(notification.getSender().getId()).isEqualTo(id(43));
+        assertThat(notification.getReceiver().getId()).isEqualTo(id(56));
         var dto = notifications.convertToDto(notification);
-        assertThat(dto.getSenderId()).isEqualTo(43L);
-        assertThat(dto.getReceiverId()).isEqualTo(56L);
-        assertThat(feedback.convertToEntity(FeedbackDto.builder().userId(71L).build()).getUser().getId()).isEqualTo(71L);
+        assertThat(dto.getSenderId()).isEqualTo(id(43));
+        assertThat(dto.getReceiverId()).isEqualTo(id(56));
+        assertThat(feedback.convertToEntity(FeedbackDto.builder().userId(id(71)).build()).getUser().getId()).isEqualTo(id(71));
     }
 }

@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.persistence.role;
 
+import java.util.UUID;
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.domain.model.Role;
 import com.project.ohl.application.port.out.RoleRepositoryPort;
@@ -18,7 +19,7 @@ public class RolePersistenceAdapter extends JpaPersistenceAdapter<Role, RoleEnti
     }
 
     @Override
-    protected Long idOf(Role model) {
+    protected UUID idOf(Role model) {
         return model.getId();
     }
 

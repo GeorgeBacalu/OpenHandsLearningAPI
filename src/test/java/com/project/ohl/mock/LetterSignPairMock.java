@@ -1,5 +1,6 @@
 package com.project.ohl.mock;
 
+import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.LetterSignPair;
 import java.util.List;
 import lombok.AccessLevel;
@@ -14,7 +15,7 @@ public class LetterSignPairMock {
 
     public static LetterSignPair getMockedLetterSignPair1() {
         return LetterSignPair.builder()
-              .id(1L)
+              .id(id(1))
               .letter("a")
               .imageId(1)
               .build();
@@ -22,7 +23,7 @@ public class LetterSignPairMock {
 
     public static LetterSignPair getMockedLetterSignPair2() {
         return LetterSignPair.builder()
-              .id(2L)
+              .id(id(2))
               .letter("b")
               .imageId(2)
               .build();

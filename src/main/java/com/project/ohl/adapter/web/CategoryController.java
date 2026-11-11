@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.web;
 
+import java.util.UUID;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.in.CategoryService;
 
@@ -34,7 +35,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable UUID id) {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
@@ -44,19 +45,19 @@ public class CategoryController {
     }
 
     @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<CategoryDto> updateCategoryById(@RequestBody @Valid CategoryDto categoryDto, @PathVariable Long id) {
+    public ResponseEntity<CategoryDto> updateCategoryById(@RequestBody @Valid CategoryDto categoryDto, @PathVariable UUID id) {
         return ResponseEntity.ok(categoryService.updateCategoryById(categoryDto, id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategoryById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCategoryById(@PathVariable UUID id) {
         categoryService.deleteCategoryById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<CategoryDto>> getCategoriesByParentIdAndSectionIdAndName(@RequestParam(required = false) Long parentId,
-                                                                                        @RequestParam(required = false, defaultValue = "1") Long sectionId,
+    public ResponseEntity<List<CategoryDto>> getCategoriesByParentIdAndSectionIdAndName(@RequestParam(required = false) UUID parentId,
+                                                                                        @RequestParam(required = false, defaultValue = "20a6880c-2e37-32e3-8e45-07a17e99a000") UUID sectionId,
                                                                                         @RequestParam(required = false, defaultValue = "") String name) {
         return ResponseEntity.ok(categoryService.getCategoriesByParentIdAndSectionIdAndName(parentId, sectionId, name));
     }
@@ -72,12 +73,12 @@ public class CategoryController {
     }
 
     @PatchMapping("/favorites/save")
-    public ResponseEntity<CategoryDto> saveFavorite(@RequestParam Long categoryId) {
+    public ResponseEntity<CategoryDto> saveFavorite(@RequestParam UUID categoryId) {
         return ResponseEntity.ok(categoryService.saveFavorite(categoryId));
     }
 
     @PatchMapping("/favorites/delete")
-    public ResponseEntity<CategoryDto> deleteFavorite(@RequestParam Long categoryId) {
+    public ResponseEntity<CategoryDto> deleteFavorite(@RequestParam UUID categoryId) {
         return ResponseEntity.ok(categoryService.deleteFavorite(categoryId));
     }
 }

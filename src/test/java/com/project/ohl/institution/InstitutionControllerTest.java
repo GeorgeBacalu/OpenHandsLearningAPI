@@ -24,7 +24,7 @@ import static com.project.ohl.mock.InstitutionMock.getMockedInstitutions;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -61,7 +61,7 @@ class InstitutionControllerTest {
 
     @Test
     void getInstitutionById_shouldReturnInstitutionWithGivenId() {
-        given(institutionService.getInstitutionById(anyLong())).willReturn(institutionDto1);
+        given(institutionService.getInstitutionById(any(UUID.class))).willReturn(institutionDto1);
         ResponseEntity<InstitutionDto> response = institutionController.getInstitutionById(VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -80,7 +80,7 @@ class InstitutionControllerTest {
     @Test
     void updateInstitutionById_shouldUpdateInstitutionWithGivenId() {
         InstitutionDto institutionDto = institutionDto2; institutionDto.setId(VALID_ID);
-        given(institutionService.updateInstitutionById(any(InstitutionDto.class), anyLong())).willReturn(institutionDto);
+        given(institutionService.updateInstitutionById(any(InstitutionDto.class), any(UUID.class))).willReturn(institutionDto);
         ResponseEntity<InstitutionDto> response = institutionController.updateInstitutionById(institutionDto2, VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

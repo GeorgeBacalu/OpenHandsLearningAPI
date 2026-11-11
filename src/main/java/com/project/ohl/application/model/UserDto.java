@@ -1,5 +1,6 @@
 package com.project.ohl.application.model;
 
+import java.util.UUID;
 import com.project.ohl.domain.model.Institution;
 import com.project.ohl.domain.model.Role;
 import com.project.ohl.domain.model.User;
@@ -7,7 +8,6 @@ import com.project.ohl.domain.model.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -21,8 +21,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserDto {
 
-    @Positive(message = "User ID must be positive")
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "Name must not be blank")
     private String name;
@@ -46,10 +45,8 @@ public class UserDto {
     private LocalDate birthday;
 
     @NotNull(message = "Institution ID must not be null")
-    @Positive(message = "Institution ID must be positive")
-    private Long institutionId;
+    private UUID institutionId;
 
     @NotNull(message = "Role ID must not be null")
-    @Positive(message = "Role ID must be positive")
-    private Long roleId;
+    private UUID roleId;
 }

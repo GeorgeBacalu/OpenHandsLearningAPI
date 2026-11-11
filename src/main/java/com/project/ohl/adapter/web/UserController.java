@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.web;
 
+import java.util.UUID;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.adapter.web.model.UserResponse;
 import com.project.ohl.application.port.in.UserService;
@@ -33,7 +34,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
         return ResponseEntity.ok(UserResponse.from(userService.getUserById(id)));
     }
 
@@ -43,12 +44,12 @@ public class UserController {
     }
 
     @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserResponse> updateUserById(@RequestBody @Valid UserDto userDto, @PathVariable Long id) {
+    public ResponseEntity<UserResponse> updateUserById(@RequestBody @Valid UserDto userDto, @PathVariable UUID id) {
         return ResponseEntity.ok(UserResponse.from(userService.updateUserById(userDto, id)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUserById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUserById(@PathVariable UUID id) {
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }

@@ -35,7 +35,7 @@ import static com.project.ohl.mock.CategoryMock.getMockedParentCategoriesFiltere
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -109,7 +109,7 @@ class CategoryServiceImplTest {
 
     @Test
     void getCategoryById_withValidId_shouldReturnCategoryWithGivenId() {
-        given(categoryRepository.findById(anyLong())).willReturn(Optional.ofNullable(categoryOne));
+        given(categoryRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(categoryOne));
         CategoryDto result = categoryService.getCategoryById(VALID_ID);
         assertThat(result).isEqualTo(categoryDtoOne);
     }
@@ -150,7 +150,7 @@ class CategoryServiceImplTest {
 
     @Test
     void deleteCategoryById_withValidId_shouldRemoveCategoryWithGivenIdFromList() {
-        given(categoryRepository.findById(anyLong())).willReturn(Optional.ofNullable(categoryOne));
+        given(categoryRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(categoryOne));
         categoryService.deleteCategoryById(VALID_ID);
         verify(categoryRepository).delete(categoryOne);
     }
@@ -165,28 +165,28 @@ class CategoryServiceImplTest {
 
     @Test
     void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNullAndNameBlank_shouldReturnListOfParentCategories() {
-        given(categoryRepository.findByParentIdNullAndSectionId(anyLong())).willReturn(parentCategories);
+        given(categoryRepository.findByParentIdNullAndSectionId(any(UUID.class))).willReturn(parentCategories);
         List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(null, VALID_ID, "");
         assertThat(result).isEqualTo(parentCategoryDtos);
     }
 
     @Test
     void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNullAndNameNotBlank_shouldReturnListOfParentCategoriesFilteredByName() {
-        given(categoryRepository.findByParentIdNullAndSectionIdAndNameContaining(anyLong(), anyString())).willReturn(filteredParentCategories);
+        given(categoryRepository.findByParentIdNullAndSectionIdAndNameContaining(any(UUID.class), anyString())).willReturn(filteredParentCategories);
         List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(null, VALID_ID, "a");
         assertThat(result).isEqualTo(filteredParentCategoryDtos);
     }
 
     @Test
     void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNotNullAndNameBlank_shouldReturnListOfChildrenCategories() {
-        given(categoryRepository.findByParentIdAndSectionId(anyLong(), anyLong())).willReturn(childrenCategoriesAlphabet);
+        given(categoryRepository.findByParentIdAndSectionId(any(UUID.class), any(UUID.class))).willReturn(childrenCategoriesAlphabet);
         List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(VALID_ID, VALID_ID, "");
         assertThat(result).isEqualTo(childrenCategoryDtosAlphabet);
     }
 
     @Test
     void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNotNullAndNameNotBlank_shouldReturnListOfChildrenCategoriesFilteredByName() {
-        given(categoryRepository.findByParentIdAndSectionIdAndNameContaining(anyLong(), anyLong(), anyString())).willReturn(filteredChildrenCategoriesAlphabet);
+        given(categoryRepository.findByParentIdAndSectionIdAndNameContaining(any(UUID.class), any(UUID.class), anyString())).willReturn(filteredChildrenCategoriesAlphabet);
         List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(VALID_ID, VALID_ID, "a");
         assertThat(result).isEqualTo(filteredChildrenCategoryDtosAlphabet);
     }
@@ -215,7 +215,7 @@ class CategoryServiceImplTest {
     @Test
     void saveFavorite_shouldAddFavoriteCategoryToList() {
         Category category = categoryOne; category.setIsFavorite(true);
-        given(categoryRepository.findById(anyLong())).willReturn(Optional.ofNullable(categoryOne));
+        given(categoryRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(categoryOne));
         given(categoryRepository.update(any(Category.class))).willReturn(category);
         CategoryDto result = categoryService.saveFavorite(categoryOne.getId());
         verify(categoryRepository).update(categoryCaptor.capture());
@@ -225,7 +225,7 @@ class CategoryServiceImplTest {
     @Test
     void deleteFavorite_shouldAddFavoriteCategoryToList() {
         Category category = categoryOne; category.setIsFavorite(false);
-        given(categoryRepository.findById(anyLong())).willReturn(Optional.ofNullable(categoryOne));
+        given(categoryRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(categoryOne));
         given(categoryRepository.update(any(Category.class))).willReturn(category);
         CategoryDto result = categoryService.deleteFavorite(categoryOne.getId());
         verify(categoryRepository).update(categoryCaptor.capture());

@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.persistence.notification;
 
+import java.util.UUID;
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.adapter.persistence.user.UserEntity;
 import com.project.ohl.domain.model.Notification;
@@ -20,7 +21,7 @@ public class NotificationPersistenceAdapter extends JpaPersistenceAdapter<Notifi
     }
 
     @Override
-    protected Long idOf(Notification model) {
+    protected UUID idOf(Notification model) {
         return model.getId();
     }
 

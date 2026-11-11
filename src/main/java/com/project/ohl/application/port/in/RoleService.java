@@ -1,5 +1,6 @@
 package com.project.ohl.application.port.in;
 
+import java.util.UUID;
 import com.project.ohl.application.model.RoleDto;
 import com.project.ohl.domain.model.Role;
 
@@ -9,13 +10,13 @@ public interface RoleService {
 
     List<RoleDto> getAllRoles();
 
-    RoleDto getRoleById(Long id);
+    RoleDto getRoleById(UUID id);
 
     RoleDto saveRole(RoleDto roleDto);
 
-    RoleDto updateRoleById(RoleDto roleDto, Long id);
+    RoleDto updateRoleById(RoleDto roleDto, UUID id);
 
-    void deleteRoleById(Long id);
+    void deleteRoleById(UUID id);
 
-    Role getRoleEntityById(Long id);
+    Role getRoleEntityById(UUID id);
 }

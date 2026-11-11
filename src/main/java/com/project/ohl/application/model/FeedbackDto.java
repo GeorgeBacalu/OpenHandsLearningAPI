@@ -1,12 +1,12 @@
 package com.project.ohl.application.model;
 
+import java.util.UUID;
 import com.project.ohl.domain.model.Feedback;
 import com.project.ohl.domain.model.User;
 
 import com.project.ohl.domain.model.FeedbackType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,8 +19,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class FeedbackDto {
 
-    @Positive(message = "Feedback ID must be positive")
-    private Long id;
+    private UUID id;
 
     @NotNull(message = "Feedback type must not be null")
     private FeedbackType type;
@@ -31,6 +30,5 @@ public class FeedbackDto {
     private LocalDateTime sentAt;
 
     @NotNull(message = "User ID must not be null")
-    @Positive(message = "User ID must be positive")
-    private Long userId;
+    private UUID userId;
 }

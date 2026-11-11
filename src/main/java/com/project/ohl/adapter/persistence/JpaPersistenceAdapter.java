@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.persistence;
 
+import java.util.UUID;
 import com.project.ohl.domain.exception.ResourceNotFoundException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -10,30 +11,34 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 public abstract class JpaPersistenceAdapter<M, E extends PersistentEntity> {
-    protected final JpaRepository<E, Long> repository;
+    protected final JpaRepository<E, UUID> repository;
     @PersistenceContext
     private EntityManager entityManager;
 
-    protected JpaPersistenceAdapter(JpaRepository<E, Long> repository) {
+    protected JpaPersistenceAdapter(JpaRepository<E, UUID> repository) {
         this.repository = repository;
     }
 
-    protected <T extends PersistentEntity> T reference(Class<T> type, Long id) {
+    protected <T extends PersistentEntity> T reference(Class<T> type, UUID id) {
         return id == null ? null : entityManager.getReference(type, id);
     }
 
     protected abstract E newEntity();
     protected abstract M toDomain(E entity);
     protected abstract void apply(M model, E entity);
-    protected abstract Long idOf(M model);
+    protected abstract UUID idOf(M model);
 
-    @Transactional(readOnly = true)
-    public List<M> findAll() {
-        return repository.findAll(Sort.by("id")).stream().map(this::toDomain).toList();
+    protected Sort defaultSort() {
+        return Sort.by("id");
     }
 
     @Transactional(readOnly = true)
-    public Optional<M> findById(Long id) {
+    public List<M> findAll() {
+        return repository.findAll(defaultSort()).stream().map(this::toDomain).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<M> findById(UUID id) {
         return id == null ? Optional.empty() : repository.findById(id).map(this::toDomain);
     }
 

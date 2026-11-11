@@ -1,5 +1,6 @@
 package com.project.ohl.domain.model;
 
+import java.util.UUID;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Notification {
 
-    private Long id;
+    private UUID id;
     private String message;
     private User sender;
     private User receiver;

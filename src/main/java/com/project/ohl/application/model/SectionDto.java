@@ -1,5 +1,6 @@
 package com.project.ohl.application.model;
 
+import java.util.UUID;
 import com.project.ohl.domain.model.Section;
 
 import jakarta.validation.constraints.NotBlank;
@@ -15,8 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SectionDto {
 
-    @Positive(message = "Section ID must be positive")
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "Name must not be blank")
     private String name;

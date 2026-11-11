@@ -25,7 +25,7 @@ import static com.project.ohl.mock.UserMock.getMockedUsers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -62,7 +62,7 @@ class UserControllerTest {
 
     @Test
     void getUserById_shouldReturnUserWithGivenId() {
-        given(userService.getUserById(anyLong())).willReturn(userDto1);
+        given(userService.getUserById(any(UUID.class))).willReturn(userDto1);
         ResponseEntity<UserResponse> response = userController.getUserById(VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -81,7 +81,7 @@ class UserControllerTest {
     @Test
     void updateUserById_shouldUpdateUserWithGivenId() {
         UserDto userDto = userDto2; userDto.setId(VALID_ID);
-        given(userService.updateUserById(any(UserDto.class), anyLong())).willReturn(userDto);
+        given(userService.updateUserById(any(UserDto.class), any(UUID.class))).willReturn(userDto);
         ResponseEntity<UserResponse> response = userController.updateUserById(userDto2, VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

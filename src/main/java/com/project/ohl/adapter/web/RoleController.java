@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.web;
 
+import java.util.UUID;
 import com.project.ohl.application.model.RoleDto;
 import com.project.ohl.application.port.in.RoleService;
 
@@ -32,7 +33,7 @@ public class RoleController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RoleDto> getRoleById(@PathVariable Long id) {
+    public ResponseEntity<RoleDto> getRoleById(@PathVariable UUID id) {
         return ResponseEntity.ok(roleService.getRoleById(id));
     }
 
@@ -42,12 +43,12 @@ public class RoleController {
     }
 
     @PutMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE)
-    public ResponseEntity<RoleDto> updateRoleById(@RequestBody @Valid RoleDto roleDto, @PathVariable Long id) {
+    public ResponseEntity<RoleDto> updateRoleById(@RequestBody @Valid RoleDto roleDto, @PathVariable UUID id) {
         return ResponseEntity.ok(roleService.updateRoleById(roleDto, id));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRoleById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRoleById(@PathVariable UUID id) {
         roleService.deleteRoleById(id);
         return ResponseEntity.noContent().build();
     }

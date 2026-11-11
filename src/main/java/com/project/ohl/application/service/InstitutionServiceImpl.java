@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import java.util.UUID;
 import com.project.ohl.application.mapper.InstitutionMapper;
 import com.project.ohl.application.model.InstitutionDto;
 import com.project.ohl.application.port.in.InstitutionService;
@@ -26,7 +27,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public InstitutionDto getInstitutionById(Long id) {
+    public InstitutionDto getInstitutionById(UUID id) {
         Institution institution = getInstitutionEntityById(id);
         return mapper.convertToDto(institution);
     }
@@ -39,7 +40,7 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public InstitutionDto updateInstitutionById(InstitutionDto institutionDto, Long id) {
+    public InstitutionDto updateInstitutionById(InstitutionDto institutionDto, UUID id) {
         Institution institutionToUpdate = getInstitutionEntityById(id);
         institutionToUpdate.setSchool(institutionDto.getSchool());
         institutionToUpdate.setClassroom(institutionDto.getClassroom());
@@ -48,13 +49,13 @@ public class InstitutionServiceImpl implements InstitutionService {
     }
 
     @Override
-    public void deleteInstitutionById(Long id) {
+    public void deleteInstitutionById(UUID id) {
         Institution institutionToDelete = getInstitutionEntityById(id);
         institutionRepository.delete(institutionToDelete);
     }
 
     @Override
-    public Institution getInstitutionEntityById(Long id) {
+    public Institution getInstitutionEntityById(UUID id) {
         return institutionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(INSTITUTION_NOT_FOUND, id)));
     }
 }

@@ -1,11 +1,13 @@
 package com.project.ohl.constants;
 
+import java.util.UUID;
+import static com.project.ohl.TestIds.id;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class IdentifierConstants {
 
-    public static final Long VALID_ID = 1L;
-    public static final Long INVALID_ID = 999L;
+    public static final UUID VALID_ID = id(1);
+    public static final UUID INVALID_ID = id(999);
 }

@@ -35,7 +35,7 @@ import static com.project.ohl.mock.UserMock.getMockedUser2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -93,7 +93,7 @@ class NotificationServiceImplTest {
 
     @Test
     void getNotificationById_withValidId_shouldReturnNotificationWithGivenId() {
-        given(notificationRepository.findById(anyLong())).willReturn(Optional.ofNullable(notification1));
+        given(notificationRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(notification1));
         NotificationDto result = notificationService.getNotificationById(VALID_ID);
         assertThat(result).isEqualTo(notificationDto1);
     }
@@ -120,7 +120,7 @@ class NotificationServiceImplTest {
     void updateNotificationById_withValidId_shouldUpdateNotificationWithGivenId() {
         Notification notification = notification2; notification.setId(VALID_ID);
         notification.setSentAt(notification1.getSentAt());
-        given(notificationRepository.findById(anyLong())).willReturn(Optional.ofNullable(notification1));
+        given(notificationRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(notification1));
         given(userService.getUserEntityById(notificationDto2.getSenderId())).willReturn(user2);
         given(userService.getUserEntityById(notificationDto2.getReceiverId())).willReturn(user1);
         given(notificationRepository.update(any(Notification.class))).willReturn(notification);
@@ -139,7 +139,7 @@ class NotificationServiceImplTest {
 
     @Test
     void deleteNotificationById_withValidId_shouldRemoveNotificationWithGivenIdFromList() {
-        given(notificationRepository.findById(anyLong())).willReturn(Optional.ofNullable(notification1));
+        given(notificationRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(notification1));
         notificationService.deleteNotificationById(VALID_ID);
         verify(notificationRepository).delete(notification1);
     }

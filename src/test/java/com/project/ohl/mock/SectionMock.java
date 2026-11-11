@@ -1,5 +1,6 @@
 package com.project.ohl.mock;
 
+import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.Section;
 import java.util.List;
 import lombok.AccessLevel;
@@ -14,7 +15,7 @@ public class SectionMock {
 
     public static Section getMockedSection1() {
         return Section.builder()
-              .id(1L)
+              .id(id(1))
               .name("test_section_name1")
               .iconId(1)
               .imageId(1)
@@ -23,7 +24,7 @@ public class SectionMock {
 
     public static Section getMockedSection2() {
         return Section.builder()
-              .id(2L)
+              .id(id(2))
               .name("test_section_name2")
               .iconId(2)
               .imageId(2)

@@ -1,5 +1,6 @@
 package com.project.ohl.application.port.out;
 
+import java.util.UUID;
 import com.project.ohl.domain.model.Category;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public interface CategoryRepositoryPort {
 
     List<Category> findAll();
 
-    Optional<Category> findById(Long id);
+    Optional<Category> findById(UUID id);
 
     Category save(Category category);
 
@@ -17,13 +18,13 @@ public interface CategoryRepositoryPort {
 
     void delete(Category category);
 
-    List<Category> findByParentIdNullAndSectionId(Long sectionId);
+    List<Category> findByParentIdNullAndSectionId(UUID sectionId);
 
-    List<Category> findByParentIdNullAndSectionIdAndNameContaining(Long sectionId, String name);
+    List<Category> findByParentIdNullAndSectionIdAndNameContaining(UUID sectionId, String name);
 
-    List<Category> findByParentIdAndSectionId(Long parentId, Long sectionId);
+    List<Category> findByParentIdAndSectionId(UUID parentId, UUID sectionId);
 
-    List<Category> findByParentIdAndSectionIdAndNameContaining(Long parentId, Long sectionId, String name);
+    List<Category> findByParentIdAndSectionIdAndNameContaining(UUID parentId, UUID sectionId, String name);
 
     List<Category> findFavorites();
 

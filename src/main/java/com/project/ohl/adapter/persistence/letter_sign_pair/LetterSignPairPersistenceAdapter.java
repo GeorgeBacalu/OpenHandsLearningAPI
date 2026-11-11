@@ -1,5 +1,7 @@
 package com.project.ohl.adapter.persistence.letter_sign_pair;
 
+import org.springframework.data.domain.Sort;
+import java.util.UUID;
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.domain.model.LetterSignPair;
 import com.project.ohl.application.port.out.LetterSignPairRepositoryPort;
@@ -13,12 +15,17 @@ public class LetterSignPairPersistenceAdapter extends JpaPersistenceAdapter<Lett
     }
 
     @Override
+    protected Sort defaultSort() {
+        return Sort.by("displayOrder", "id");
+    }
+
+    @Override
     protected LetterSignPairEntity newEntity() {
         return new LetterSignPairEntity();
     }
 
     @Override
-    protected Long idOf(LetterSignPair model) {
+    protected UUID idOf(LetterSignPair model) {
         return model.getId();
     }
 

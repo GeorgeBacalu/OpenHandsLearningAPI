@@ -14,6 +14,8 @@ import lombok.Setter;
 @Entity
 @Table(name = "sections")
 public class SectionEntity extends PersistentEntity {
+    @Column(name = "display_order", nullable = false)
+    private Integer displayOrder = Integer.MAX_VALUE;
     @Column(name = "name")
     private String name;
     @Column(name = "icon_id")

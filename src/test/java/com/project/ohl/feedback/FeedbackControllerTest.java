@@ -24,7 +24,7 @@ import static com.project.ohl.mock.FeedbackMock.getMockedFeedbacks;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -61,7 +61,7 @@ class FeedbackControllerTest {
 
     @Test
     void getFeedbackById_shouldReturnFeedbackWithGivenId() {
-        given(feedbackService.getFeedbackById(anyLong())).willReturn(feedbackDto1);
+        given(feedbackService.getFeedbackById(any(UUID.class))).willReturn(feedbackDto1);
         ResponseEntity<FeedbackDto> response = feedbackController.getFeedbackById(VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -80,7 +80,7 @@ class FeedbackControllerTest {
     @Test
     void updateFeedbackById_shouldUpdateFeedbackWithGivenId() {
         FeedbackDto feedbackDto = feedbackDto2; feedbackDto.setId(VALID_ID);
-        given(feedbackService.updateFeedbackById(any(FeedbackDto.class), anyLong())).willReturn(feedbackDto);
+        given(feedbackService.updateFeedbackById(any(FeedbackDto.class), any(UUID.class))).willReturn(feedbackDto);
         ResponseEntity<FeedbackDto> response = feedbackController.updateFeedbackById(feedbackDto2, VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

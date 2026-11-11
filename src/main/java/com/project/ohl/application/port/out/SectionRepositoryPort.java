@@ -1,5 +1,6 @@
 package com.project.ohl.application.port.out;
 
+import java.util.UUID;
 import com.project.ohl.domain.model.Section;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public interface SectionRepositoryPort {
 
     List<Section> findAll();
 
-    Optional<Section> findById(Long id);
+    Optional<Section> findById(UUID id);
 
     Section save(Section section);
 

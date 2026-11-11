@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import java.util.UUID;
 import com.project.ohl.application.mapper.RoleMapper;
 import com.project.ohl.application.model.RoleDto;
 import com.project.ohl.application.port.in.RoleService;
@@ -26,7 +27,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleDto getRoleById(Long id) {
+    public RoleDto getRoleById(UUID id) {
         Role role = getRoleEntityById(id);
         return mapper.convertToDto(role);
     }
@@ -39,7 +40,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleDto updateRoleById(RoleDto roleDto, Long id) {
+    public RoleDto updateRoleById(RoleDto roleDto, UUID id) {
         Role roleToUpdate = getRoleEntityById(id);
         roleToUpdate.setAuthority(roleDto.getAuthority());
         Role updatedRole = roleRepository.update(roleToUpdate);
@@ -47,13 +48,13 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public void deleteRoleById(Long id) {
+    public void deleteRoleById(UUID id) {
         Role roleToDelete = getRoleEntityById(id);
         roleRepository.delete(roleToDelete);
     }
 
     @Override
-    public Role getRoleEntityById(Long id) {
+    public Role getRoleEntityById(UUID id) {
         return roleRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(ROLE_NOT_FOUND, id)));
     }
 }

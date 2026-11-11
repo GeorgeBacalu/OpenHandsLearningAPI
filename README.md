@@ -16,7 +16,7 @@ needed.
 On macOS/Linux, use `./mvnw clean verify`. Database tests use an isolated H2
 database. Hibernate creates the schema when the test context starts and drops it
 when the context closes. Each database-backed test loads `src/test/resources/test.sql`
-with two records per table. The shared fixture clears all rows and resets identities
+with two records per table. The shared fixture clears all rows
 before and after each test, and verifies the row counts. The full catalog is not loaded.
 
 Tests cover persistence, optimistic locking, foreign keys, HTTP errors, BCrypt,
@@ -34,6 +34,25 @@ The PostgreSQL database already contains the schema and data. Set
 `src/main/resources/application.properties` contains the connection, schema
 validation, and timezone settings. Hibernate validates the existing development
 schema; startup does not create tables or seed data. No dev profile is required.
+
+All entity IDs and foreign keys use UUIDs. New records receive random UUIDs;
+HTTP IDs are UUID strings. Resource image/icon numbers remain integers.
+
+For an existing database with numeric IDs, back it up with `pg_dump -Fc`, restore
+that backup into a separate demo database, and rehearse this migration first:
+
+```powershell
+psql -h localhost -U postgres -d open-hands-learning-demo -v ON_ERROR_STOP=1 -f database/migrations/20261111_uuid_ids.sql
+```
+
+Stop API writes and apply the same command with `-d open-hands-learning` after
+verification. The migration runs once, in a transaction, and compares every row
+and relationship before committing. It maps old IDs to stable UUIDs using
+`UUID.nameUUIDFromBytes` semantics over UTF-8 `OpenHandsLearning:<table>:<old-id>`.
+It also adds missing optimistic-lock versions and preserves catalog ordering in
+`display_order`. New IDs use UUID v4. For rollback, restore the pre-migration
+backup into a separate database and switch the previous API/client versions to
+that database; restoring an old backup omits subsequent writes.
 
 ## HTTP contract
 

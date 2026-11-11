@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.persistence.institution;
 
+import java.util.UUID;
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.domain.model.Institution;
 import com.project.ohl.application.port.out.InstitutionRepositoryPort;
@@ -18,7 +19,7 @@ public class InstitutionPersistenceAdapter extends JpaPersistenceAdapter<Institu
     }
 
     @Override
-    protected Long idOf(Institution model) {
+    protected UUID idOf(Institution model) {
         return model.getId();
     }
 

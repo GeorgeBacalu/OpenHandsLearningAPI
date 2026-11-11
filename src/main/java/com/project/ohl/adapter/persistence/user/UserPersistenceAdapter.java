@@ -1,5 +1,6 @@
 package com.project.ohl.adapter.persistence.user;
 
+import java.util.UUID;
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.adapter.persistence.role.RoleEntity;
 import com.project.ohl.adapter.persistence.institution.InstitutionEntity;
@@ -22,7 +23,7 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
     }
 
     @Override
-    protected Long idOf(User model) {
+    protected UUID idOf(User model) {
         return model.getId();
     }
 

@@ -24,7 +24,7 @@ import static com.project.ohl.mock.RoleMock.getMockedRoles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -61,7 +61,7 @@ class RoleControllerTest {
 
     @Test
     void getRoleById_shouldReturnRoleWithGivenId() {
-        given(roleService.getRoleById(anyLong())).willReturn(roleDto1);
+        given(roleService.getRoleById(any(UUID.class))).willReturn(roleDto1);
         ResponseEntity<RoleDto> response = roleController.getRoleById(VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -80,7 +80,7 @@ class RoleControllerTest {
     @Test
     void updateRoleById_shouldUpdateRoleWithGivenId() {
         RoleDto roleDto = roleDto2; roleDto.setId(VALID_ID);
-        given(roleService.updateRoleById(any(RoleDto.class), anyLong())).willReturn(roleDto);
+        given(roleService.updateRoleById(any(RoleDto.class), any(UUID.class))).willReturn(roleDto);
         ResponseEntity<RoleDto> response = roleController.updateRoleById(roleDto2, VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

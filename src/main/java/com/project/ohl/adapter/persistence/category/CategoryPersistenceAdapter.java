@@ -1,5 +1,7 @@
 package com.project.ohl.adapter.persistence.category;
 
+import org.springframework.data.domain.Sort;
+import java.util.UUID;
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.adapter.persistence.section.SectionEntity;
 import com.project.ohl.domain.model.Category;
@@ -20,12 +22,17 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
     }
 
     @Override
+    protected Sort defaultSort() {
+        return Sort.by("displayOrder", "id");
+    }
+
+    @Override
     protected CategoryEntity newEntity() {
         return new CategoryEntity();
     }
 
     @Override
-    protected Long idOf(Category model) {
+    protected UUID idOf(Category model) {
         return model.getId();
     }
 
@@ -52,32 +59,32 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
     }
 
     @Override
-    public List<Category> findByParentIdNullAndSectionId(Long sectionId) {
-        return categories.findByParent_IdIsNullAndSection_IdOrderByIdAsc(sectionId).stream().map(this::toDomain).toList();
+    public List<Category> findByParentIdNullAndSectionId(UUID sectionId) {
+        return categories.findByParent_IdIsNullAndSection_IdOrderByDisplayOrderAscIdAsc(sectionId).stream().map(this::toDomain).toList();
     }
 
     @Override
-    public List<Category> findByParentIdNullAndSectionIdAndNameContaining(Long sectionId, String name) {
-        return categories.findByParent_IdIsNullAndSection_IdAndNameContainingIgnoreCaseOrderByIdAsc(sectionId, name).stream().map(this::toDomain).toList();
+    public List<Category> findByParentIdNullAndSectionIdAndNameContaining(UUID sectionId, String name) {
+        return categories.findByParent_IdIsNullAndSection_IdAndNameContainingIgnoreCaseOrderByDisplayOrderAscIdAsc(sectionId, name).stream().map(this::toDomain).toList();
     }
 
     @Override
-    public List<Category> findByParentIdAndSectionId(Long parentId, Long sectionId) {
-        return categories.findByParent_IdAndSection_IdOrderByIdAsc(parentId, sectionId).stream().map(this::toDomain).toList();
+    public List<Category> findByParentIdAndSectionId(UUID parentId, UUID sectionId) {
+        return categories.findByParent_IdAndSection_IdOrderByDisplayOrderAscIdAsc(parentId, sectionId).stream().map(this::toDomain).toList();
     }
 
     @Override
-    public List<Category> findByParentIdAndSectionIdAndNameContaining(Long parentId, Long sectionId, String name) {
-        return categories.findByParent_IdAndSection_IdAndNameContainingIgnoreCaseOrderByIdAsc(parentId, sectionId, name).stream().map(this::toDomain).toList();
+    public List<Category> findByParentIdAndSectionIdAndNameContaining(UUID parentId, UUID sectionId, String name) {
+        return categories.findByParent_IdAndSection_IdAndNameContainingIgnoreCaseOrderByDisplayOrderAscIdAsc(parentId, sectionId, name).stream().map(this::toDomain).toList();
     }
 
     @Override
     public List<Category> findFavorites() {
-        return categories.findByIsFavoriteTrueOrderByIdAsc().stream().map(this::toDomain).toList();
+        return categories.findByIsFavoriteTrueOrderByDisplayOrderAscIdAsc().stream().map(this::toDomain).toList();
     }
 
     @Override
     public List<Category> findFavoritesByNameContaining(String name) {
-        return categories.findByIsFavoriteTrueAndNameContainingIgnoreCaseOrderByIdAsc(name).stream().map(this::toDomain).toList();
+        return categories.findByIsFavoriteTrueAndNameContainingIgnoreCaseOrderByDisplayOrderAscIdAsc(name).stream().map(this::toDomain).toList();
     }
 }

@@ -1,5 +1,6 @@
 package com.project.ohl.mock;
 
+import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.User;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,7 +21,7 @@ public class UserMock {
 
     public static User getMockedUser1() {
         return User.builder()
-              .id(1L)
+              .id(id(1))
               .name("test_user_name1")
               .email("test_user_email1@email.com")
               .password("test_user_password1")
@@ -34,7 +35,7 @@ public class UserMock {
 
     public static User getMockedUser2() {
         return User.builder()
-              .id(2L)
+              .id(id(2))
               .name("test_user_name2")
               .email("test_user_email2@email.com")
               .password("test_user_password2")

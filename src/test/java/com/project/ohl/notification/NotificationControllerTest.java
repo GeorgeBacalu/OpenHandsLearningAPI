@@ -24,7 +24,7 @@ import static com.project.ohl.mock.NotificationMock.getMockedNotifications;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -61,7 +61,7 @@ class NotificationControllerTest {
 
     @Test
     void getNotificationById_shouldReturnNotificationWithGivenId() {
-        given(notificationService.getNotificationById(anyLong())).willReturn(notificationDto1);
+        given(notificationService.getNotificationById(any(UUID.class))).willReturn(notificationDto1);
         ResponseEntity<NotificationDto> response = notificationController.getNotificationById(VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -80,7 +80,7 @@ class NotificationControllerTest {
     @Test
     void updateNotificationById_shouldUpdateNotificationWithGivenId() {
         NotificationDto notificationDto = notificationDto2; notificationDto.setId(VALID_ID);
-        given(notificationService.updateNotificationById(any(NotificationDto.class), anyLong())).willReturn(notificationDto);
+        given(notificationService.updateNotificationById(any(NotificationDto.class), any(UUID.class))).willReturn(notificationDto);
         ResponseEntity<NotificationDto> response = notificationController.updateNotificationById(notificationDto2, VALID_ID);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);

@@ -1,5 +1,6 @@
 package com.project.ohl.application.model;
 
+import java.util.UUID;
 import com.project.ohl.domain.model.Category;
 import com.project.ohl.domain.model.Section;
 
@@ -17,8 +18,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CategoryDto {
 
-    @Positive(message = "Category ID must be positive")
-    private Long id;
+    private UUID id;
 
     @NotBlank(message = "Name must not be blank")
     private String name;
@@ -34,9 +34,8 @@ public class CategoryDto {
     @NotNull(message = "IsFavorite must not be null")
     private Boolean isFavorite = false;
 
-    private Long parentId;
+    private UUID parentId;
 
-    @Positive(message = "Section ID must be positive")
     @NotNull(message = "Section ID must not be null")
-    private Long sectionId;
+    private UUID sectionId;
 }

@@ -1,5 +1,6 @@
 package com.project.ohl.application.port.out;
 
+import java.util.UUID;
 import com.project.ohl.domain.model.Institution;
 
 import java.util.List;
@@ -9,7 +10,7 @@ public interface InstitutionRepositoryPort {
 
     List<Institution> findAll();
 
-    Optional<Institution> findById(Long id);
+    Optional<Institution> findById(UUID id);
 
     Institution save(Institution institution);
 

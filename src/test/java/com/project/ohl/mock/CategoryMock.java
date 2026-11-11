@@ -1,5 +1,6 @@
 package com.project.ohl.mock;
 
+import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.Category;
 import java.util.List;
 import lombok.AccessLevel;
@@ -56,7 +57,7 @@ public class CategoryMock {
 
     public static Category getMockedCategoryAlphabet() {
         return Category.builder()
-              .id(1L)
+              .id(id(1))
               .name("Alfabet")
               .imageId(1)
               .isExpanded(false)
@@ -68,7 +69,7 @@ public class CategoryMock {
 
     public static Category getMockedCategoryNumbers() {
         return Category.builder()
-              .id(2L)
+              .id(id(2))
               .name("Numere")
               .imageId(2)
               .isExpanded(false)
@@ -80,7 +81,7 @@ public class CategoryMock {
 
     public static Category getMockedCategoryColors() {
         return Category.builder()
-              .id(3L)
+              .id(id(3))
               .name("Culori")
               .imageId(3)
               .isExpanded(false)
@@ -92,7 +93,7 @@ public class CategoryMock {
 
     public static Category getMockedCategoryA() {
         return Category.builder()
-              .id(10L)
+              .id(id(10))
               .name("a")
               .imageId(10)
               .isExpanded(false)
@@ -104,7 +105,7 @@ public class CategoryMock {
 
     public static Category getMockedCategoryB() {
         return Category.builder()
-              .id(13L)
+              .id(id(13))
               .name("b")
               .imageId(13)
               .isExpanded(false)
@@ -116,7 +117,7 @@ public class CategoryMock {
 
     public static Category getMockedCategoryOne() {
         return Category.builder()
-              .id(41L)
+              .id(id(41))
               .name("unu")
               .imageId(41)
               .isExpanded(false)
@@ -128,7 +129,7 @@ public class CategoryMock {
 
     public static Category getMockedCategoryTwo() {
         return Category.builder()
-              .id(42L)
+              .id(id(42))
               .name("doi")
               .imageId(42)
               .isExpanded(false)
@@ -140,7 +141,7 @@ public class CategoryMock {
 
     public static Category getMockedCategoryRed() {
         return Category.builder()
-              .id(51L)
+              .id(id(51))
               .name("rosu")
               .imageId(51)
               .isExpanded(false)
@@ -152,7 +153,7 @@ public class CategoryMock {
 
     public static Category getMockedCategoryOrange() {
         return Category.builder()
-              .id(52L)
+              .id(id(52))
               .name("portocaliu")
               .imageId(52)
               .isExpanded(false)

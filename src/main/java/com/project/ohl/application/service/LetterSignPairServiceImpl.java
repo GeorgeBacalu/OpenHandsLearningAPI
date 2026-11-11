@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import java.util.UUID;
 import com.project.ohl.application.mapper.LetterSignPairMapper;
 import com.project.ohl.application.model.LetterSignPairDto;
 import com.project.ohl.application.port.in.LetterSignPairService;
@@ -26,7 +27,7 @@ public class LetterSignPairServiceImpl implements LetterSignPairService {
     }
 
     @Override
-    public LetterSignPairDto getLetterSignPairById(Long id) {
+    public LetterSignPairDto getLetterSignPairById(UUID id) {
         LetterSignPair letterSignPair = getLetterSignPairEntityById(id);
         return mapper.convertToDto(letterSignPair);
     }
@@ -39,7 +40,7 @@ public class LetterSignPairServiceImpl implements LetterSignPairService {
     }
 
     @Override
-    public LetterSignPairDto updateLetterSignPairById(LetterSignPairDto letterSignPairDto, Long id) {
+    public LetterSignPairDto updateLetterSignPairById(LetterSignPairDto letterSignPairDto, UUID id) {
         LetterSignPair letterSignPairToUpdate = getLetterSignPairEntityById(id);
         letterSignPairToUpdate.setLetter(letterSignPairDto.getLetter());
         letterSignPairToUpdate.setImageId(letterSignPairDto.getImageId());
@@ -48,12 +49,12 @@ public class LetterSignPairServiceImpl implements LetterSignPairService {
     }
 
     @Override
-    public void deleteLetterSignPairById(Long id) {
+    public void deleteLetterSignPairById(UUID id) {
         LetterSignPair letterSignPairToDelete = getLetterSignPairEntityById(id);
         letterSignPairRepository.delete(letterSignPairToDelete);
     }
 
-    private LetterSignPair getLetterSignPairEntityById(Long id) {
+    private LetterSignPair getLetterSignPairEntityById(UUID id) {
         return letterSignPairRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(LETTER_SIGN_PAIR_NOT_FOUND, id)));
     }
 }

@@ -14,6 +14,8 @@ import lombok.Setter;
 @Entity
 @Table(name = "letter_sign_pairs")
 public class LetterSignPairEntity extends PersistentEntity {
+    @Column(name = "display_order", nullable = false)
+    private Integer displayOrder = Integer.MAX_VALUE;
     @Column(name = "letter")
     private String letter;
     @Column(name = "image_id")

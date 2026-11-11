@@ -1,5 +1,6 @@
 package com.project.ohl.mock;
 
+import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.Institution;
 import java.util.List;
 import lombok.AccessLevel;
@@ -14,7 +15,7 @@ public class InstitutionMock {
 
     public static Institution getMockedInstitution1() {
         return Institution.builder()
-              .id(1L)
+              .id(id(1))
               .school("test_institution_school1")
               .classroom("test_institution_classroom1")
               .build();
@@ -22,7 +23,7 @@ public class InstitutionMock {
 
     public static Institution getMockedInstitution2() {
         return Institution.builder()
-              .id(2L)
+              .id(id(2))
               .school("test_institution_school2")
               .classroom("test_institution_classroom2")
               .build();

@@ -34,7 +34,7 @@ import static com.project.ohl.mock.UserMock.getMockedUser2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -90,7 +90,7 @@ class FeedbackServiceImplTest {
 
     @Test
     void getFeedbackById_withValidId_shouldReturnFeedbackWithGivenId() {
-        given(feedbackRepository.findById(anyLong())).willReturn(Optional.ofNullable(feedback1));
+        given(feedbackRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(feedback1));
         FeedbackDto result = feedbackService.getFeedbackById(VALID_ID);
         assertThat(result).isEqualTo(feedbackDto1);
     }
@@ -117,8 +117,8 @@ class FeedbackServiceImplTest {
     void updateFeedbackById_withValidId_shouldUpdateFeedbackWithGivenId() {
         Feedback feedback = feedback2; feedback.setId(VALID_ID);
         feedback.setSentAt(feedback1.getSentAt());
-        given(feedbackRepository.findById(anyLong())).willReturn(Optional.ofNullable(feedback1));
-        given(userService.getUserEntityById(anyLong())).willReturn(user);
+        given(feedbackRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(feedback1));
+        given(userService.getUserEntityById(any(UUID.class))).willReturn(user);
         given(feedbackRepository.update(any(Feedback.class))).willReturn(feedback);
         FeedbackDto result = feedbackService.updateFeedbackById(feedbackDto2, VALID_ID);
         verify(feedbackRepository).update(feedbackCaptor.capture());
@@ -135,7 +135,7 @@ class FeedbackServiceImplTest {
 
     @Test
     void deleteFeedbackById_withValidId_shouldRemoveFeedbackWithGivenIdFromList() {
-        given(feedbackRepository.findById(anyLong())).willReturn(Optional.ofNullable(feedback1));
+        given(feedbackRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(feedback1));
         feedbackService.deleteFeedbackById(VALID_ID);
         verify(feedbackRepository).delete(feedback1);
     }

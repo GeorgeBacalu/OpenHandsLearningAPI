@@ -1,5 +1,6 @@
 package com.project.ohl.application.port.in;
 
+import java.util.UUID;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.domain.model.User;
 
@@ -9,13 +10,13 @@ public interface UserService {
 
     List<UserDto> getAllUsers();
 
-    UserDto getUserById(Long id);
+    UserDto getUserById(UUID id);
 
     UserDto saveUser(UserDto userDto);
 
-    UserDto updateUserById(UserDto userDto, Long id);
+    UserDto updateUserById(UserDto userDto, UUID id);
 
-    void deleteUserById(Long id);
+    void deleteUserById(UUID id);
 
-    User getUserEntityById(Long id);
+    User getUserEntityById(UUID id);
 }

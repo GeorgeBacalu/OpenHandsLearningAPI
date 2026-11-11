@@ -1,5 +1,6 @@
 package com.project.ohl.application.port.in;
 
+import java.util.UUID;
 import com.project.ohl.application.model.InstitutionDto;
 import com.project.ohl.domain.model.Institution;
 
@@ -9,13 +10,13 @@ public interface InstitutionService {
 
     List<InstitutionDto> getAllInstitutions();
 
-    InstitutionDto getInstitutionById(Long id);
+    InstitutionDto getInstitutionById(UUID id);
 
     InstitutionDto saveInstitution(InstitutionDto institutionDto);
 
-    InstitutionDto updateInstitutionById(InstitutionDto institutionDto, Long id);
+    InstitutionDto updateInstitutionById(InstitutionDto institutionDto, UUID id);
 
-    void deleteInstitutionById(Long id);
+    void deleteInstitutionById(UUID id);
 
-    Institution getInstitutionEntityById(Long id);
+    Institution getInstitutionEntityById(UUID id);
 }
