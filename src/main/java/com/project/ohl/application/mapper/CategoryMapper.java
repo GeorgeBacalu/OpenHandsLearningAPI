@@ -1,10 +1,10 @@
 package com.project.ohl.application.mapper;
 
-import com.project.ohl.domain.model.Category;
 import com.project.ohl.application.model.CategoryDto;
+import com.project.ohl.domain.model.Category;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import java.util.List;
 
 @Mapper(config = MappingConfiguration.class, uses = ReferenceMapper.class)
 public interface CategoryMapper {

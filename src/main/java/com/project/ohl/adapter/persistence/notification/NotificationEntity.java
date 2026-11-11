@@ -3,11 +3,11 @@ package com.project.ohl.adapter.persistence.notification;
 import com.project.ohl.adapter.persistence.PersistentEntity;
 import com.project.ohl.adapter.persistence.user.UserEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Index;
-import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -19,20 +19,20 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 @Table(name = "notifications", indexes = {
-      @Index(name = "idx_notifications_receiver", columnList = "receiver_id,sent_at"),
+      @Index(name = "idx_notifications_receiver", columnList = "receiver_id,sent_at,id"),
       @Index(name = "idx_notifications_sender", columnList = "sender_id")
 })
 public class NotificationEntity extends PersistentEntity {
-    @Column(name = "message")
+    @Column(name = "message", nullable = false)
     private String message;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id")
+    @JoinColumn(name = "sender_id", nullable = false)
     private UserEntity sender;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id")
+    @JoinColumn(name = "receiver_id", nullable = false)
     private UserEntity receiver;
     @Column(name = "is_read", nullable = false)
     private Boolean isRead;
-    @Column(name = "sent_at")
+    @Column(name = "sent_at", nullable = false)
     private LocalDateTime sentAt;
 }

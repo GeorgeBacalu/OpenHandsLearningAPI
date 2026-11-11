@@ -1,11 +1,11 @@
 package com.project.ohl.adapter.persistence.notification;
 
-import java.util.UUID;
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.adapter.persistence.user.UserEntity;
-import com.project.ohl.domain.model.Notification;
 import com.project.ohl.application.port.out.NotificationRepositoryPort;
+import com.project.ohl.domain.model.Notification;
 import com.project.ohl.domain.model.User;
+import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 @Repository

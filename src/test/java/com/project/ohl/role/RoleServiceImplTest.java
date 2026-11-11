@@ -1,22 +1,23 @@
 package com.project.ohl.role;
 
 import com.project.ohl.application.mapper.RoleMapper;
-import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.RoleDto;
 import com.project.ohl.application.port.out.RoleRepositoryPort;
 import com.project.ohl.application.service.RoleServiceImpl;
-import com.project.ohl.domain.model.Role;
-
 import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.Role;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.ROLE_NOT_FOUND;
@@ -28,7 +29,6 @@ import static com.project.ohl.mock.RoleMock.getMockedRoles;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class RoleServiceImplTest {
 
-    @org.mockito.Spy
+    @Spy
     private final RoleMapper mapper = Mappers.getMapper(RoleMapper.class);
 
     @InjectMocks

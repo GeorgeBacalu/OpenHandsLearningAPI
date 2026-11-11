@@ -1,17 +1,16 @@
 package com.project.ohl.application.service;
 
-import java.util.UUID;
 import com.project.ohl.application.mapper.NotificationMapper;
 import com.project.ohl.application.model.NotificationDto;
 import com.project.ohl.application.port.in.NotificationService;
-import com.project.ohl.application.port.out.NotificationRepositoryPort;
-import com.project.ohl.domain.model.Notification;
-
-import com.project.ohl.domain.exception.ResourceNotFoundException;
 import com.project.ohl.application.port.in.UserService;
+import com.project.ohl.application.port.out.NotificationRepositoryPort;
+import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.Notification;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.NOTIFICATION_NOT_FOUND;

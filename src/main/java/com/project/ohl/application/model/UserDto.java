@@ -1,19 +1,16 @@
 package com.project.ohl.application.model;
 
-import java.util.UUID;
-import com.project.ohl.domain.model.Institution;
-import com.project.ohl.domain.model.Role;
-import com.project.ohl.domain.model.User;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @AllArgsConstructor
@@ -22,6 +19,7 @@ import lombok.NoArgsConstructor;
 public class UserDto {
 
     private UUID id;
+    private UUID classroomId;
 
     @NotBlank(message = "Name must not be blank")
     private String name;
@@ -32,7 +30,7 @@ public class UserDto {
 
     @NotBlank(message = "Password must not be blank")
     @Size(min = 8, max = 72, message = "Password is invalid")
-    @lombok.ToString.Exclude
+    @ToString.Exclude
     private String password;
 
     @NotBlank(message = "Mobile must not be blank")

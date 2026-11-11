@@ -1,7 +1,7 @@
 package com.project.ohl.application.mapper;
 
-import com.project.ohl.domain.model.User;
 import com.project.ohl.application.model.UserDto;
+import com.project.ohl.domain.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

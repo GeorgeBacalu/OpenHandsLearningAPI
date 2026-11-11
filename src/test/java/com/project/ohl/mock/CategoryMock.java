@@ -1,11 +1,11 @@
 package com.project.ohl.mock;
 
-import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.Category;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import static com.project.ohl.TestIds.id;
 import static com.project.ohl.mock.SectionMock.getMockedSection1;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

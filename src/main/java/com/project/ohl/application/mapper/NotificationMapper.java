@@ -1,7 +1,7 @@
 package com.project.ohl.application.mapper;
 
-import com.project.ohl.domain.model.Notification;
 import com.project.ohl.application.model.NotificationDto;
+import com.project.ohl.domain.model.Notification;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

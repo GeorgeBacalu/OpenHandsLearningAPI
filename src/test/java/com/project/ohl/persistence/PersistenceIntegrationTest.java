@@ -1,61 +1,67 @@
 package com.project.ohl.persistence;
 
-import static com.project.ohl.TestIds.CATEGORY_PARENT;
-import static com.project.ohl.TestIds.CATEGORY_CHILD;
-import static com.project.ohl.TestIds.SECTION_VIDEO;
-import static com.project.ohl.TestIds.INSTITUTION_A;
-import static com.project.ohl.TestIds.ROLE_USER;
-import static com.project.ohl.TestIds.id;
+import com.project.ohl.DatabaseIntegrationTest;
 import com.project.ohl.adapter.persistence.section.SectionEntity;
 import com.project.ohl.adapter.persistence.section.SectionJpaRepository;
-import com.project.ohl.domain.model.Category;
-import com.project.ohl.application.port.out.CategoryRepositoryPort;
+import com.project.ohl.application.mapper.CategoryMapper;
+import com.project.ohl.application.model.UserDto;
 import com.project.ohl.application.port.in.CategoryService;
-import com.project.ohl.domain.model.Feedback;
+import com.project.ohl.application.port.in.UserService;
+import com.project.ohl.application.port.out.CategoryRepositoryPort;
 import com.project.ohl.application.port.out.FeedbackRepositoryPort;
+import com.project.ohl.application.port.out.InstitutionRepositoryPort;
+import com.project.ohl.application.port.out.LetterSignPairRepositoryPort;
+import com.project.ohl.application.port.out.NotificationRepositoryPort;
+import com.project.ohl.application.port.out.RoleRepositoryPort;
+import com.project.ohl.application.port.out.SectionRepositoryPort;
+import com.project.ohl.application.port.out.UserRepositoryPort;
+import com.project.ohl.domain.exception.InvalidRequestException;
+import com.project.ohl.domain.model.Authority;
+import com.project.ohl.domain.model.Category;
+import com.project.ohl.domain.model.Feedback;
 import com.project.ohl.domain.model.FeedbackType;
 import com.project.ohl.domain.model.Institution;
-import com.project.ohl.application.port.out.InstitutionRepositoryPort;
 import com.project.ohl.domain.model.LetterSignPair;
-import com.project.ohl.application.port.out.LetterSignPairRepositoryPort;
 import com.project.ohl.domain.model.Notification;
-import com.project.ohl.application.port.out.NotificationRepositoryPort;
-import com.project.ohl.domain.model.Role;
-import com.project.ohl.application.port.out.RoleRepositoryPort;
-import com.project.ohl.domain.model.Authority;
 import com.project.ohl.domain.model.Section;
-import com.project.ohl.application.port.out.SectionRepositoryPort;
 import com.project.ohl.domain.model.User;
-import com.project.ohl.application.port.out.UserRepositoryPort;
 import jakarta.persistence.EntityManagerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import static com.project.ohl.TestIds.CATEGORY_CHILD;
+import static com.project.ohl.TestIds.CATEGORY_PARENT;
+import static com.project.ohl.TestIds.INSTITUTION_A;
+import static com.project.ohl.TestIds.ROLE_USER;
+import static com.project.ohl.TestIds.SECTION_VIDEO;
+import static com.project.ohl.TestIds.id;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest {
+class PersistenceIntegrationTest extends DatabaseIntegrationTest {
     @Autowired private SectionRepositoryPort sections;
     @Autowired private InstitutionRepositoryPort institutions;
     @Autowired private RoleRepositoryPort roles;
     @Autowired private UserRepositoryPort users;
     @Autowired private CategoryRepositoryPort categories;
     @Autowired private CategoryService categoryService;
-    @Autowired private com.project.ohl.application.mapper.CategoryMapper categoryMapper;
+    @Autowired private CategoryMapper categoryMapper;
     @Autowired private LetterSignPairRepositoryPort letters;
     @Autowired private FeedbackRepositoryPort feedbacks;
     @Autowired private NotificationRepositoryPort notifications;
     @Autowired private SectionJpaRepository sectionJpaRepository;
     @Autowired private EntityManagerFactory entityManagerFactory;
 
-    @Autowired private com.project.ohl.application.port.in.UserService userService;
+    @Autowired private UserService userService;
 
     @Test
     void rejectsSelfParentsAndDescendantParents() {
@@ -64,23 +70,23 @@ class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest
         var update = categoryMapper.convertToDto(parent);
         update.setParentId(parent.getId());
         assertThatThrownBy(() -> categoryService.updateCategoryById(update, parent.getId()))
-                .isInstanceOf(com.project.ohl.domain.exception.InvalidRequestException.class);
+                .isInstanceOf(InvalidRequestException.class);
         update.setParentId(child.getId());
         assertThatThrownBy(() -> categoryService.updateCategoryById(update, parent.getId()))
-                .isInstanceOf(com.project.ohl.domain.exception.InvalidRequestException.class);
+                .isInstanceOf(InvalidRequestException.class);
     }
 
     @Test
     void hashesPasswordsBeforeSavingUsers() {
         var institution = institutions.findById(INSTITUTION_A).orElseThrow();
         var role = roles.findById(ROLE_USER).orElseThrow();
-        var request = com.project.ohl.application.model.UserDto.builder().name("Ana")
+        var request = UserDto.builder().name("Ana")
                 .email("hashed@example.test").password("long-test-password").mobile("0712345678")
                 .address("Bucharest").institutionId(institution.getId()).roleId(role.getId()).build();
         var created = userService.saveUser(request);
         var stored = users.findById(created.getId()).orElseThrow().getPassword();
         assertThat(stored).startsWith("$2b$12$").doesNotContain(request.getPassword());
-        var encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+        var encoder = new BCryptPasswordEncoder();
         assertThat(encoder.matches(request.getPassword(), stored)).isTrue();
         request.setPassword("another-test-password");
         userService.updateUserById(request, created.getId());
@@ -92,9 +98,9 @@ class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest
     @Test
     void persistsAndUpdatesEveryResourceUsingTheHibernateSchema() {
         var section = sections.save(Section.builder().name("Video").iconId(1).imageId(2).build());
-        var institution = institutions.save(Institution.builder().school("School").classroom("A").build());
-        var role = roles.save(Role.builder().authority(Authority.USER).build());
-        var user = users.save(User.builder().name("Ana").email("ana@example.test")
+        var institution = institutions.save(Institution.builder().school("School").build());
+        var role = roles.findById(ROLE_USER).orElseThrow();
+        var user = users.save(User.builder().name("Ana").email("created@example.test")
               .password("test-password").mobile("0712345678").address("Bucharest")
               .birthday(LocalDate.of(2000, 1, 1)).institution(institution).role(role).build());
         var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
@@ -107,7 +113,7 @@ class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest
         var notification = notifications.save(Notification.builder().message("Welcome")
               .sender(user).receiver(user).sentAt(sentAt).isRead(false).build());
 
-        assertThat(java.util.List.of(section.getId(), institution.getId(), role.getId(), user.getId(),
+        assertThat(List.of(section.getId(), institution.getId(), role.getId(), user.getId(),
                 child.getId(), letter.getId(), feedback.getId(), notification.getId()))
                 .allSatisfy(value -> assertThat(value.version()).isEqualTo(4));
 
@@ -119,19 +125,19 @@ class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest
         assertThat(letters.findById(letter.getId()).orElseThrow().getLetter()).isEqualTo("A");
 
         section.setName("Updated video");
-        institution.setClassroom("B");
-        role.setAuthority(Authority.ADMIN);
+        institution.setSchool("Updated School");
+        role.setAuthority(Authority.USER);
         user.setName("Updated Ana");
-        child.setIsFavorite(true);
+        child.setName("Updated category");
         letter.setLetter("B");
         feedback.setDescription("Updated feedback");
         notification.setIsRead(true);
 
         assertThat(sections.update(section).getName()).isEqualTo("Updated video");
-        assertThat(institutions.update(institution).getClassroom()).isEqualTo("B");
-        assertThat(roles.update(role).getAuthority()).isEqualTo(Authority.ADMIN);
+        assertThat(institutions.update(institution).getSchool()).isEqualTo("Updated School");
+        assertThat(roles.update(role).getAuthority()).isEqualTo(Authority.USER);
         assertThat(users.update(user).getName()).isEqualTo("Updated Ana");
-        assertThat(categories.update(child).getIsFavorite()).isTrue();
+        assertThat(categories.update(child).getName()).isEqualTo("Updated category");
         assertThat(letters.update(letter).getLetter()).isEqualTo("B");
         assertThat(feedbacks.update(feedback).getDescription()).isEqualTo("Updated feedback");
         assertThat(notifications.update(notification).getIsRead()).isTrue();
@@ -141,7 +147,6 @@ class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest
         categories.delete(child);
         letters.delete(letter);
         users.delete(user);
-        roles.delete(role);
         institutions.delete(institution);
         sections.delete(section);
         sectionJpaRepository.flush();

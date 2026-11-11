@@ -1,10 +1,9 @@
 package com.project.ohl.application.port.in;
 
-import java.util.UUID;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.domain.model.User;
-
 import java.util.List;
+import java.util.UUID;
 
 public interface UserService {
 

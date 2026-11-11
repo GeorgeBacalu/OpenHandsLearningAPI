@@ -1,12 +1,12 @@
 package com.project.ohl.application.port.out;
 
-import java.util.UUID;
 import com.project.ohl.domain.model.Category;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface CategoryRepositoryPort {
+    Optional<Category> findByCode(String code);
 
     List<Category> findAll();
 
@@ -26,7 +26,4 @@ public interface CategoryRepositoryPort {
 
     List<Category> findByParentIdAndSectionIdAndNameContaining(UUID parentId, UUID sectionId, String name);
 
-    List<Category> findFavorites();
-
-    List<Category> findFavoritesByNameContaining(String name);
 }

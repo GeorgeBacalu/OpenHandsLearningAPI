@@ -1,19 +1,21 @@
 package com.project.ohl.adapter.persistence.user;
 
 import com.project.ohl.adapter.persistence.PersistentEntity;
-import com.project.ohl.adapter.persistence.role.RoleEntity;
+import com.project.ohl.adapter.persistence.classroom.ClassroomEntity;
 import com.project.ohl.adapter.persistence.institution.InstitutionEntity;
+import com.project.ohl.adapter.persistence.role.RoleEntity;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Index;
-import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Check;
 
 @Getter
 @Setter
@@ -23,23 +25,27 @@ import lombok.Setter;
       @Index(name = "idx_users_institution", columnList = "institution_id"),
       @Index(name = "idx_users_role", columnList = "role_id")
 })
+@Check(constraints = "trim(name) <> '' AND trim(email) <> '' AND trim(password) <> '' AND trim(mobile) <> '' AND trim(address) <> ''")
 public class UserEntity extends PersistentEntity {
-    @Column(name = "name")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classroom_id")
+    private ClassroomEntity classroom;
+    @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
-    @Column(name = "mobile")
+    @Column(name = "mobile", nullable = false)
     private String mobile;
-    @Column(name = "address")
+    @Column(name = "address", nullable = false)
     private String address;
     @Column(name = "birthday")
     private LocalDate birthday;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "institution_id")
+    @JoinColumn(name = "institution_id", nullable = false)
     private InstitutionEntity institution;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
+    @JoinColumn(name = "role_id", nullable = false)
     private RoleEntity role;
 }

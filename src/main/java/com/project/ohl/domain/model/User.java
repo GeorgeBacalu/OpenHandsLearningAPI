@@ -1,11 +1,12 @@
 package com.project.ohl.domain.model;
 
-import java.util.UUID;
 import java.time.LocalDate;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Data
 @AllArgsConstructor
@@ -14,9 +15,10 @@ import lombok.NoArgsConstructor;
 public class User {
 
     private UUID id;
+    private UUID classroomId;
     private String name;
     private String email;
-    @lombok.ToString.Exclude
+    @ToString.Exclude
     private String password;
     private String mobile;
     private String address;

@@ -1,15 +1,19 @@
 package com.project.ohl.application.service;
 
-import java.util.UUID;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.in.CategoryService;
-import com.project.ohl.application.port.out.CategoryRepositoryPort;
-import com.project.ohl.domain.model.Category;
-
-import com.project.ohl.domain.exception.ResourceNotFoundException;
 import com.project.ohl.application.port.in.SectionService;
+import com.project.ohl.application.port.out.CategoryRepositoryPort;
+import com.project.ohl.application.port.out.FavoriteRepositoryPort;
+import com.project.ohl.application.port.out.UserRepositoryPort;
+import com.project.ohl.domain.exception.InvalidRequestException;
+import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.Category;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.CATEGORY_NOT_FOUND;
@@ -21,6 +25,8 @@ public class CategoryServiceImpl implements CategoryService {
     private final SectionService sectionService;
 
     private final CategoryMapper mapper;
+    private final FavoriteRepositoryPort favorites;
+    private final UserRepositoryPort users;
 
     @Override
     public List<CategoryDto> getAllCategories() {
@@ -36,6 +42,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto saveCategory(CategoryDto categoryDto) {
+        validateParent(null, categoryDto.getParentId(), categoryDto.getSectionId());
         Category category = mapper.convertToEntity(categoryDto);
         Category savedCategory = categoryRepository.save(category);
         return mapper.convertToDto(savedCategory);
@@ -44,7 +51,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategoryById(CategoryDto categoryDto, UUID id) {
         Category categoryToUpdate = getCategoryEntityById(id);
-        validateParent(id, categoryDto.getParentId());
+        validateParent(id, categoryDto.getParentId(), categoryDto.getSectionId());
+        categoryToUpdate.setCode(categoryDto.getCode());
+        categoryToUpdate.setMediaKey(categoryDto.getMediaKey());
         categoryToUpdate.setName(categoryDto.getName());
         categoryToUpdate.setImageId(categoryDto.getImageId());
         categoryToUpdate.setIsExpanded(categoryDto.getIsExpanded());
@@ -77,40 +86,66 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getFavoriteCategories() {
-        List<Category> favorites = categoryRepository.findFavorites();
-        return mapper.convertToDtoList(favorites);
+    public CategoryDto getCategoryById(UUID id, UUID userId) {
+        CategoryDto result = getCategoryById(id);
+        if (userId != null) {
+            requireUser(userId);
+            result.setIsFavorite(favorites.exists(userId, id));
+        }
+        return result;
     }
 
     @Override
-    public List<CategoryDto> getFavoritesByName(String name) {
-        List<Category> filteredFavorites = name == null || name.isBlank()
-              ? categoryRepository.findFavorites()
-              : categoryRepository.findFavoritesByNameContaining(name);
-        return mapper.convertToDtoList(filteredFavorites);
+    public List<CategoryDto> getCategoriesByFilters(UUID parentId, UUID sectionId, String parentCode, String sectionCode, String name) {
+        if (parentCode != null) parentId = categoryRepository.findByCode(parentCode)
+                .orElseThrow(() -> new ResourceNotFoundException("Category " + parentCode + " was not found")).getId();
+        if (sectionId == null) sectionId = sectionService.getSectionEntityByCode(sectionCode == null ? "VIDEO" : sectionCode).getId();
+        return getCategoriesByParentIdAndSectionIdAndName(parentId, sectionId, name);
     }
 
     @Override
-    public CategoryDto saveFavorite(UUID categoryId) {
-        Category favoriteToSave = getCategoryEntityById(categoryId);
-        favoriteToSave.setIsFavorite(true);
-        return mapper.convertToDto(categoryRepository.update(favoriteToSave));
+    public List<CategoryDto> getFavoriteCategories(UUID userId) { return getFavoritesByName(userId, ""); }
+
+    @Override
+    public List<CategoryDto> getFavoritesByName(UUID userId, String name) {
+        requireUser(userId);
+        var result = mapper.convertToDtoList(favorites.findByUserAndName(userId, name == null ? "" : name));
+        result.forEach(category -> category.setIsFavorite(true));
+        return result;
     }
 
     @Override
-    public CategoryDto deleteFavorite(UUID categoryId) {
-        Category favoriteToDelete = getCategoryEntityById(categoryId);
-        favoriteToDelete.setIsFavorite(false);
-        return mapper.convertToDto(categoryRepository.update(favoriteToDelete));
+    public CategoryDto saveFavorite(UUID userId, UUID categoryId) {
+        requireUser(userId);
+        CategoryDto result = getCategoryById(categoryId);
+        favorites.save(userId, categoryId);
+        result.setIsFavorite(true);
+        return result;
     }
 
-    private void validateParent(UUID categoryId, UUID parentId) {
-        var visited = new java.util.HashSet<UUID>();
+    @Override
+    public CategoryDto deleteFavorite(UUID userId, UUID categoryId) {
+        requireUser(userId);
+        CategoryDto result = getCategoryById(categoryId);
+        favorites.delete(userId, categoryId);
+        result.setIsFavorite(false);
+        return result;
+    }
+
+    private void requireUser(UUID id) {
+        if (id == null || users.findById(id).isEmpty()) throw new ResourceNotFoundException("User " + id + " was not found");
+    }
+
+    private void validateParent(UUID categoryId, UUID parentId, UUID sectionId) {
+        var visited = new HashSet<UUID>();
         while (parentId != null) {
             if (parentId.equals(categoryId) || !visited.add(parentId)) {
-                throw new com.project.ohl.domain.exception.InvalidRequestException("Category hierarchy must not contain cycles.");
+                throw new InvalidRequestException("Category hierarchy must not contain cycles.");
             }
-            var parent = getCategoryEntityById(parentId).getParent();
+            var current = getCategoryEntityById(parentId);
+            if (current.getSection() != null && !Objects.equals(current.getSection().getId(), sectionId))
+                throw new InvalidRequestException("Parent and child must belong to the same section.");
+            var parent = current.getParent();
             parentId = parent == null ? null : parent.getId();
         }
     }

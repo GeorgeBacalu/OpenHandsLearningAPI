@@ -1,6 +1,7 @@
 package com.project.ohl.adapter.config;
 
 import com.project.ohl.application.mapper.CategoryMapper;
+import com.project.ohl.application.mapper.ClassroomMapper;
 import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.mapper.InstitutionMapper;
 import com.project.ohl.application.mapper.LetterSignPairMapper;
@@ -14,6 +15,11 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
 public class MapperConfig {
+    @Bean
+    public ClassroomMapper classroomMapper() {
+        return Mappers.getMapper(ClassroomMapper.class);
+    }
+
     @Bean
     public CategoryMapper categoryMapper() {
         return Mappers.getMapper(CategoryMapper.class);

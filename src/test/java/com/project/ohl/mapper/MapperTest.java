@@ -1,6 +1,5 @@
 package com.project.ohl.mapper;
 
-import static com.project.ohl.TestIds.id;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.mapper.NotificationMapper;
@@ -14,6 +13,8 @@ import com.project.ohl.domain.model.Section;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+
+import static com.project.ohl.TestIds.id;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MapperTest {

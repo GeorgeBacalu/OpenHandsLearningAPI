@@ -6,6 +6,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashSet;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import tools.jackson.databind.json.JsonMapper;
+
 import static com.project.ohl.TestIds.INSTITUTION_A;
 import static com.project.ohl.TestIds.ROLE_USER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +35,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(response.headers().firstValue("Content-Type").orElse("")).contains("application/json");
         var users = json.readTree(response.body());
         assertThat(users.size()).isEqualTo(2);
-        assertThat(java.util.List.of(users.get(0).path("name").asText(), users.get(1).path("name").asText()))
+        assertThat(List.of(users.get(0).path("name").asText(), users.get(1).path("name").asText()))
                 .containsExactlyInAnyOrder("Ana", "Dan");
         var ana = users.get(0).path("name").asText().equals("Ana") ? users.get(0) : users.get(1);
         assertThat(ana.path("mobile").asText()).isEqualTo("0712345678");

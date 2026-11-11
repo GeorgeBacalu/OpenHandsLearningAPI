@@ -1,10 +1,9 @@
 package com.project.ohl.application.port.out;
 
-import java.util.UUID;
 import com.project.ohl.domain.model.User;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface UserRepositoryPort {
 

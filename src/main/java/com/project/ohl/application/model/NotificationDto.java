@@ -1,12 +1,9 @@
 package com.project.ohl.application.model;
 
-import java.util.UUID;
-import com.project.ohl.domain.model.Notification;
-import com.project.ohl.domain.model.User;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -16,7 +16,7 @@ import lombok.Setter;
 public class LetterSignPairEntity extends PersistentEntity {
     @Column(name = "display_order", nullable = false)
     private Integer displayOrder = Integer.MAX_VALUE;
-    @Column(name = "letter")
+    @Column(name = "letter", nullable = false)
     private String letter;
     @Column(name = "image_id")
     private Integer imageId;

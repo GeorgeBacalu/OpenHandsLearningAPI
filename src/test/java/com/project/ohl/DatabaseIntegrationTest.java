@@ -7,10 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class DatabaseIntegrationTest {
-    private static final String[] TABLES = {"institutions", "roles", "sections", "categories",
+    private static final String[] TABLES = {"classrooms", "user_favorites", "institutions", "roles", "sections", "categories",
             "letter_sign_pairs", "users", "feedbacks", "notifications"};
     @Autowired private DataSource dataSource;
 

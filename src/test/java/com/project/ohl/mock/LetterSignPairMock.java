@@ -1,10 +1,11 @@
 package com.project.ohl.mock;
 
-import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.LetterSignPair;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import static com.project.ohl.TestIds.id;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class LetterSignPairMock {

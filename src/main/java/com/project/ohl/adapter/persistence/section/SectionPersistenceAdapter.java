@@ -1,10 +1,12 @@
 package com.project.ohl.adapter.persistence.section;
 
-import org.springframework.data.domain.Sort;
-import java.util.UUID;
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
-import com.project.ohl.domain.model.Section;
 import com.project.ohl.application.port.out.SectionRepositoryPort;
+import com.project.ohl.domain.model.CatalogMetadata;
+import com.project.ohl.domain.model.Section;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -20,6 +22,11 @@ public class SectionPersistenceAdapter extends JpaPersistenceAdapter<Section, Se
     }
 
     @Override
+    public Optional<Section> findByCode(String code) {
+        return ((SectionJpaRepository) repository).findByCode(code).map(this::toDomain);
+    }
+
+    @Override
     protected SectionEntity newEntity() {
         return new SectionEntity();
     }
@@ -30,9 +37,9 @@ public class SectionPersistenceAdapter extends JpaPersistenceAdapter<Section, Se
     }
 
     @Override
-    protected Section toDomain(SectionEntity entity) {
+    public Section toDomain(SectionEntity entity) {
         return Section.builder().id(entity.getId())
-              .name(entity.getName())
+              .name(entity.getName()).code(entity.getCode()).mediaKey(entity.getMediaKey()).iconKey(entity.getIconKey())
               .iconId(entity.getIconId())
               .imageId(entity.getImageId())
               .build();
@@ -41,6 +48,9 @@ public class SectionPersistenceAdapter extends JpaPersistenceAdapter<Section, Se
     @Override
     protected void apply(Section model, SectionEntity entity) {
         entity.setName(model.getName());
+        entity.setCode(CatalogMetadata.code(model.getCode(), entity.getCode(), "SECTION"));
+        entity.setMediaKey(CatalogMetadata.mediaKey(model.getMediaKey(), entity.getMediaKey(), model.getName()));
+        entity.setIconKey(CatalogMetadata.mediaKey(model.getIconKey(), entity.getIconKey(), "ic_" + model.getName()));
         entity.setIconId(model.getIconId());
         entity.setImageId(model.getImageId());
     }

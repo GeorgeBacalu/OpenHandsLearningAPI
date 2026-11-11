@@ -18,6 +18,6 @@ import lombok.Setter;
 @Table(name = "roles")
 public class RoleEntity extends PersistentEntity {
     @Enumerated(EnumType.STRING)
-    @Column(name = "authority")
+    @Column(name = "authority", nullable = false, unique = true)
     private Authority authority;
 }

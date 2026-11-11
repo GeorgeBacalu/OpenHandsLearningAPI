@@ -41,28 +41,48 @@ HTTP IDs are UUID strings. Resource image/icon numbers remain integers.
 
 ## Database migrations
 
-Flyway 13.12.1 uses `src/main/resources/db/migration/V1__initial_schema.sql` to
-create the current PostgreSQL schema, including UUID defaults, primary keys,
-foreign keys, and catalog ordering. It contains no records. The earlier manual
-UUID conversion is superseded by this initial schema migration.
+Flyway is explicitly disabled in `application.properties`; Hibernate only validates
+schema on startup. Development is baselined at V1 and has V2 applied; its existing
+records and memberships were verified after migration. The immutable V1 captures
+the previous UUID schema. V2 adds:
 
-Flyway is disabled by default (`FLYWAY_ENABLED=false`) so starting the API against
-the existing development database does not create a history table or change its
-schema or data. Automatic baselining is disabled. Existing databases are not
-enrolled in Flyway by this change.
+- Per-user favorites; existing shared favorites are copied to each existing user.
+- Institutions representing schools, separate classrooms, and optional user classroom membership.
+- Unique normalized account emails and school/classroom names, required values, and supported role/feedback values.
+- Stable catalog `code`, `mediaKey`, and section `iconKey` fields, independent of translated display names.
+- Query indexes, matching-section parent relationships, and a serialized database trigger preventing hierarchy cycles.
 
-To initialize a separate, empty PostgreSQL database, set its connection and enable
-Flyway for that process before starting the API:
+V2 transforms existing records and memberships; it seeds no users or catalog
+content. Space characters remain valid sign entries. New empty databases contain
+no application records after V1 and V2. Back up and rehearse upgrades on a copy
+before deploying these branches. Existing duplicate account emails or ambiguous
+classroom names must be resolved explicitly; migration failures roll back V2.
+The new backend requires V2 before it can validate its schema.
+
+For a separate empty PostgreSQL database:
 
 ```powershell
 $env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/open-hands-learning-new"
-$env:FLYWAY_ENABLED = "true"
-.\mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run '-Dspring-boot.run.arguments=--spring.flyway.enabled=true'
 ```
 
-Flyway applies V1 once and records its checksum; Hibernate then validates the
-schema. Do not edit an applied migration; add V2 for subsequent schema changes.
-The H2 tests retain Hibernate schema creation and their separate minimal fixtures.
+For an audited copy already matching V1 with no Flyway history, explicitly
+baseline it at version 1 before applying V2. Automatic baselining remains disabled
+in the application's default configuration. Never edit applied migrations.
+
+Regular tests use Hibernate-created H2 schemas and two records per table. The
+Flyway baseline test checks V1 creation and repeat runs on H2. V2 is PostgreSQL
+specific because its hierarchy trigger serializes concurrent tree changes. Its
+upgrade and record preservation were verified using a temporary database copy;
+there is no PostgreSQL provisioning or rehearsal configuration in the project.
+
+Favorites endpoints require `userId`; a category read accepts optional `userId`
+to return that user's favorite status. Profile selection is not authentication:
+the existing API remains public and needs an authentication layer before serving
+private accounts in production. Catalog filters accept `parentCode` and
+`sectionCode` (default `VIDEO`), while UUID filters remain supported. Clients can
+rename labels without changing codes or media keys. Codes are immutable through
+the API. Classroom CRUD is available at `/api/classrooms`.
 
 ## HTTP contract
 

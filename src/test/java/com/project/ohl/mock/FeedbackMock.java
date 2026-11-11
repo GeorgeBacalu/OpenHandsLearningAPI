@@ -1,6 +1,5 @@
 package com.project.ohl.mock;
 
-import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.Feedback;
 import com.project.ohl.domain.model.FeedbackType;
 import java.time.LocalDateTime;
@@ -8,6 +7,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import static com.project.ohl.TestIds.id;
 import static com.project.ohl.mock.UserMock.getMockedUser1;
 import static com.project.ohl.mock.UserMock.getMockedUser2;
 

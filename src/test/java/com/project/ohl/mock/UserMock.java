@@ -1,12 +1,12 @@
 package com.project.ohl.mock;
 
-import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.User;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import static com.project.ohl.TestIds.id;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitution1;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitution2;
 import static com.project.ohl.mock.RoleMock.getMockedRole1;
