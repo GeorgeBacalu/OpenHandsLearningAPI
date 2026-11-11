@@ -16,7 +16,7 @@ import tools.jackson.databind.json.JsonMapper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class OpenHandsLearningApplicationTest {
+class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     @LocalServerPort private int port;
     @Autowired
     @Qualifier("requestMappingHandlerMapping")
@@ -29,7 +29,11 @@ class OpenHandsLearningApplicationTest {
         var response = send("GET", "/api/users", null);
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.headers().firstValue("Content-Type").orElse("")).contains("application/json");
-        assertThat(response.body()).isEqualTo("[]");
+        var users = json.readTree(response.body());
+        assertThat(users.size()).isEqualTo(2);
+        assertThat(users.get(0).path("name").asText()).isEqualTo("Ana");
+        assertThat(users.get(1).path("name").asText()).isEqualTo("Dan");
+        assertThat(users.get(0).has("password")).isFalse();
     }
 
     @Test

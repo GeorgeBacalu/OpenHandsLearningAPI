@@ -1,6 +1,8 @@
 package com.project.ohl.adapter.persistence.user;
 
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
+import com.project.ohl.adapter.persistence.role.RoleEntity;
+import com.project.ohl.adapter.persistence.institution.InstitutionEntity;
 import com.project.ohl.domain.model.Institution;
 import com.project.ohl.domain.model.Role;
 import com.project.ohl.domain.model.User;
@@ -33,8 +35,8 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
               .mobile(entity.getMobile())
               .address(entity.getAddress())
               .birthday(entity.getBirthday())
-              .institution(entity.getInstitutionId() == null ? null : Institution.builder().id(entity.getInstitutionId()).build())
-              .role(entity.getRoleId() == null ? null : Role.builder().id(entity.getRoleId()).build())
+              .institution(entity.getInstitution() == null ? null : Institution.builder().id(entity.getInstitution().getId()).build())
+              .role(entity.getRole() == null ? null : Role.builder().id(entity.getRole().getId()).build())
               .build();
     }
 
@@ -46,7 +48,7 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
         entity.setMobile(model.getMobile());
         entity.setAddress(model.getAddress());
         entity.setBirthday(model.getBirthday());
-        entity.setInstitutionId(model.getInstitution() == null ? null : model.getInstitution().getId());
-        entity.setRoleId(model.getRole() == null ? null : model.getRole().getId());
+        entity.setInstitution(reference(InstitutionEntity.class, model.getInstitution() == null ? null : model.getInstitution().getId()));
+        entity.setRole(reference(RoleEntity.class, model.getRole() == null ? null : model.getRole().getId()));
     }
 }

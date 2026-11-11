@@ -13,40 +13,27 @@ needed.
 .\mvnw.cmd clean verify
 ```
 
-On macOS/Linux, use `./mvnw clean verify`. Tests execute the production SQL schema
-against an isolated H2 database in PostgreSQL compatibility mode. They cover all
-eight persistence adapters, optimistic locking, foreign keys, HTTP error status
-codes, password hashing, OpenAPI route coverage, and architecture boundaries.
-To run against a dedicated PostgreSQL test database, set
-`SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and
-`SPRING_DATASOURCE_PASSWORD` before running the same command.
+On macOS/Linux, use `./mvnw clean verify`. Database tests use an isolated H2
+database. Hibernate creates the schema when the test context starts and drops it
+when the context closes. Each database-backed test loads `src/test/resources/test.sql`
+with two records per table. The shared fixture clears all rows and resets identities
+before and after each test, and verifies the row counts. The full catalog is not loaded.
+
+Tests cover persistence, optimistic locking, foreign keys, HTTP errors, BCrypt,
+MapStruct mappings, OpenAPI coverage, and architecture boundaries.
 
 ## Run locally
 
-Provide PostgreSQL and set `DATABASE_URL`, `DATABASE_USERNAME`, and
-`DATABASE_PASSWORD`. Spring's `SPRING_DATASOURCE_*` environment variables also
-work. The default URL is `jdbc:postgresql://localhost:5432/OpenHandsLearning`;
-no password is checked in. Set `DATABASE_URL` when connecting to an existing
-database with a different name.
+The PostgreSQL database already contains the schema and data. Set
+`POSTGRES_USERNAME` and `POSTGRES_PASSWORD`, then run:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
 
-`schema.sql` creates the tables, adds optimistic-lock versions to existing tables,
-and creates query indexes. Hibernate validates the SQL schema and never creates
-or updates it. Existing rows are preserved. Normal startup does not load sample
-users or catalog data.
-
-To initialize the learning catalog, use the `dev` profile against PostgreSQL:
-
-```powershell
-.\mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-`catalog.sql` reserves the catalog's stable IDs, skips existing IDs, and advances
-identity sequences. It can run repeatedly. Do not enable this profile on a
-database where those IDs are already assigned to unrelated custom content.
+`src/main/resources/application.properties` contains the connection, schema
+validation, and timezone settings. Hibernate validates the existing development
+schema; startup does not create tables or seed data. No dev profile is required.
 
 ## HTTP contract
 

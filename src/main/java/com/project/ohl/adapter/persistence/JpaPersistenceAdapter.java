@@ -1,6 +1,8 @@
 package com.project.ohl.adapter.persistence;
 
 import com.project.ohl.domain.exception.ResourceNotFoundException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Sort;
@@ -9,9 +11,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 public abstract class JpaPersistenceAdapter<M, E extends PersistentEntity> {
     protected final JpaRepository<E, Long> repository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     protected JpaPersistenceAdapter(JpaRepository<E, Long> repository) {
         this.repository = repository;
+    }
+
+    protected <T extends PersistentEntity> T reference(Class<T> type, Long id) {
+        return id == null ? null : entityManager.getReference(type, id);
     }
 
     protected abstract E newEntity();

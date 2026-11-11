@@ -1,6 +1,7 @@
 package com.project.ohl.adapter.persistence.category;
 
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
+import com.project.ohl.adapter.persistence.section.SectionEntity;
 import com.project.ohl.domain.model.Category;
 import com.project.ohl.application.port.out.CategoryRepositoryPort;
 import com.project.ohl.domain.model.Section;
@@ -35,8 +36,8 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
               .imageId(entity.getImageId())
               .isExpanded(Boolean.TRUE.equals(entity.getIsExpanded()))
               .isFavorite(Boolean.TRUE.equals(entity.getIsFavorite()))
-              .parent(entity.getParentId() == null ? null : Category.builder().id(entity.getParentId()).build())
-              .section(entity.getSectionId() == null ? null : Section.builder().id(entity.getSectionId()).build())
+              .parent(entity.getParent() == null ? null : Category.builder().id(entity.getParent().getId()).build())
+              .section(entity.getSection() == null ? null : Section.builder().id(entity.getSection().getId()).build())
               .build();
     }
 
@@ -46,28 +47,28 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
         entity.setImageId(model.getImageId());
         entity.setIsExpanded(Boolean.TRUE.equals(model.getIsExpanded()));
         entity.setIsFavorite(Boolean.TRUE.equals(model.getIsFavorite()));
-        entity.setParentId(model.getParent() == null ? null : model.getParent().getId());
-        entity.setSectionId(model.getSection() == null ? null : model.getSection().getId());
+        entity.setParent(reference(CategoryEntity.class, model.getParent() == null ? null : model.getParent().getId()));
+        entity.setSection(reference(SectionEntity.class, model.getSection() == null ? null : model.getSection().getId()));
     }
 
     @Override
     public List<Category> findByParentIdNullAndSectionId(Long sectionId) {
-        return categories.findByParentIdIsNullAndSectionIdOrderByIdAsc(sectionId).stream().map(this::toDomain).toList();
+        return categories.findByParent_IdIsNullAndSection_IdOrderByIdAsc(sectionId).stream().map(this::toDomain).toList();
     }
 
     @Override
     public List<Category> findByParentIdNullAndSectionIdAndNameContaining(Long sectionId, String name) {
-        return categories.findByParentIdIsNullAndSectionIdAndNameContainingIgnoreCaseOrderByIdAsc(sectionId, name).stream().map(this::toDomain).toList();
+        return categories.findByParent_IdIsNullAndSection_IdAndNameContainingIgnoreCaseOrderByIdAsc(sectionId, name).stream().map(this::toDomain).toList();
     }
 
     @Override
     public List<Category> findByParentIdAndSectionId(Long parentId, Long sectionId) {
-        return categories.findByParentIdAndSectionIdOrderByIdAsc(parentId, sectionId).stream().map(this::toDomain).toList();
+        return categories.findByParent_IdAndSection_IdOrderByIdAsc(parentId, sectionId).stream().map(this::toDomain).toList();
     }
 
     @Override
     public List<Category> findByParentIdAndSectionIdAndNameContaining(Long parentId, Long sectionId, String name) {
-        return categories.findByParentIdAndSectionIdAndNameContainingIgnoreCaseOrderByIdAsc(parentId, sectionId, name).stream().map(this::toDomain).toList();
+        return categories.findByParent_IdAndSection_IdAndNameContainingIgnoreCaseOrderByIdAsc(parentId, sectionId, name).stream().map(this::toDomain).toList();
     }
 
     @Override

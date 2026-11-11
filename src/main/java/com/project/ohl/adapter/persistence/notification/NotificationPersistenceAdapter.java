@@ -1,6 +1,7 @@
 package com.project.ohl.adapter.persistence.notification;
 
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
+import com.project.ohl.adapter.persistence.user.UserEntity;
 import com.project.ohl.domain.model.Notification;
 import com.project.ohl.application.port.out.NotificationRepositoryPort;
 import com.project.ohl.domain.model.User;
@@ -27,8 +28,8 @@ public class NotificationPersistenceAdapter extends JpaPersistenceAdapter<Notifi
     protected Notification toDomain(NotificationEntity entity) {
         return Notification.builder().id(entity.getId())
               .message(entity.getMessage())
-              .sender(entity.getSenderId() == null ? null : User.builder().id(entity.getSenderId()).build())
-              .receiver(entity.getReceiverId() == null ? null : User.builder().id(entity.getReceiverId()).build())
+              .sender(entity.getSender() == null ? null : User.builder().id(entity.getSender().getId()).build())
+              .receiver(entity.getReceiver() == null ? null : User.builder().id(entity.getReceiver().getId()).build())
               .isRead(Boolean.TRUE.equals(entity.getIsRead()))
               .sentAt(entity.getSentAt())
               .build();
@@ -37,8 +38,8 @@ public class NotificationPersistenceAdapter extends JpaPersistenceAdapter<Notifi
     @Override
     protected void apply(Notification model, NotificationEntity entity) {
         entity.setMessage(model.getMessage());
-        entity.setSenderId(model.getSender() == null ? null : model.getSender().getId());
-        entity.setReceiverId(model.getReceiver() == null ? null : model.getReceiver().getId());
+        entity.setSender(reference(UserEntity.class, model.getSender() == null ? null : model.getSender().getId()));
+        entity.setReceiver(reference(UserEntity.class, model.getReceiver() == null ? null : model.getReceiver().getId()));
         entity.setIsRead(Boolean.TRUE.equals(model.getIsRead()));
         entity.setSentAt(model.getSentAt());
     }

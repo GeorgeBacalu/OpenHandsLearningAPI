@@ -1,6 +1,7 @@
 package com.project.ohl.adapter.persistence.feedback;
 
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
+import com.project.ohl.adapter.persistence.user.UserEntity;
 import com.project.ohl.domain.model.Feedback;
 import com.project.ohl.application.port.out.FeedbackRepositoryPort;
 import com.project.ohl.domain.model.User;
@@ -29,7 +30,7 @@ public class FeedbackPersistenceAdapter extends JpaPersistenceAdapter<Feedback, 
               .type(entity.getType())
               .description(entity.getDescription())
               .sentAt(entity.getSentAt())
-              .user(entity.getUserId() == null ? null : User.builder().id(entity.getUserId()).build())
+              .user(entity.getUser() == null ? null : User.builder().id(entity.getUser().getId()).build())
               .build();
     }
 
@@ -38,6 +39,6 @@ public class FeedbackPersistenceAdapter extends JpaPersistenceAdapter<Feedback, 
         entity.setType(model.getType());
         entity.setDescription(model.getDescription());
         entity.setSentAt(model.getSentAt());
-        entity.setUserId(model.getUser() == null ? null : model.getUser().getId());
+        entity.setUser(reference(UserEntity.class, model.getUser() == null ? null : model.getUser().getId()));
     }
 }
