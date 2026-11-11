@@ -1,11 +1,10 @@
 package com.project.ohl.adapter.web;
 
-import java.util.UUID;
 import com.project.ohl.application.model.FeedbackDto;
 import com.project.ohl.application.port.in.FeedbackService;
-
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -28,8 +28,9 @@ public class FeedbackController {
     private final FeedbackService feedbackService;
 
     @GetMapping
-    public ResponseEntity<List<FeedbackDto>> getAllFeedbacks() {
-        return ResponseEntity.ok(feedbackService.getAllFeedbacks());
+    public ResponseEntity<List<FeedbackDto>> getAllFeedbacks(@RequestParam(required = false) UUID userId,
+            @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "50") int size) {
+        return ResponseEntity.ok(feedbackService.getAllFeedbacks(userId, page, size));
     }
 
     @GetMapping("/{id}")

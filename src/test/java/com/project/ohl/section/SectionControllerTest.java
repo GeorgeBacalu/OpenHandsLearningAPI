@@ -1,16 +1,16 @@
 package com.project.ohl.section;
 
-import com.project.ohl.application.mapper.SectionMapper;
-import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.SectionController;
+import com.project.ohl.application.mapper.SectionMapper;
 import com.project.ohl.application.model.SectionDto;
 import com.project.ohl.application.port.in.SectionService;
 import com.project.ohl.domain.model.Section;
-
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,7 +24,6 @@ import static com.project.ohl.mock.SectionMock.getMockedSections;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 

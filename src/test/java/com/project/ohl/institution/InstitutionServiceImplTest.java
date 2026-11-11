@@ -1,22 +1,23 @@
 package com.project.ohl.institution;
 
 import com.project.ohl.application.mapper.InstitutionMapper;
-import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.InstitutionDto;
 import com.project.ohl.application.port.out.InstitutionRepositoryPort;
 import com.project.ohl.application.service.InstitutionServiceImpl;
-import com.project.ohl.domain.model.Institution;
-
 import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.Institution;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.INSTITUTION_NOT_FOUND;
@@ -28,7 +29,6 @@ import static com.project.ohl.mock.InstitutionMock.getMockedInstitutions;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -36,19 +36,19 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class InstitutionServiceImplTest {
 
-    @org.mockito.Spy
+    @Spy
     private final InstitutionMapper mapper = Mappers.getMapper(InstitutionMapper.class);
-    
+
     @InjectMocks
     private InstitutionServiceImpl institutionService;
-    
+
     @Mock
     private InstitutionRepositoryPort institutionRepository;
-    
-    
+
+
     @Captor
     private ArgumentCaptor<Institution> institutionCaptor;
-    
+
     private Institution institution1;
     private Institution institution2;
     private List<Institution> institutions;

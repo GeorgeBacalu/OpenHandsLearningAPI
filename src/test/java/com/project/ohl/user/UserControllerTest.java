@@ -1,17 +1,17 @@
 package com.project.ohl.user;
 
-import com.project.ohl.application.mapper.UserMapper;
-import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.UserController;
 import com.project.ohl.adapter.web.model.UserResponse;
+import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.domain.model.User;
-
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,7 +25,6 @@ import static com.project.ohl.mock.UserMock.getMockedUsers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 

@@ -1,16 +1,16 @@
 package com.project.ohl.notification;
 
-import com.project.ohl.application.mapper.NotificationMapper;
-import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.NotificationController;
+import com.project.ohl.application.mapper.NotificationMapper;
 import com.project.ohl.application.model.NotificationDto;
 import com.project.ohl.application.port.in.NotificationService;
 import com.project.ohl.domain.model.Notification;
-
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,7 +24,6 @@ import static com.project.ohl.mock.NotificationMock.getMockedNotifications;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -52,8 +51,8 @@ class NotificationControllerTest {
 
     @Test
     void getAllNotifications_shouldReturnListOfNotifications() {
-        given(notificationService.getAllNotifications()).willReturn(notificationDtos);
-        ResponseEntity<List<NotificationDto>> response = notificationController.getAllNotifications();
+        given(notificationService.getAllNotifications(null, 0, 50)).willReturn(notificationDtos);
+        ResponseEntity<List<NotificationDto>> response = notificationController.getAllNotifications(null, 0, 50);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(notificationDtos);

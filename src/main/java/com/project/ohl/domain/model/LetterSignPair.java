@@ -14,5 +14,5 @@ public class LetterSignPair {
 
     private UUID id;
     private String letter;
-    private Integer imageId;
+    private String mediaKey;
 }

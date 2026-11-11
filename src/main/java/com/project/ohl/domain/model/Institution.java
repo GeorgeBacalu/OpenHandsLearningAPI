@@ -14,5 +14,4 @@ public class Institution {
 
     private UUID id;
     private String school;
-    private String classroom;
 }

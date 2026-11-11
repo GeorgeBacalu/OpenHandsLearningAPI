@@ -1,8 +1,9 @@
 package com.project.ohl.application.model;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.util.UUID;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,9 +17,10 @@ public class LetterSignPairDto {
 
     private UUID id;
 
-    @NotBlank(message = "Letter must not be blank")
+    @NotEmpty(message = "Letter must not be empty")
     private String letter;
 
-    @Positive(message = "Image ID must be positive")
-    private Integer imageId;
+    @Pattern(regexp = "^[a-z0-9_]+$")
+    @Size(max = 255)
+    private String mediaKey;
 }

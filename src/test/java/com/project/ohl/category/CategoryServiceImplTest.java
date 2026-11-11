@@ -1,23 +1,29 @@
 package com.project.ohl.category;
 
 import com.project.ohl.application.mapper.CategoryMapper;
-import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.CategoryDto;
-import com.project.ohl.application.port.out.CategoryRepositoryPort;
-import com.project.ohl.application.service.CategoryServiceImpl;
-import com.project.ohl.domain.model.Category;
-
-import com.project.ohl.domain.exception.ResourceNotFoundException;
 import com.project.ohl.application.port.in.SectionService;
+import com.project.ohl.application.port.out.CategoryRepositoryPort;
+import com.project.ohl.application.port.out.FavoriteRepositoryPort;
+import com.project.ohl.application.port.out.UserRepositoryPort;
+import com.project.ohl.application.service.CategoryServiceImpl;
+import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.Category;
+import com.project.ohl.domain.model.User;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.CATEGORY_NOT_FOUND;
@@ -35,7 +41,6 @@ import static com.project.ohl.mock.CategoryMock.getMockedParentCategoriesFiltere
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import java.util.UUID;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -44,7 +49,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceImplTest {
 
-    @org.mockito.Spy
+    @Spy
     private final CategoryMapper mapper = Mappers.getMapper(CategoryMapper.class);
 
     @InjectMocks
@@ -55,6 +60,9 @@ class CategoryServiceImplTest {
 
     @Mock
     private SectionService sectionService;
+
+    @Mock private FavoriteRepositoryPort favorites;
+    @Mock private UserRepositoryPort users;
 
     @Captor
     private ArgumentCaptor<Category> categoryCaptor;
@@ -80,6 +88,8 @@ class CategoryServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        Mockito.lenient().when(users.findById(any(UUID.class)))
+                .thenReturn(Optional.of(User.builder().id(VALID_ID).build()));
         categoryOne = getMockedCategoryOne();
         categoryTwo = getMockedCategoryTwo();
         categories = getMockedCategories();
@@ -123,6 +133,8 @@ class CategoryServiceImplTest {
 
     @Test
     void saveCategory_shouldAddCategoryToList() {
+        if (categoryDtoOne.getParentId() != null)
+            given(categoryRepository.findById(categoryDtoOne.getParentId())).willReturn(Optional.of(categoryOne.getParent()));
         given(categoryRepository.save(any(Category.class))).willReturn(categoryOne);
         CategoryDto result = categoryService.saveCategory(categoryDtoOne);
         verify(categoryRepository).save(categoryCaptor.capture());
@@ -193,22 +205,22 @@ class CategoryServiceImplTest {
 
     @Test
     void getFavoriteCategories_shouldReturnListOfFavorites() {
-        given(categoryRepository.findFavorites()).willReturn(favoriteCategories);
-        List<CategoryDto> result = categoryService.getFavoriteCategories();
+        given(favorites.findByUserAndName(any(UUID.class), ArgumentMatchers.eq(""))).willReturn(favoriteCategories);
+        List<CategoryDto> result = categoryService.getFavoriteCategories(VALID_ID);
         assertThat(result).isEqualTo(favoriteCategoryDtos);
     }
 
     @Test
     void getFavoritesByName_whenNameIsBlank_shouldReturnListOfFavorites() {
-        given(categoryRepository.findFavorites()).willReturn(favoriteCategories);
-        List<CategoryDto> result = categoryService.getFavoritesByName("");
+        given(favorites.findByUserAndName(any(UUID.class), ArgumentMatchers.eq(""))).willReturn(favoriteCategories);
+        List<CategoryDto> result = categoryService.getFavoritesByName(VALID_ID, "");
         assertThat(result).isEqualTo(favoriteCategoryDtos);
     }
 
     @Test
     void getFavoritesByName_whenNameIsNotBlank_shouldReturnListOfFavoritesFilteredByName() {
-        given(categoryRepository.findFavoritesByNameContaining(anyString())).willReturn(filteredFavoriteCategories);
-        List<CategoryDto> result = categoryService.getFavoritesByName("a");
+        given(favorites.findByUserAndName(any(UUID.class), anyString())).willReturn(filteredFavoriteCategories);
+        List<CategoryDto> result = categoryService.getFavoritesByName(VALID_ID, "a");
         assertThat(result).isEqualTo(filteredFavoriteCategoryDtos);
     }
 
@@ -216,19 +228,17 @@ class CategoryServiceImplTest {
     void saveFavorite_shouldAddFavoriteCategoryToList() {
         Category category = categoryOne; category.setIsFavorite(true);
         given(categoryRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(categoryOne));
-        given(categoryRepository.update(any(Category.class))).willReturn(category);
-        CategoryDto result = categoryService.saveFavorite(categoryOne.getId());
-        verify(categoryRepository).update(categoryCaptor.capture());
-        assertThat(result).isEqualTo(mapper.convertToDto(categoryCaptor.getValue()));
+        CategoryDto result = categoryService.saveFavorite(VALID_ID, categoryOne.getId());
+        verify(favorites).save(VALID_ID, categoryOne.getId());
+        assertThat(result.getIsFavorite()).isTrue();
     }
 
     @Test
     void deleteFavorite_shouldAddFavoriteCategoryToList() {
         Category category = categoryOne; category.setIsFavorite(false);
         given(categoryRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(categoryOne));
-        given(categoryRepository.update(any(Category.class))).willReturn(category);
-        CategoryDto result = categoryService.deleteFavorite(categoryOne.getId());
-        verify(categoryRepository).update(categoryCaptor.capture());
-        assertThat(result).isEqualTo(mapper.convertToDto(categoryCaptor.getValue()));
+        CategoryDto result = categoryService.deleteFavorite(VALID_ID, categoryOne.getId());
+        verify(favorites).delete(VALID_ID, categoryOne.getId());
+        assertThat(result.getIsFavorite()).isFalse();
     }
 }

@@ -1,14 +1,13 @@
 package com.project.ohl.application.port.out;
 
-import java.util.UUID;
 import com.project.ohl.domain.model.Feedback;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface FeedbackRepositoryPort {
 
-    List<Feedback> findAll();
+    List<Feedback> findPage(UUID userId, int page, int size);
 
     Optional<Feedback> findById(UUID id);
 

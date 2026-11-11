@@ -1,9 +1,11 @@
+DELETE FROM user_favorites;
 UPDATE categories SET parent_id = NULL;
 DELETE FROM notifications;
 DELETE FROM feedbacks;
 DELETE FROM categories;
 DELETE FROM users;
 DELETE FROM roles;
+DELETE FROM classrooms;
 DELETE FROM institutions;
 DELETE FROM sections;
 DELETE FROM letter_sign_pairs;

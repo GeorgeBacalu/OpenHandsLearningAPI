@@ -1,27 +1,28 @@
 package com.project.ohl.notification;
 
 import com.project.ohl.application.mapper.NotificationMapper;
-import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.NotificationDto;
+import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.application.port.out.NotificationRepositoryPort;
 import com.project.ohl.application.service.NotificationServiceImpl;
-import com.project.ohl.domain.model.Notification;
-
 import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.Notification;
 import com.project.ohl.domain.model.User;
-import com.project.ohl.application.port.in.UserService;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.NOTIFICATION_NOT_FOUND;
@@ -35,7 +36,6 @@ import static com.project.ohl.mock.UserMock.getMockedUser2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
 
-    @org.mockito.Spy
+    @Spy
     private final NotificationMapper mapper = Mappers.getMapper(NotificationMapper.class);
 
     @InjectMocks
@@ -86,8 +86,8 @@ class NotificationServiceImplTest {
 
     @Test
     void getAllNotifications_shouldReturnListOfNotifications() {
-        given(notificationRepository.findAll()).willReturn(notifications);
-        List<NotificationDto> result = notificationService.getAllNotifications();
+        given(notificationRepository.findPage(null, 0, 50)).willReturn(notifications);
+        List<NotificationDto> result = notificationService.getAllNotifications(null, 0, 50);
         assertThat(result).isEqualTo(notificationDtos);
     }
 
@@ -107,9 +107,8 @@ class NotificationServiceImplTest {
 
     @Test
     void saveNotification_shouldAddNotificationToList() {
-        given(clock.getZone()).willReturn(zonedDateTime.getZone());
         given(clock.instant()).willReturn(zonedDateTime.toInstant());
-        notification1.setSentAt(zonedDateTime.toLocalDateTime());
+        notification1.setSentAt(zonedDateTime.toInstant());
         given(notificationRepository.save(any(Notification.class))).willReturn(notification1);
         NotificationDto result = notificationService.saveNotification(notificationDto1);
         verify(notificationRepository).save(notificationCaptor.capture());

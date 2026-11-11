@@ -1,17 +1,17 @@
 package com.project.ohl.application.service;
 
-import java.util.UUID;
 import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.model.FeedbackDto;
 import com.project.ohl.application.port.in.FeedbackService;
-import com.project.ohl.application.port.out.FeedbackRepositoryPort;
-import com.project.ohl.domain.model.Feedback;
-
-import com.project.ohl.domain.exception.ResourceNotFoundException;
 import com.project.ohl.application.port.in.UserService;
+import com.project.ohl.application.port.out.FeedbackRepositoryPort;
+import com.project.ohl.domain.exception.InvalidRequestException;
+import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.Feedback;
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.FEEDBACK_NOT_FOUND;
@@ -26,8 +26,9 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final FeedbackMapper mapper;
 
     @Override
-    public List<FeedbackDto> getAllFeedbacks() {
-        List<Feedback> feedbacks = feedbackRepository.findAll();
+    public List<FeedbackDto> getAllFeedbacks(UUID userId, int page, int size) {
+        if (page < 0 || size < 1 || size > 100) throw new InvalidRequestException("Page must be non-negative and size between 1 and 100");
+        List<Feedback> feedbacks = feedbackRepository.findPage(userId, page, size);
         return feedbacks.stream().map(mapper::convertToDto).toList();
     }
 
@@ -40,7 +41,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     public FeedbackDto saveFeedback(FeedbackDto feedbackDto) {
         Feedback feedback = mapper.convertToEntity(feedbackDto);
-        feedback.setSentAt(LocalDateTime.now(clock));
+        feedback.setSentAt(Instant.now(clock));
         Feedback savedFeedback = feedbackRepository.save(feedback);
         return mapper.convertToDto(savedFeedback);
     }

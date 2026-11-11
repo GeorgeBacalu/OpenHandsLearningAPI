@@ -1,7 +1,7 @@
 package com.project.ohl.domain.model;
 
+import java.time.Instant;
 import java.util.UUID;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,5 +18,5 @@ public class Notification {
     private User sender;
     private User receiver;
     private Boolean isRead;
-    private LocalDateTime sentAt;
+    private Instant sentAt;
 }

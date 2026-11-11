@@ -1,9 +1,7 @@
 package com.project.ohl.application.model;
 
-import java.util.UUID;
-import com.project.ohl.domain.model.Institution;
-
 import jakarta.validation.constraints.NotBlank;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +18,4 @@ public class InstitutionDto {
     @NotBlank(message = "School must not be blank")
     private String school;
 
-    @NotBlank(message = "Classroom must not be blank")
-    private String classroom;
 }

@@ -1,15 +1,16 @@
 package com.project.ohl.application.port.in;
 
-import java.util.UUID;
 import com.project.ohl.application.model.CategoryDto;
-
 import java.util.List;
+import java.util.UUID;
 
 public interface CategoryService {
 
     List<CategoryDto> getAllCategories();
 
     CategoryDto getCategoryById(UUID id);
+    CategoryDto getCategoryById(UUID id, UUID userId);
+    List<CategoryDto> getCategoriesByFilters(UUID parentId, UUID sectionId, String parentCode, String sectionCode, String name);
 
     CategoryDto saveCategory(CategoryDto categoryDto);
 
@@ -19,11 +20,11 @@ public interface CategoryService {
 
     List<CategoryDto> getCategoriesByParentIdAndSectionIdAndName(UUID parentId, UUID sectionId, String name);
 
-    List<CategoryDto> getFavoriteCategories();
+    List<CategoryDto> getFavoriteCategories(UUID userId);
 
-    List<CategoryDto> getFavoritesByName(String name);
+    List<CategoryDto> getFavoritesByName(UUID userId, String name);
 
-    CategoryDto saveFavorite(UUID categoryId);
+    CategoryDto saveFavorite(UUID userId, UUID categoryId);
 
-    CategoryDto deleteFavorite(UUID categoryId);
+    CategoryDto deleteFavorite(UUID userId, UUID categoryId);
 }

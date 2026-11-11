@@ -1,27 +1,28 @@
 package com.project.ohl.feedback;
 
 import com.project.ohl.application.mapper.FeedbackMapper;
-import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.FeedbackDto;
+import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.application.port.out.FeedbackRepositoryPort;
 import com.project.ohl.application.service.FeedbackServiceImpl;
-import com.project.ohl.domain.model.Feedback;
-
 import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.Feedback;
 import com.project.ohl.domain.model.User;
-import com.project.ohl.application.port.in.UserService;
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.FEEDBACK_NOT_FOUND;
@@ -34,7 +35,6 @@ import static com.project.ohl.mock.UserMock.getMockedUser2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class FeedbackServiceImplTest {
 
-    @org.mockito.Spy
+    @Spy
     private final FeedbackMapper mapper = Mappers.getMapper(FeedbackMapper.class);
 
     @InjectMocks
@@ -83,8 +83,8 @@ class FeedbackServiceImplTest {
 
     @Test
     void getAllFeedbacks_shouldReturnListOfFeedbacks() {
-        given(feedbackRepository.findAll()).willReturn(feedbacks);
-        List<FeedbackDto> result = feedbackService.getAllFeedbacks();
+        given(feedbackRepository.findPage(null, 0, 50)).willReturn(feedbacks);
+        List<FeedbackDto> result = feedbackService.getAllFeedbacks(null, 0, 50);
         assertThat(result).isEqualTo(feedbackDtos);
     }
 
@@ -104,9 +104,8 @@ class FeedbackServiceImplTest {
 
     @Test
     void saveFeedback_shouldAddFeedbackToList() {
-        given(clock.getZone()).willReturn(zonedDateTime.getZone());
         given(clock.instant()).willReturn(zonedDateTime.toInstant());
-        feedback1.setSentAt(zonedDateTime.toLocalDateTime());
+        feedback1.setSentAt(zonedDateTime.toInstant());
         given(feedbackRepository.save(any(Feedback.class))).willReturn(feedback1);
         FeedbackDto result = feedbackService.saveFeedback(feedbackDto1);
         verify(feedbackRepository).save(feedbackCaptor.capture());

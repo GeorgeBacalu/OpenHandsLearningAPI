@@ -1,9 +1,9 @@
 package com.project.ohl.adapter.persistence.role;
 
-import java.util.UUID;
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
-import com.project.ohl.domain.model.Role;
 import com.project.ohl.application.port.out.RoleRepositoryPort;
+import com.project.ohl.domain.model.Role;
+import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 @Repository

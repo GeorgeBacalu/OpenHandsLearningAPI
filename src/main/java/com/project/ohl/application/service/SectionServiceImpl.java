@@ -1,14 +1,13 @@
 package com.project.ohl.application.service;
 
-import java.util.UUID;
 import com.project.ohl.application.mapper.SectionMapper;
 import com.project.ohl.application.model.SectionDto;
 import com.project.ohl.application.port.in.SectionService;
 import com.project.ohl.application.port.out.SectionRepositoryPort;
-import com.project.ohl.domain.model.Section;
-
 import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.model.Section;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.SECTION_NOT_FOUND;
@@ -42,9 +41,11 @@ public class SectionServiceImpl implements SectionService {
     @Override
     public SectionDto updateSectionById(SectionDto sectionDto, UUID id) {
         Section sectionToUpdate = getSectionEntityById(id);
+        sectionToUpdate.setCode(sectionDto.getCode());
+        sectionToUpdate.setMediaKey(sectionDto.getMediaKey());
+        sectionToUpdate.setIconKey(sectionDto.getIconKey());
         sectionToUpdate.setName(sectionDto.getName());
-        sectionToUpdate.setIconId(sectionDto.getIconId());
-        sectionToUpdate.setImageId(sectionDto.getImageId());
+
         Section updatedSection = sectionRepository.update(sectionToUpdate);
         return mapper.convertToDto(updatedSection);
     }
@@ -59,4 +60,9 @@ public class SectionServiceImpl implements SectionService {
     public Section getSectionEntityById(UUID id) {
         return sectionRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(SECTION_NOT_FOUND, id)));
     }
+    @Override
+    public Section getSectionEntityByCode(String code) {
+        return sectionRepository.findByCode(code).orElseThrow(() -> new ResourceNotFoundException("Section " + code + " was not found"));
+    }
+
 }

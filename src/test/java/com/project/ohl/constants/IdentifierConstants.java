@@ -1,9 +1,10 @@
 package com.project.ohl.constants;
 
 import java.util.UUID;
-import static com.project.ohl.TestIds.id;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import static com.project.ohl.TestIds.id;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class IdentifierConstants {

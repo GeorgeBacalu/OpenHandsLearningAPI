@@ -1,13 +1,5 @@
 package com.project.ohl.application.error;
 
-import com.project.ohl.domain.model.Category;
-import com.project.ohl.domain.model.Feedback;
-import com.project.ohl.domain.model.Institution;
-import com.project.ohl.domain.model.Notification;
-import com.project.ohl.domain.model.Role;
-import com.project.ohl.domain.model.Section;
-import com.project.ohl.domain.model.User;
-
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

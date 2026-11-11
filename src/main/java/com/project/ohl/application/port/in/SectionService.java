@@ -1,10 +1,9 @@
 package com.project.ohl.application.port.in;
 
-import java.util.UUID;
 import com.project.ohl.application.model.SectionDto;
 import com.project.ohl.domain.model.Section;
-
 import java.util.List;
+import java.util.UUID;
 
 public interface SectionService {
 
@@ -19,4 +18,5 @@ public interface SectionService {
     void deleteSectionById(UUID id);
 
     Section getSectionEntityById(UUID id);
+    Section getSectionEntityByCode(String code);
 }

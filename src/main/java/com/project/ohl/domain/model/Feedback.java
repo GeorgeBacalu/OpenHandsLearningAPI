@@ -1,7 +1,7 @@
 package com.project.ohl.domain.model;
 
+import java.time.Instant;
 import java.util.UUID;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +16,6 @@ public class Feedback {
     private UUID id;
     private FeedbackType type;
     private String description;
-    private LocalDateTime sentAt;
+    private Instant sentAt;
     private User user;
 }

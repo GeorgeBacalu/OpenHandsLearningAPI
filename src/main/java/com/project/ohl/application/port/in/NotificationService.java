@@ -1,13 +1,12 @@
 package com.project.ohl.application.port.in;
 
-import java.util.UUID;
 import com.project.ohl.application.model.NotificationDto;
-
 import java.util.List;
+import java.util.UUID;
 
 public interface NotificationService {
 
-    List<NotificationDto> getAllNotifications();
+    List<NotificationDto> getAllNotifications(UUID receiverId, int page, int size);
 
     NotificationDto getNotificationById(UUID id);
 

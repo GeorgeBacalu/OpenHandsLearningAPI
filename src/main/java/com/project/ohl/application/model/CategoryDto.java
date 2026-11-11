@@ -1,12 +1,10 @@
 package com.project.ohl.application.model;
 
-import java.util.UUID;
-import com.project.ohl.domain.model.Category;
-import com.project.ohl.domain.model.Section;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,16 +20,17 @@ public class CategoryDto {
 
     @NotBlank(message = "Name must not be blank")
     private String name;
-
-    @Positive(message = "Image ID must be positive")
-    private Integer imageId;
+    @Pattern(regexp = "^[A-Z][A-Z0-9_]*$")
+    @Size(max = 120)
+    private String code;
+    @Pattern(regexp = "^[a-z0-9_]+$")
+    @Size(max = 255)
+    private String mediaKey;
 
     @Builder.Default
-    @NotNull(message = "IsExpanded must not be null")
     private Boolean isExpanded = false;
 
     @Builder.Default
-    @NotNull(message = "IsFavorite must not be null")
     private Boolean isFavorite = false;
 
     private UUID parentId;

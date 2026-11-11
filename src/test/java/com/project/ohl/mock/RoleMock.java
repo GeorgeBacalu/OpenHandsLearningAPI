@@ -1,11 +1,12 @@
 package com.project.ohl.mock;
 
-import static com.project.ohl.TestIds.id;
-import com.project.ohl.domain.model.Role;
 import com.project.ohl.domain.model.Authority;
+import com.project.ohl.domain.model.Role;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import static com.project.ohl.TestIds.id;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RoleMock {

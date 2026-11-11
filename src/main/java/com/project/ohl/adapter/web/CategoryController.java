@@ -1,11 +1,10 @@
 package com.project.ohl.adapter.web;
 
-import java.util.UUID;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.in.CategoryService;
-
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,8 +34,8 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable UUID id) {
-        return ResponseEntity.ok(categoryService.getCategoryById(id));
+    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable UUID id, @RequestParam(required = false) UUID userId) {
+        return ResponseEntity.ok(userId == null ? categoryService.getCategoryById(id) : categoryService.getCategoryById(id, userId));
     }
 
     @PostMapping(consumes = APPLICATION_JSON_VALUE)
@@ -57,28 +56,29 @@ public class CategoryController {
 
     @GetMapping("/filter")
     public ResponseEntity<List<CategoryDto>> getCategoriesByParentIdAndSectionIdAndName(@RequestParam(required = false) UUID parentId,
-                                                                                        @RequestParam(required = false, defaultValue = "20a6880c-2e37-32e3-8e45-07a17e99a000") UUID sectionId,
-                                                                                        @RequestParam(required = false, defaultValue = "") String name) {
-        return ResponseEntity.ok(categoryService.getCategoriesByParentIdAndSectionIdAndName(parentId, sectionId, name));
+            @RequestParam(required = false) UUID sectionId, @RequestParam(defaultValue = "") String name,
+            @RequestParam(required = false) String parentCode, @RequestParam(defaultValue = "VIDEO") String sectionCode) {
+        if (parentCode == null && sectionId != null) return ResponseEntity.ok(categoryService.getCategoriesByParentIdAndSectionIdAndName(parentId, sectionId, name));
+        return ResponseEntity.ok(categoryService.getCategoriesByFilters(parentId, sectionId, parentCode, sectionCode, name));
     }
 
     @GetMapping("/favorites")
-    public ResponseEntity<List<CategoryDto>> getFavoriteCategories() {
-        return ResponseEntity.ok(categoryService.getFavoriteCategories());
+    public ResponseEntity<List<CategoryDto>> getFavoriteCategories(@RequestParam UUID userId) {
+        return ResponseEntity.ok(categoryService.getFavoriteCategories(userId));
     }
 
     @GetMapping("/favorites/filter")
-    public ResponseEntity<List<CategoryDto>> getFavoritesByName(@RequestParam String name) {
-        return ResponseEntity.ok(categoryService.getFavoritesByName(name));
+    public ResponseEntity<List<CategoryDto>> getFavoritesByName(@RequestParam UUID userId, @RequestParam String name) {
+        return ResponseEntity.ok(categoryService.getFavoritesByName(userId, name));
     }
 
     @PatchMapping("/favorites/save")
-    public ResponseEntity<CategoryDto> saveFavorite(@RequestParam UUID categoryId) {
-        return ResponseEntity.ok(categoryService.saveFavorite(categoryId));
+    public ResponseEntity<CategoryDto> saveFavorite(@RequestParam UUID userId, @RequestParam UUID categoryId) {
+        return ResponseEntity.ok(categoryService.saveFavorite(userId, categoryId));
     }
 
     @PatchMapping("/favorites/delete")
-    public ResponseEntity<CategoryDto> deleteFavorite(@RequestParam UUID categoryId) {
-        return ResponseEntity.ok(categoryService.deleteFavorite(categoryId));
+    public ResponseEntity<CategoryDto> deleteFavorite(@RequestParam UUID userId, @RequestParam UUID categoryId) {
+        return ResponseEntity.ok(categoryService.deleteFavorite(userId, categoryId));
     }
 }

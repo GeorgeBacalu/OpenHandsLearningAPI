@@ -1,14 +1,13 @@
 package com.project.ohl.application.port.out;
 
-import java.util.UUID;
 import com.project.ohl.domain.model.Notification;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface NotificationRepositoryPort {
 
-    List<Notification> findAll();
+    List<Notification> findPage(UUID receiverId, int page, int size);
 
     Optional<Notification> findById(UUID id);
 

@@ -1,0 +1,9 @@
+ALTER TABLE public.categories DROP COLUMN version;
+ALTER TABLE public.classrooms DROP COLUMN version;
+ALTER TABLE public.feedbacks DROP COLUMN version;
+ALTER TABLE public.institutions DROP COLUMN version;
+ALTER TABLE public.letter_sign_pairs DROP COLUMN version;
+ALTER TABLE public.notifications DROP COLUMN version;
+ALTER TABLE public.roles DROP COLUMN version;
+ALTER TABLE public.sections DROP COLUMN version;
+ALTER TABLE public.users DROP COLUMN version;

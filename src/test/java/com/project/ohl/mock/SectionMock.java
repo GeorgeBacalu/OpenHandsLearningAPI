@@ -1,10 +1,11 @@
 package com.project.ohl.mock;
 
-import static com.project.ohl.TestIds.id;
 import com.project.ohl.domain.model.Section;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+
+import static com.project.ohl.TestIds.id;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SectionMock {
@@ -17,8 +18,8 @@ public class SectionMock {
         return Section.builder()
               .id(id(1))
               .name("test_section_name1")
-              .iconId(1)
-              .imageId(1)
+
+
               .build();
     }
 
@@ -26,8 +27,8 @@ public class SectionMock {
         return Section.builder()
               .id(id(2))
               .name("test_section_name2")
-              .iconId(2)
-              .imageId(2)
+
+
               .build();
     }
 }

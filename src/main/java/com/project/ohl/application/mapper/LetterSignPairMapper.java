@@ -1,7 +1,7 @@
 package com.project.ohl.application.mapper;
 
-import com.project.ohl.domain.model.LetterSignPair;
 import com.project.ohl.application.model.LetterSignPairDto;
+import com.project.ohl.domain.model.LetterSignPair;
 import org.mapstruct.Mapper;
 
 @Mapper(config = MappingConfiguration.class)

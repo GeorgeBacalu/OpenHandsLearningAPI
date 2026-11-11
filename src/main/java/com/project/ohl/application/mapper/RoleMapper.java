@@ -1,7 +1,7 @@
 package com.project.ohl.application.mapper;
 
-import com.project.ohl.domain.model.Role;
 import com.project.ohl.application.model.RoleDto;
+import com.project.ohl.domain.model.Role;
 import org.mapstruct.Mapper;
 
 @Mapper(config = MappingConfiguration.class)

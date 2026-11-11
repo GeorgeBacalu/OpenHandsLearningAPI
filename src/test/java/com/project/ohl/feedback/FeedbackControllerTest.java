@@ -1,16 +1,16 @@
 package com.project.ohl.feedback;
 
-import com.project.ohl.application.mapper.FeedbackMapper;
-import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.FeedbackController;
+import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.model.FeedbackDto;
 import com.project.ohl.application.port.in.FeedbackService;
 import com.project.ohl.domain.model.Feedback;
-
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,7 +24,6 @@ import static com.project.ohl.mock.FeedbackMock.getMockedFeedbacks;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import java.util.UUID;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -52,8 +51,8 @@ class FeedbackControllerTest {
 
     @Test
     void getAllFeedbacks_shouldReturnListOfFeedbacks() {
-        given(feedbackService.getAllFeedbacks()).willReturn(feedbackDtos);
-        ResponseEntity<List<FeedbackDto>> response = feedbackController.getAllFeedbacks();
+        given(feedbackService.getAllFeedbacks(null, 0, 50)).willReturn(feedbackDtos);
+        ResponseEntity<List<FeedbackDto>> response = feedbackController.getAllFeedbacks(null, 0, 50);
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(feedbackDtos);

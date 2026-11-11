@@ -118,6 +118,15 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ]
       },
@@ -250,8 +259,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "uuid",
-              "default": "20a6880c-2e37-32e3-8e45-07a17e99a000"
+              "format": "uuid"
             }
           },
           {
@@ -261,6 +269,23 @@
             "schema": {
               "type": "string",
               "default": ""
+            }
+          },
+          {
+            "name": "parentCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sectionCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "VIDEO"
             }
           }
         ]
@@ -296,7 +321,18 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
       }
     },
     "/api/categories/favorites/filter": {
@@ -338,6 +374,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ]
       }
@@ -373,6 +418,15 @@
         "parameters": [
           {
             "name": "categoryId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "userId",
             "in": "query",
             "required": true,
             "schema": {
@@ -420,6 +474,15 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ]
       }
@@ -454,7 +517,37 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ]
       },
       "post": {
         "operationId": "saveFeedback",
@@ -1033,7 +1126,37 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "receiverId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ]
       },
       "post": {
         "operationId": "saveNotification",
@@ -1774,6 +1897,199 @@
           }
         ]
       }
+    },
+    "/api/classrooms": {
+      "get": {
+        "operationId": "getAllClassrooms",
+        "tags": [
+          "classrooms"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClassroomDto"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Request or server error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "saveClassroom",
+        "tags": [
+          "classrooms"
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassroomDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Request or server error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassroomDto"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/classrooms/{id}": {
+      "get": {
+        "operationId": "getClassroomById",
+        "tags": [
+          "classrooms"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassroomDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Request or server error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "put": {
+        "operationId": "updateClassroomById",
+        "tags": [
+          "classrooms"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassroomDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Request or server error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassroomDto"
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "deleteClassroomById",
+        "tags": [
+          "classrooms"
+        ],
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "default": {
+            "description": "Request or server error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1789,14 +2105,6 @@
             "type": "string",
             "minLength": 1
           },
-          "imageId": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int32",
-            "minimum": 1
-          },
           "parentId": {
             "type": [
               "string",
@@ -1807,6 +2115,28 @@
           "sectionId": {
             "type": "string",
             "format": "uuid"
+          },
+          "code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "maxLength": 120
+          },
+          "mediaKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "maxLength": 255
+          },
+          "isFavorite": {
+            "type": "boolean",
+            "readOnly": true
+          },
+          "isExpanded": {
+            "type": "boolean",
+            "readOnly": true,
+            "deprecated": true
           }
         },
         "required": [
@@ -1831,7 +2161,8 @@
           },
           "description": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 10000
           },
           "sentAt": {
             "type": [
@@ -1861,15 +2192,10 @@
           "school": {
             "type": "string",
             "minLength": 1
-          },
-          "classroom": {
-            "type": "string",
-            "minLength": 1
           }
         },
         "required": [
-          "school",
-          "classroom"
+          "school"
         ]
       },
       "LetterSignPairDto": {
@@ -1883,13 +2209,10 @@
             "type": "string",
             "minLength": 1
           },
-          "imageId": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int32",
-            "minimum": 1
+          "mediaKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "maxLength": 255
           }
         },
         "required": [
@@ -1905,7 +2228,8 @@
           },
           "message": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "maxLength": 10000
           },
           "senderId": {
             "type": "string",
@@ -1959,21 +2283,23 @@
             "type": "string",
             "minLength": 1
           },
-          "iconId": {
+          "code": {
             "type": [
-              "integer",
+              "string",
               "null"
             ],
-            "format": "int32",
-            "minimum": 1
+            "pattern": "^[A-Z][A-Z0-9_]*$",
+            "maxLength": 120
           },
-          "imageId": {
-            "type": [
-              "integer",
-              "null"
-            ],
-            "format": "int32",
-            "minimum": 1
+          "mediaKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "maxLength": 255
+          },
+          "iconKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "maxLength": 255
           }
         },
         "required": [
@@ -2025,6 +2351,13 @@
           },
           "roleId": {
             "type": "string",
+            "format": "uuid"
+          },
+          "classroomId": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid"
           }
         },
@@ -2095,6 +2428,13 @@
               "null"
             ],
             "format": "uuid"
+          },
+          "classroomId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -2125,6 +2465,27 @@
             }
           }
         }
+      },
+      "ClassroomDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "institutionId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "name",
+          "institutionId"
+        ]
       }
     }
   }
