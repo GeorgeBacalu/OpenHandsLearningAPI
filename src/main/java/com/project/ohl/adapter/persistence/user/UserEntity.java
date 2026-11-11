@@ -10,7 +10,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,7 +23,7 @@ import org.hibernate.annotations.Check;
       @Index(name = "idx_users_school", columnList = "school_id"),
       @Index(name = "idx_users_role", columnList = "role_id")
 })
-@Check(constraints = "trim(name) <> '' AND trim(email) <> '' AND trim(password) <> '' AND trim(mobile) <> '' AND trim(address) <> ''")
+@Check(constraints = "trim(name) <> '' AND trim(email) <> '' AND trim(password) <> '' AND trim(phone) <> ''")
 public class UserEntity extends PersistentEntity {
     @Column(name = "name", nullable = false)
     private String name;
@@ -32,12 +31,8 @@ public class UserEntity extends PersistentEntity {
     private String email;
     @Column(name = "password", nullable = false)
     private String password;
-    @Column(name = "mobile", nullable = false)
-    private String mobile;
-    @Column(name = "address", nullable = false)
-    private String address;
-    @Column(name = "birthday")
-    private LocalDate birthday;
+    @Column(name = "phone", nullable = false)
+    private String phone;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_id", nullable = false)
     private SchoolEntity school;

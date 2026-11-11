@@ -44,8 +44,28 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(List.of(users.get(0).path("name").asText(), users.get(1).path("name").asText()))
                 .containsExactlyInAnyOrder("Ana", "Dan");
         var ana = users.get(0).path("name").asText().equals("Ana") ? users.get(0) : users.get(1);
-        assertThat(ana.path("mobile").asText()).isEqualTo("0712345678");
+        assertThat(ana.path("phone").asText()).isEqualTo("0712345678");
         assertThat(users.get(0).has("password")).isFalse();
+    }
+
+    @Test
+    void userProfilesContainOnlyTheSupportedFields() throws Exception {
+        var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'users'", String.class);
+        assertThat(columns).containsExactlyInAnyOrder("id", "name", "email", "phone", "password", "role_id", "school_id");
+        var request = json.createObjectNode().put("name", "Created profile").put("email", "created-profile@example.test")
+                .put("phone", "0712345678").put("password", "test-password")
+                .put("roleId", ROLE_USER.toString()).put("schoolId", SCHOOL_A.toString());
+        var created = send("POST", "/api/users", json.writeValueAsString(request));
+        assertThat(created.statusCode()).isEqualTo(201);
+        var profile = json.readTree(created.body());
+        assertThat(profile.size()).isEqualTo(6);
+        assertThat(profile.path("phone").asText()).isEqualTo("0712345678");
+        assertThat(profile.has("password") || profile.has("mobile") || profile.has("address") || profile.has("birthday")).isFalse();
+        String id = profile.path("id").asText();
+        request.put("phone", "0798765432");
+        assertThat(send("PUT", "/api/users/" + id, json.writeValueAsString(request)).statusCode()).isEqualTo(200);
+        assertThat(json.readTree(send("GET", "/api/users/" + id, null).body()).path("phone").asText()).isEqualTo("0798765432");
+        assertThat(send("DELETE", "/api/users/" + id, null).statusCode()).isEqualTo(204);
     }
 
     @Test
@@ -104,8 +124,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         request.put("name", "Test User");
         request.put("email", "test@example.test");
         request.put("password", "\u00e9".repeat(37));
-        request.put("mobile", "0712345678");
-        request.put("address", "Bucharest");
+        request.put("phone", "0712345678");
         request.put("schoolId", SCHOOL_A.toString());
         request.put("roleId", ROLE_USER.toString());
         var response = send("POST", "/api/users", json.writeValueAsString(request));

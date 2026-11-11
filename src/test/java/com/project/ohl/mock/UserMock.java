@@ -1,7 +1,6 @@
 package com.project.ohl.mock;
 
 import com.project.ohl.domain.model.User;
-import java.time.LocalDate;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -25,9 +24,7 @@ public class UserMock {
               .name("test_user_name1")
               .email("test_user_email1@email.com")
               .password("test_user_password1")
-              .mobile("0000000001")
-              .address("test_user_address1")
-              .birthday(LocalDate.of(2000, 1, 1))
+              .phone("0000000001")
               .school(getMockedSchool1())
               .role(getMockedRole1())
               .build();
@@ -39,9 +36,7 @@ public class UserMock {
               .name("test_user_name2")
               .email("test_user_email2@email.com")
               .password("test_user_password2")
-              .mobile("0000000002")
-              .address("test_user_address2")
-              .birthday(LocalDate.of(2000, 1, 2))
+              .phone("0000000002")
               .school(getMockedSchool2())
               .role(getMockedRole2())
               .build();

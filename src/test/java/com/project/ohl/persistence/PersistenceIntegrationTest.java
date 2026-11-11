@@ -18,7 +18,6 @@ import com.project.ohl.domain.model.School;
 import com.project.ohl.domain.model.Section;
 import com.project.ohl.domain.model.User;
 import jakarta.persistence.EntityManagerFactory;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import org.hibernate.SessionFactory;
@@ -69,8 +68,8 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         var school = schools.findById(SCHOOL_A).orElseThrow();
         var role = roles.findById(ROLE_USER).orElseThrow();
         var request = UserDto.builder().name("Ana")
-                .email("hashed@example.test").password("long-test-password").mobile("0712345678")
-                .address("Bucharest").schoolId(school.getId()).roleId(role.getId()).build();
+                .email("hashed@example.test").password("long-test-password").phone("0712345678")
+                .schoolId(school.getId()).roleId(role.getId()).build();
         var created = userService.saveUser(request);
         var stored = users.findById(created.getId()).orElseThrow().getPassword();
         assertThat(stored).startsWith("$2b$12$").doesNotContain(request.getPassword());
@@ -89,8 +88,8 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         var school = schools.save(School.builder().name("School").cityId(UUID.fromString("00000000-0000-4000-8000-000000000104")).build());
         var role = roles.findById(ROLE_USER).orElseThrow();
         var user = users.save(User.builder().name("Ana").email("created@example.test")
-              .password("test-password").mobile("0712345678").address("Bucharest")
-              .birthday(LocalDate.of(2000, 1, 1)).school(school).role(role).build());
+              .password("test-password").phone("0712345678")
+              .school(school).role(role).build());
         var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
         var child = categories.save(Category.builder().name("C").parent(parent)
                 .section(sections.findById(SECTION_VIDEO).orElseThrow()).build());

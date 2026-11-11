@@ -1538,22 +1538,6 @@
             "writeOnly": true,
             "description": "8 to 72 characters, with a maximum of 72 UTF-8 bytes."
           },
-          "mobile": {
-            "type": "string",
-            "minLength": 10,
-            "maxLength": 10
-          },
-          "address": {
-            "type": "string",
-            "minLength": 1
-          },
-          "birthday": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date"
-          },
           "schoolId": {
             "type": "string",
             "format": "uuid"
@@ -1561,14 +1545,18 @@
           "roleId": {
             "type": "string",
             "format": "uuid"
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 10
           }
         },
         "required": [
           "name",
           "email",
           "password",
-          "mobile",
-          "address",
+          "phone",
           "schoolId",
           "roleId"
         ]
@@ -1595,28 +1583,6 @@
             "format": "email",
             "minLength": 1
           },
-          "mobile": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "minLength": 10,
-            "maxLength": 10
-          },
-          "address": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "minLength": 1
-          },
-          "birthday": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date"
-          },
           "schoolId": {
             "type": [
               "string",
@@ -1630,6 +1596,14 @@
               "null"
             ],
             "format": "uuid"
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 10,
+            "maxLength": 10
           }
         }
       },

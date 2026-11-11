@@ -34,9 +34,7 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
               .name(entity.getName())
               .email(entity.getEmail())
               .password(entity.getPassword())
-              .mobile(entity.getMobile())
-              .address(entity.getAddress())
-              .birthday(entity.getBirthday())
+              .phone(entity.getPhone())
               .school(entity.getSchool() == null ? null : School.builder().id(entity.getSchool().getId()).build())
               .role(entity.getRole() == null ? null : Role.builder().id(entity.getRole().getId()).build())
               .build();
@@ -47,9 +45,7 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
         entity.setName(model.getName());
         entity.setEmail(model.getEmail() == null ? null : model.getEmail().strip().toLowerCase(Locale.ROOT));
         entity.setPassword(model.getPassword());
-        entity.setMobile(model.getMobile());
-        entity.setAddress(model.getAddress());
-        entity.setBirthday(model.getBirthday());
+        entity.setPhone(model.getPhone());
         entity.setSchool(reference(SchoolEntity.class, model.getSchool() == null ? null : model.getSchool().getId()));
         entity.setRole(reference(RoleEntity.class, model.getRole() == null ? null : model.getRole().getId()));
     }

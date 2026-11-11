@@ -61,7 +61,7 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
     @Test void accountEmailsAreNormalizedAndCannotBeDuplicated() {
         UUID role = ROLE_USER;
         var request = UserDto.builder().name("Created user").email("  CREATED@Example.TEST ")
-                .password("test-password").mobile("0712345678").address("Bucharest")
+                .password("test-password").phone("0712345678")
                 .schoolId(SCHOOL_A).roleId(role).build();
         assertThat(users.saveUser(request).getEmail()).isEqualTo("created@example.test");
         request.setEmail(" ANA@example.TEST ");

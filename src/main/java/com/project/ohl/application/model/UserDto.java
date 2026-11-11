@@ -4,7 +4,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,14 +31,9 @@ public class UserDto {
     @ToString.Exclude
     private String password;
 
-    @NotBlank(message = "Mobile must not be blank")
-    @Size(min = 10, max = 10, message = "Mobile is invalid")
-    private String mobile;
-
-    @NotBlank(message = "Address must not be blank")
-    private String address;
-
-    private LocalDate birthday;
+    @NotBlank(message = "Phone must not be blank")
+    @Size(min = 10, max = 10, message = "Phone is invalid")
+    private String phone;
 
     @NotNull(message = "School ID must not be null")
     private UUID schoolId;
