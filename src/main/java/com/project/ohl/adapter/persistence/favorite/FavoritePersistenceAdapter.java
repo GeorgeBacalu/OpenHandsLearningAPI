@@ -14,7 +14,7 @@ public class FavoritePersistenceAdapter implements FavoriteRepositoryPort {
     private final FavoriteJpaRepository favorites;
     private final CategoryPersistenceAdapter categories;
     public List<Category> findByUserAndName(UUID userId, String name) {
-        return favorites.findByUser_IdAndCategory_NameContainingIgnoreCaseOrderByCategory_DisplayOrderAscCategory_IdAsc(userId, name)
+        return favorites.findByUser_IdAndCategory_NameContainingIgnoreCase(userId, name)
                 .stream().map(value -> categories.toDomain(value.getCategory())).toList();
     }
     public boolean exists(UUID userId, UUID categoryId) { return favorites.existsById(new FavoriteId(userId, categoryId)); }

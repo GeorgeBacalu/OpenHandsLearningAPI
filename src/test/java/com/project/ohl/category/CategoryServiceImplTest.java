@@ -10,7 +10,9 @@ import com.project.ohl.application.service.CategoryServiceImpl;
 import com.project.ohl.domain.exception.ResourceNotFoundException;
 import com.project.ohl.domain.model.Category;
 import com.project.ohl.domain.model.User;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -101,13 +103,18 @@ class CategoryServiceImplTest {
         filteredFavoriteCategories = getMockedFavoriteCategoriesFilteredByName();
         categoryDtoOne = mapper.convertToDto(categoryOne);
         categoryDtoTwo = mapper.convertToDto(categoryTwo);
-        categoryDtos = mapper.convertToDtoList(categories);
-        parentCategoryDtos = mapper.convertToDtoList(parentCategories);
+        categoryDtos = mapper.convertToDtoList(List.of(
+                categories.get(3), categories.get(0), categories.get(4),
+                categories.get(2), categories.get(6), categories.get(1),
+                categories.get(8), categories.get(7), categories.get(5)));
+        parentCategoryDtos = mapper.convertToDtoList(List.of(parentCategories.get(0), parentCategories.get(2), parentCategories.get(1)));
         filteredParentCategoryDtos = mapper.convertToDtoList(filteredParentCategories);
         childrenCategoryDtosAlphabet = mapper.convertToDtoList(childrenCategoriesAlphabet);
         filteredChildrenCategoryDtosAlphabet = mapper.convertToDtoList(filteredChildrenCategoriesAlphabet);
-        favoriteCategoryDtos = mapper.convertToDtoList(favoriteCategories);
-        filteredFavoriteCategoryDtos = mapper.convertToDtoList(filteredFavoriteCategories);
+        favoriteCategoryDtos = mapper.convertToDtoList(List.of(
+                favoriteCategories.get(2), favoriteCategories.get(0), favoriteCategories.get(1),
+                favoriteCategories.get(3), favoriteCategories.get(4)));
+        filteredFavoriteCategoryDtos = mapper.convertToDtoList(List.of(filteredFavoriteCategories.get(1), filteredFavoriteCategories.get(0)));
     }
 
     @Test
@@ -115,6 +122,34 @@ class CategoryServiceImplTest {
         given(categoryRepository.findAll()).willReturn(categories);
         List<CategoryDto> result = categoryService.getAllCategories();
         assertThat(result).isEqualTo(categoryDtos);
+    }
+
+    @Test
+    void categoriesUseRomanianAlphabeticalOrderIndependentlyOfTheDefaultLocale() {
+        List<String> names = List.of("Zebră", "Țară", "Tată", "Șarpe", "Sare",
+                "Înger", "Inel", "Ânger", "Ălbină", "Arici");
+        var values = new ArrayList<Category>();
+        for (int i = 0; i < names.size(); i++)
+            values.add(Category.builder().id(new UUID(0, i + 1)).name(names.get(i)).build());
+        given(categoryRepository.findAll()).willReturn(values);
+        Locale original = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            assertThat(categoryService.getAllCategories()).extracting(CategoryDto::getName)
+                    .containsExactly("Arici", "Ălbină", "Ânger", "Inel", "Înger",
+                            "Sare", "Șarpe", "Tată", "Țară", "Zebră");
+        } finally {
+            Locale.setDefault(original);
+        }
+    }
+
+    @Test
+    void equivalentNamesUseTheUuidForStableOrdering() {
+        var first = Category.builder().id(new UUID(0, 1)).name("alfa").build();
+        var second = Category.builder().id(new UUID(0, 2)).name("ALFA").build();
+        given(categoryRepository.findAll()).willReturn(List.of(second, first));
+        assertThat(categoryService.getAllCategories()).extracting(CategoryDto::getId)
+                .containsExactly(first.getId(), second.getId());
     }
 
     @Test

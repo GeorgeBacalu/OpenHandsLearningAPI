@@ -9,7 +9,6 @@ import com.project.ohl.domain.model.Section;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,11 +20,6 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
     public CategoryPersistenceAdapter(CategoryJpaRepository repository) {
         super(repository);
         this.categories = repository;
-    }
-
-    @Override
-    protected Sort defaultSort() {
-        return Sort.by("displayOrder", "id");
     }
 
     @Override
@@ -67,22 +61,22 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
 
     @Override
     public List<Category> findByParentIdNullAndSectionId(UUID sectionId) {
-        return categories.findByParent_IdIsNullAndSection_IdOrderByDisplayOrderAscIdAsc(sectionId).stream().map(this::toDomain).toList();
+        return categories.findByParent_IdIsNullAndSection_Id(sectionId).stream().map(this::toDomain).toList();
     }
 
     @Override
     public List<Category> findByParentIdNullAndSectionIdAndNameContaining(UUID sectionId, String name) {
-        return categories.findByParent_IdIsNullAndSection_IdAndNameContainingIgnoreCaseOrderByDisplayOrderAscIdAsc(sectionId, name).stream().map(this::toDomain).toList();
+        return categories.findByParent_IdIsNullAndSection_IdAndNameContainingIgnoreCase(sectionId, name).stream().map(this::toDomain).toList();
     }
 
     @Override
     public List<Category> findByParentIdAndSectionId(UUID parentId, UUID sectionId) {
-        return categories.findByParent_IdAndSection_IdOrderByDisplayOrderAscIdAsc(parentId, sectionId).stream().map(this::toDomain).toList();
+        return categories.findByParent_IdAndSection_Id(parentId, sectionId).stream().map(this::toDomain).toList();
     }
 
     @Override
     public List<Category> findByParentIdAndSectionIdAndNameContaining(UUID parentId, UUID sectionId, String name) {
-        return categories.findByParent_IdAndSection_IdAndNameContainingIgnoreCaseOrderByDisplayOrderAscIdAsc(parentId, sectionId, name).stream().map(this::toDomain).toList();
+        return categories.findByParent_IdAndSection_IdAndNameContainingIgnoreCase(parentId, sectionId, name).stream().map(this::toDomain).toList();
     }
 
 }

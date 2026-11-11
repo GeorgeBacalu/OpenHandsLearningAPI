@@ -10,8 +10,13 @@ import com.project.ohl.application.port.out.UserRepositoryPort;
 import com.project.ohl.domain.exception.InvalidRequestException;
 import com.project.ohl.domain.exception.ResourceNotFoundException;
 import com.project.ohl.domain.model.Category;
+import java.text.Collator;
+import java.text.ParseException;
+import java.text.RuleBasedCollator;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +25,7 @@ import static com.project.ohl.application.error.ExceptionMessageConstants.CATEGO
 
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
+    private static final Collator ROMANIAN_COLLATOR = romanianCollator();
 
     private final CategoryRepositoryPort categoryRepository;
     private final SectionService sectionService;
@@ -31,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryDto> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
-        return mapper.convertToDtoList(categories);
+        return alphabeticalCategories(categories);
     }
 
     @Override
@@ -82,7 +88,7 @@ public class CategoryServiceImpl implements CategoryService {
                   ? categoryRepository.findByParentIdAndSectionId(parentId, sectionId)
                   : categoryRepository.findByParentIdAndSectionIdAndNameContaining(parentId, sectionId, name);
         }
-        return mapper.convertToDtoList(categories);
+        return alphabeticalCategories(categories);
     }
 
     @Override
@@ -109,7 +115,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryDto> getFavoritesByName(UUID userId, String name) {
         requireUser(userId);
-        var result = mapper.convertToDtoList(favorites.findByUserAndName(userId, name == null ? "" : name));
+        var result = alphabeticalCategories(favorites.findByUserAndName(userId, name == null ? "" : name));
         result.forEach(category -> category.setIsFavorite(true));
         return result;
     }
@@ -130,6 +136,26 @@ public class CategoryServiceImpl implements CategoryService {
         favorites.delete(userId, categoryId);
         result.setIsFavorite(false);
         return result;
+    }
+
+    private List<CategoryDto> alphabeticalCategories(List<Category> categories) {
+        var collator = (Collator) ROMANIAN_COLLATOR.clone();
+        Comparator<Category> byName = Comparator.comparing(category -> category.getName().strip().toLowerCase(Locale.ROOT), collator);
+        return categories.stream().sorted(byName.thenComparing(Category::getId))
+                .map(mapper::convertToDto).toList();
+    }
+
+    private static Collator romanianCollator() {
+        try {
+            var base = (RuleBasedCollator) Collator.getInstance(Locale.forLanguageTag("ro-RO"));
+            var collator = new RuleBasedCollator(base.getRules()
+                    + "& a < ă , Ă < â , Â & i < î , Î & s < ș , Ș = ş , Ş & t < ț , Ț = ţ , Ţ");
+            collator.setStrength(Collator.SECONDARY);
+            collator.setDecomposition(Collator.CANONICAL_DECOMPOSITION);
+            return collator;
+        } catch (ParseException exception) {
+            throw new ExceptionInInitializerError(exception);
+        }
     }
 
     private void requireUser(UUID id) {

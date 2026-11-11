@@ -18,14 +18,9 @@ import org.hibernate.annotations.Check;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "categories", indexes = {
-      @Index(name = "idx_categories_section_parent_order", columnList = "section_id,parent_id,display_order,id"),
-      @Index(name = "idx_categories_parent", columnList = "parent_id")
-})
-@Check(constraints = "trim(name) <> '' AND display_order >= 0 AND (parent_id IS NULL OR parent_id <> id)")
+@Table(name = "categories", indexes = @Index(name = "idx_categories_parent", columnList = "parent_id"))
+@Check(constraints = "trim(name) <> '' AND (parent_id IS NULL OR parent_id <> id)")
 public class CategoryEntity extends PersistentEntity {
-    @Column(name = "display_order", nullable = false)
-    private Integer displayOrder = Integer.MAX_VALUE;
     @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "code", nullable = false, unique = true, length = 120)

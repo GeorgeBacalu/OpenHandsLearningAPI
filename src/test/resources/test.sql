@@ -14,9 +14,9 @@ INSERT INTO sections (id, name, display_order, code, media_key, icon_key) VALUES
     ('7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'Video', 1, 'VIDEO', 'video_section', 'ic_video_section'),
     ('d65b741b-1b28-451f-9faa-51763b236348', 'Expressions', 2, 'EXPRESSIONS', 'expressions_section', 'ic_expressions_section');
 
-INSERT INTO categories (id, name, parent_id, section_id, display_order, code, media_key) VALUES
-    ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 'Alphabet', NULL, '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 1, 'ALPHABET', 'alfabet'),
-    ('f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185', 'Letter A', '176ccfb5-fe9b-484c-a799-310eb72a02a5', '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 2, 'LETTER_A', 'dactilema_a');
+INSERT INTO categories (id, name, parent_id, section_id, code, media_key) VALUES
+    ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 'Alphabet', NULL, '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'ALPHABET', 'alfabet'),
+    ('f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185', 'Letter A', '176ccfb5-fe9b-484c-a799-310eb72a02a5', '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'LETTER_A', 'dactilema_a');
 
 INSERT INTO letter_sign_pairs (id, letter, media_key, display_order) VALUES
     ('ce98a927-206e-4e7e-8039-1c696792a988', 'A', 'dactilema_a', 1),
