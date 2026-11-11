@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class Classroom {
     private UUID id;
     private String name;
-    private UUID institutionId;
+    private UUID schoolId;
 }

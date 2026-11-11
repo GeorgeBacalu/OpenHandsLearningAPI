@@ -3,7 +3,7 @@ package com.project.ohl.adapter.config;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.mapper.ClassroomMapper;
 import com.project.ohl.application.mapper.FeedbackMapper;
-import com.project.ohl.application.mapper.InstitutionMapper;
+import com.project.ohl.application.mapper.SchoolMapper;
 import com.project.ohl.application.mapper.NotificationMapper;
 import com.project.ohl.application.mapper.RoleMapper;
 import com.project.ohl.application.mapper.SectionMapper;
@@ -30,8 +30,8 @@ public class MapperConfig {
     }
 
     @Bean
-    public InstitutionMapper institutionMapper() {
-        return Mappers.getMapper(InstitutionMapper.class);
+    public SchoolMapper schoolMapper() {
+        return Mappers.getMapper(SchoolMapper.class);
     }
 
 

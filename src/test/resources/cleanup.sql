@@ -6,5 +6,7 @@ DELETE FROM categories;
 DELETE FROM users;
 DELETE FROM roles;
 DELETE FROM classrooms;
-DELETE FROM institutions;
+DELETE FROM schools;
 DELETE FROM sections;
+DELETE FROM cities;
+DELETE FROM counties;

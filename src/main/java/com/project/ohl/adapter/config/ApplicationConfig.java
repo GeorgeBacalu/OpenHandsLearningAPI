@@ -3,7 +3,7 @@ package com.project.ohl.adapter.config;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.mapper.ClassroomMapper;
 import com.project.ohl.application.mapper.FeedbackMapper;
-import com.project.ohl.application.mapper.InstitutionMapper;
+import com.project.ohl.application.mapper.SchoolMapper;
 import com.project.ohl.application.mapper.NotificationMapper;
 import com.project.ohl.application.mapper.RoleMapper;
 import com.project.ohl.application.mapper.SectionMapper;
@@ -11,7 +11,7 @@ import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.port.in.CategoryService;
 import com.project.ohl.application.port.in.ClassroomService;
 import com.project.ohl.application.port.in.FeedbackService;
-import com.project.ohl.application.port.in.InstitutionService;
+import com.project.ohl.application.port.in.SchoolService;
 import com.project.ohl.application.port.in.NotificationService;
 import com.project.ohl.application.port.in.RoleService;
 import com.project.ohl.application.port.in.SectionService;
@@ -20,7 +20,7 @@ import com.project.ohl.application.port.out.CategoryRepositoryPort;
 import com.project.ohl.application.port.out.ClassroomRepositoryPort;
 import com.project.ohl.application.port.out.FavoriteRepositoryPort;
 import com.project.ohl.application.port.out.FeedbackRepositoryPort;
-import com.project.ohl.application.port.out.InstitutionRepositoryPort;
+import com.project.ohl.application.port.out.SchoolRepositoryPort;
 import com.project.ohl.application.port.out.NotificationRepositoryPort;
 import com.project.ohl.application.port.out.PasswordHasher;
 import com.project.ohl.application.port.out.RoleRepositoryPort;
@@ -29,7 +29,7 @@ import com.project.ohl.application.port.out.UserRepositoryPort;
 import com.project.ohl.application.service.CategoryServiceImpl;
 import com.project.ohl.application.service.ClassroomServiceImpl;
 import com.project.ohl.application.service.FeedbackServiceImpl;
-import com.project.ohl.application.service.InstitutionServiceImpl;
+import com.project.ohl.application.service.SchoolServiceImpl;
 import com.project.ohl.application.service.NotificationServiceImpl;
 import com.project.ohl.application.service.RoleServiceImpl;
 import com.project.ohl.application.service.SectionServiceImpl;
@@ -61,8 +61,8 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public InstitutionService institutionService(InstitutionRepositoryPort institutions, InstitutionMapper mapper) {
-        return transactional(InstitutionService.class, new InstitutionServiceImpl(institutions, mapper));
+    public SchoolService schoolService(SchoolRepositoryPort schools, SchoolMapper mapper) {
+        return transactional(SchoolService.class, new SchoolServiceImpl(schools, mapper));
     }
 
     @Bean
@@ -77,8 +77,8 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public UserService userService(UserRepositoryPort users, InstitutionService institutions, RoleService roles, PasswordHasher passwordHasher, UserMapper mapper, ClassroomRepositoryPort classrooms) {
-        return transactional(UserService.class, new UserServiceImpl(users, institutions, roles, passwordHasher, mapper, classrooms));
+    public UserService userService(UserRepositoryPort users, SchoolService schools, RoleService roles, PasswordHasher passwordHasher, UserMapper mapper, ClassroomRepositoryPort classrooms) {
+        return transactional(UserService.class, new UserServiceImpl(users, schools, roles, passwordHasher, mapper, classrooms));
     }
 
     @Bean

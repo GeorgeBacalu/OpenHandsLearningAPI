@@ -8,7 +8,7 @@ import com.project.ohl.application.port.in.CategoryService;
 import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.application.port.out.CategoryRepositoryPort;
 import com.project.ohl.application.port.out.FeedbackRepositoryPort;
-import com.project.ohl.application.port.out.InstitutionRepositoryPort;
+import com.project.ohl.application.port.out.SchoolRepositoryPort;
 import com.project.ohl.application.port.out.NotificationRepositoryPort;
 import com.project.ohl.application.port.out.RoleRepositoryPort;
 import com.project.ohl.application.port.out.SectionRepositoryPort;
@@ -18,7 +18,7 @@ import com.project.ohl.domain.model.Authority;
 import com.project.ohl.domain.model.Category;
 import com.project.ohl.domain.model.Feedback;
 import com.project.ohl.domain.model.FeedbackType;
-import com.project.ohl.domain.model.Institution;
+import com.project.ohl.domain.model.School;
 import com.project.ohl.domain.model.Notification;
 import com.project.ohl.domain.model.Section;
 import com.project.ohl.domain.model.User;
@@ -26,6 +26,7 @@ import jakarta.persistence.EntityManagerFactory;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static com.project.ohl.TestIds.CATEGORY_CHILD;
 import static com.project.ohl.TestIds.CATEGORY_PARENT;
-import static com.project.ohl.TestIds.INSTITUTION_A;
+import static com.project.ohl.TestIds.SCHOOL_A;
 import static com.project.ohl.TestIds.ROLE_USER;
 import static com.project.ohl.TestIds.SECTION_VIDEO;
 import static com.project.ohl.TestIds.id;
@@ -45,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 class PersistenceIntegrationTest extends DatabaseIntegrationTest {
     @Autowired private SectionRepositoryPort sections;
-    @Autowired private InstitutionRepositoryPort institutions;
+    @Autowired private SchoolRepositoryPort schools;
     @Autowired private RoleRepositoryPort roles;
     @Autowired private UserRepositoryPort users;
     @Autowired private CategoryRepositoryPort categories;
@@ -73,11 +74,11 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
 
     @Test
     void hashesPasswordsBeforeSavingUsers() {
-        var institution = institutions.findById(INSTITUTION_A).orElseThrow();
+        var school = schools.findById(SCHOOL_A).orElseThrow();
         var role = roles.findById(ROLE_USER).orElseThrow();
         var request = UserDto.builder().name("Ana")
                 .email("hashed@example.test").password("long-test-password").mobile("0712345678")
-                .address("Bucharest").institutionId(institution.getId()).roleId(role.getId()).build();
+                .address("Bucharest").schoolId(school.getId()).roleId(role.getId()).build();
         var created = userService.saveUser(request);
         var stored = users.findById(created.getId()).orElseThrow().getPassword();
         assertThat(stored).startsWith("$2b$12$").doesNotContain(request.getPassword());
@@ -93,11 +94,11 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
     @Test
     void persistsAndUpdatesEveryResourceUsingTheHibernateSchema() {
         var section = sections.save(Section.builder().name("Video").build());
-        var institution = institutions.save(Institution.builder().school("School").build());
+        var school = schools.save(School.builder().name("School").cityId(UUID.fromString("00000000-0000-4000-8000-000000000104")).build());
         var role = roles.findById(ROLE_USER).orElseThrow();
         var user = users.save(User.builder().name("Ana").email("created@example.test")
               .password("test-password").mobile("0712345678").address("Bucharest")
-              .birthday(LocalDate.of(2000, 1, 1)).institution(institution).role(role).build());
+              .birthday(LocalDate.of(2000, 1, 1)).school(school).role(role).build());
         var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
         var child = categories.save(Category.builder().name("C").parent(parent)
                 .section(sections.findById(SECTION_VIDEO).orElseThrow()).build());
@@ -107,18 +108,18 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         var notification = notifications.save(Notification.builder().message("Welcome")
               .sender(user).receiver(user).sentAt(sentAt).isRead(false).build());
 
-        assertThat(List.of(section.getId(), institution.getId(), role.getId(), user.getId(),
+        assertThat(List.of(section.getId(), school.getId(), role.getId(), user.getId(),
                 child.getId(), feedback.getId(), notification.getId()))
                 .allSatisfy(value -> assertThat(value.version()).isEqualTo(4));
 
-        assertThat(users.findById(user.getId()).orElseThrow().getInstitution().getId()).isEqualTo(institution.getId());
+        assertThat(users.findById(user.getId()).orElseThrow().getSchool().getId()).isEqualTo(school.getId());
         assertThat(users.findById(user.getId()).orElseThrow().getRole().getId()).isEqualTo(role.getId());
         assertThat(categories.findById(child.getId()).orElseThrow().getParent().getId()).isEqualTo(parent.getId());
         assertThat(feedbacks.findById(feedback.getId()).orElseThrow().getUser().getId()).isEqualTo(user.getId());
         assertThat(notifications.findById(notification.getId()).orElseThrow().getReceiver().getId()).isEqualTo(user.getId());
 
         section.setName("Updated video");
-        institution.setSchool("Updated School");
+        school.setName("Updated School");
         role.setAuthority(Authority.USER);
         user.setName("Updated Ana");
         child.setName("Updated category");
@@ -126,7 +127,7 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         notification.setIsRead(true);
 
         assertThat(sections.update(section).getName()).isEqualTo("Updated video");
-        assertThat(institutions.update(institution).getSchool()).isEqualTo("Updated School");
+        assertThat(schools.update(school).getName()).isEqualTo("Updated School");
         assertThat(roles.update(role).getAuthority()).isEqualTo(Authority.USER);
         assertThat(users.update(user).getName()).isEqualTo("Updated Ana");
         assertThat(categories.update(child).getName()).isEqualTo("Updated category");
@@ -137,7 +138,7 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         feedbacks.delete(feedback);
         categories.delete(child);
         users.delete(user);
-        institutions.delete(institution);
+        schools.delete(school);
         sections.delete(section);
         sectionJpaRepository.flush();
         assertThat(categories.findById(child.getId())).isEmpty();

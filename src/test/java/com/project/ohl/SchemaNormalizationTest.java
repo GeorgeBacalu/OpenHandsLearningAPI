@@ -1,10 +1,10 @@
 package com.project.ohl;
 
-import com.project.ohl.application.model.ClassroomDto;
 import com.project.ohl.application.model.UserDto;
+import com.project.ohl.application.model.ClassroomDto;
 import com.project.ohl.application.port.in.CategoryService;
-import com.project.ohl.application.port.in.ClassroomService;
 import com.project.ohl.application.port.in.UserService;
+import com.project.ohl.application.port.in.ClassroomService;
 import com.project.ohl.domain.exception.InvalidRequestException;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import static com.project.ohl.TestIds.CATEGORY_CHILD;
 import static com.project.ohl.TestIds.CATEGORY_PARENT;
-import static com.project.ohl.TestIds.INSTITUTION_A;
+import static com.project.ohl.TestIds.SCHOOL_A;
 import static com.project.ohl.TestIds.ROLE_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -52,7 +52,6 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
                 .extracting(value -> value.getId()).containsExactly(CATEGORY_CHILD);
     }
 
-
     @Test void parentAndChildMustBelongToTheSameSection() {
         var child = categories.getCategoryById(CATEGORY_CHILD);
         UUID otherSection = database.queryForObject("SELECT id FROM sections WHERE code = 'EXPRESSIONS'", UUID.class);
@@ -66,18 +65,19 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
         UUID role = ROLE_USER;
         var request = UserDto.builder().name("Created user").email("  CREATED@Example.TEST ")
                 .password("test-password").mobile("0712345678").address("Bucharest")
-                .institutionId(INSTITUTION_A).roleId(role).build();
+                .schoolId(SCHOOL_A).roleId(role).build();
         assertThat(users.saveUser(request).getEmail()).isEqualTo("created@example.test");
         request.setEmail(" ANA@example.TEST ");
         assertThatThrownBy(() -> users.saveUser(request)).isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test void classroomsHaveSchoolMembershipAndUsersCannotJoinAnotherSchoolsClassroom() {
-        var created = classrooms.saveClassroom(ClassroomDto.builder().name("Class C").institutionId(INSTITUTION_A).build());
-        assertThat(classrooms.getClassroomById(created.getId()).getInstitutionId()).isEqualTo(INSTITUTION_A);
+        var created = classrooms.saveClassroom(ClassroomDto.builder().name("Class C").schoolId(SCHOOL_A).build());
+        assertThat(classrooms.getClassroomById(created.getId()).getSchoolId()).isEqualTo(SCHOOL_A);
         var ana = users.getUserById(user("Ana"));
         ana.setPassword("test-password");
         ana.setClassroomId(database.queryForObject("SELECT id FROM classrooms WHERE name = 'B'", UUID.class));
         assertThatThrownBy(() -> users.updateUserById(ana, ana.getId())).isInstanceOf(InvalidRequestException.class);
     }
+
 }

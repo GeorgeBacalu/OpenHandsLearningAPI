@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class ClassroomDto {
     private UUID id;
     @NotBlank private String name;
-    @NotNull private UUID institutionId;
+    @NotNull private UUID schoolId;
 }

@@ -10,8 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Institution {
+public class School {
 
     private UUID id;
-    private String school;
+    private String name;
+    private UUID cityId;
 }

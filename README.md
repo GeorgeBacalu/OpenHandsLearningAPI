@@ -42,22 +42,22 @@ HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Andro
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V7 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V8 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
 - Per-user favorites; existing shared favorites are copied to each existing user.
-- Institutions representing schools, separate classrooms, and optional user classroom membership.
-- Unique normalized account emails and school/classroom names, required values, and supported role/feedback values.
+- Schools and normalized user membership.
+- Unique normalized account emails, required values, and supported role/feedback values.
 - Stable catalog `code`, `mediaKey`, and section `iconKey` fields, independent of translated display names.
 - Query indexes, matching-section parent relationships, and a serialized database trigger preventing hierarchy cycles.
 
 V2 transforms existing records and memberships; it seeds no users or catalog
 content. Space characters remain valid sign entries. New empty databases contain
-no application records after V1 through V4. Back up and rehearse upgrades on a copy
-before deploying these branches. Existing duplicate account emails or ambiguous
-classroom names must be resolved explicitly; migration failures roll back V2.
-Migrate the database through V7 before running this backend.
+no application records after V1 through V7. Back up and rehearse upgrades on a copy
+before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
+roll back V2.
+Migrate the database through V8 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
@@ -96,6 +96,40 @@ No backend request is needed for letter-to-sign lookup. The previous mappings
 are preserved in the local dictionary, including Romanian aliases and spaces.
 The pre-migration database backup retains the retired table.
 
+V8 replaces institutions with a Romania-only directory: `counties` →
+`cities` → `schools`. Schools use `city_id`; users use `school_id`.
+The cities table includes villages and Bucharest sectors, as represented by SIRUTA.
+Existing account UUIDs remain unchanged.
+
+Populate the directory explicitly after taking a database backup:
+
+```powershell
+.\mvnw.cmd spring-boot:run '-Dspring-boot.run.arguments=--spring.flyway.enabled=true --app.school-directory.import=true'
+```
+
+The importer reads the [INS SIRUTA S1 2026 catalog](https://data.gov.ro/dataset/siruta_s1-2026)
+and [Ministry school network 2025–2026](https://data.gov.ro/dataset/retea-scolara-2025-2026)
+through the data.gov.ro CKAN API. These are the verified source editions; imports
+do not automatically switch to a new edition. Apache POI 6.0.0 reads XLSX and
+Commons CSV 1.14.1 reads SIRUTA. No directory records are seeded by Flyway.
+Normal startup makes no external directory requests.
+
+Official SIRUTA and SIIIR codes determine repeatable UUIDs. Import validates both
+files and all school locations before writing, then upserts the complete directory
+in one transaction. Repeat imports preserve UUIDs and unchanged rows. Records absent
+from a later source are retained so memberships are not silently deleted.
+The three original numbered placeholder schools are replaced by the official
+Glina, Cățelu–Glina and Bobești–Glina schools; their users transfer to the corresponding schools. A database check rejects schools without a city; it is validated once
+legacy placeholders have been replaced. A failed import rolls back its changes.
+
+Browse `/api/counties`,
+`/api/cities?countyId=...`, and `/api/schools/search?cityId=...`.
+City and school searches accept `name`, `offset` (default 0), and `limit`
+(default 50, maximum 200). School CRUD is at `/api/schools`; requests use
+`name` and `cityId`. User requests use `schoolId`.
+
+Classroom CRUD remains available at `/api/classrooms`; users can reference `classroomId`.
+
 For a separate empty PostgreSQL database:
 
 ```powershell
@@ -107,7 +141,7 @@ For an audited copy already matching V1 with no Flyway history, explicitly
 baseline it at version 1 before applying subsequent migrations. Automatic baselining remains disabled
 in the application's default configuration. Never edit applied migrations.
 
-Regular tests use Hibernate-created H2 schemas and two records per table. The
+Regular tests use Hibernate-created H2 schemas, two records per table. The
 Flyway baseline test checks V1 creation and repeat runs on H2. V2 is PostgreSQL
 specific because its hierarchy trigger serializes concurrent tree changes. Its
 upgrade and record preservation were verified using a temporary database copy;
@@ -116,10 +150,8 @@ there is no PostgreSQL provisioning or rehearsal configuration in the project.
 Favorites endpoints require `userId`; a category read accepts optional `userId`
 to return that user's favorite status. Profile selection is not authentication:
 the existing API remains public and needs an authentication layer before serving
-private accounts in production. Catalog filters accept `parentCode` and
-`sectionCode` (default `VIDEO`), while UUID filters remain supported. Clients can
-rename labels without changing codes or media keys. Codes are immutable through
-the API. Classroom CRUD is available at `/api/classrooms`.
+private accounts in production. Catalog filters use the selected parent UUID and section UUID. Clients can
+rename category labels without changing UUIDs, children or media keys.
 
 ## HTTP contract
 
@@ -144,6 +176,7 @@ updates store BCrypt.
 - `adapter/web`: HTTP controllers, response projections, and error handling.
 - `adapter/persistence`: JPA entities, Spring Data repositories, and persistence adapters.
 - `adapter/config`: dependency wiring, service transaction boundaries, password hashing, and clock configuration.
+- `adapter/directory`: opt-in government catalog downloads and parsing.
 
 Application use cases depend on ports. Web and persistence adapters do not call
 each other. Service transactions wrap complete use cases, and MapStruct-generated

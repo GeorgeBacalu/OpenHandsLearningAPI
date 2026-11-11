@@ -19,7 +19,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     public ClassroomDto saveClassroom(ClassroomDto model) { return mapper.convertToDto(classrooms.save(mapper.convertToEntity(model))); }
     public ClassroomDto updateClassroomById(ClassroomDto model, UUID id) {
         Classroom current = find(id);
-        current.setName(model.getName()); current.setInstitutionId(model.getInstitutionId());
+        current.setName(model.getName()); current.setSchoolId(model.getSchoolId());
         return mapper.convertToDto(classrooms.update(current));
     }
     public void deleteClassroomById(UUID id) { classrooms.delete(find(id)); }

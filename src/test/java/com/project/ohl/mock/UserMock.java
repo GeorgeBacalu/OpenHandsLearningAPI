@@ -7,8 +7,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import static com.project.ohl.TestIds.id;
-import static com.project.ohl.mock.InstitutionMock.getMockedInstitution1;
-import static com.project.ohl.mock.InstitutionMock.getMockedInstitution2;
+import static com.project.ohl.mock.SchoolMock.getMockedSchool1;
+import static com.project.ohl.mock.SchoolMock.getMockedSchool2;
 import static com.project.ohl.mock.RoleMock.getMockedRole1;
 import static com.project.ohl.mock.RoleMock.getMockedRole2;
 
@@ -28,7 +28,7 @@ public class UserMock {
               .mobile("0000000001")
               .address("test_user_address1")
               .birthday(LocalDate.of(2000, 1, 1))
-              .institution(getMockedInstitution1())
+              .school(getMockedSchool1())
               .role(getMockedRole1())
               .build();
     }
@@ -42,7 +42,7 @@ public class UserMock {
               .mobile("0000000002")
               .address("test_user_address2")
               .birthday(LocalDate.of(2000, 1, 2))
-              .institution(getMockedInstitution2())
+              .school(getMockedSchool2())
               .role(getMockedRole2())
               .build();
     }

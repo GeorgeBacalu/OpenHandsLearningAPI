@@ -1,7 +1,7 @@
 package com.project.ohl.application.mapper;
 
 import com.project.ohl.domain.model.Category;
-import com.project.ohl.domain.model.Institution;
+import com.project.ohl.domain.model.School;
 import com.project.ohl.domain.model.Role;
 import com.project.ohl.domain.model.Section;
 import com.project.ohl.domain.model.User;
@@ -18,7 +18,7 @@ public interface ReferenceMapper {
 
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")
-    Institution institution(UUID id);
+    School school(UUID id);
 
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")

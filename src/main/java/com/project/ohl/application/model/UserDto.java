@@ -42,8 +42,8 @@ public class UserDto {
 
     private LocalDate birthday;
 
-    @NotNull(message = "Institution ID must not be null")
-    private UUID institutionId;
+    @NotNull(message = "School ID must not be null")
+    private UUID schoolId;
 
     @NotNull(message = "Role ID must not be null")
     private UUID roleId;

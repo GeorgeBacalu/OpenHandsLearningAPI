@@ -48,7 +48,7 @@ class MapperTest {
         assertThat(category.getParent()).isNull();
         assertThat(category.getSection()).isNull();
         var user = users.convertToEntity(new UserDto());
-        assertThat(user.getInstitution()).isNull();
+        assertThat(user.getSchool()).isNull();
         assertThat(user.getRole()).isNull();
         var notification = notifications.convertToEntity(new NotificationDto());
         assertThat(notification.getSender()).isNull();
@@ -59,8 +59,8 @@ class MapperTest {
 
     @Test
     void distinctRelatedIdsAreMappedToTheCorrectReferences() {
-        var user = users.convertToEntity(UserDto.builder().institutionId(id(19)).roleId(id(4)).build());
-        assertThat(user.getInstitution().getId()).isEqualTo(id(19));
+        var user = users.convertToEntity(UserDto.builder().schoolId(id(19)).roleId(id(4)).build());
+        assertThat(user.getSchool().getId()).isEqualTo(id(19));
         assertThat(user.getRole().getId()).isEqualTo(id(4));
         var notification = notifications.convertToEntity(NotificationDto.builder().senderId(id(43)).receiverId(id(56)).build());
         assertThat(notification.getSender().getId()).isEqualTo(id(43));

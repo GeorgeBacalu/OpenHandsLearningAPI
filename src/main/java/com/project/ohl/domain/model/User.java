@@ -23,6 +23,6 @@ public class User {
     private String mobile;
     private String address;
     private LocalDate birthday;
-    private Institution institution;
+    private School school;
     private Role role;
 }

@@ -2,7 +2,7 @@ package com.project.ohl.application.service;
 
 import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.model.UserDto;
-import com.project.ohl.application.port.in.InstitutionService;
+import com.project.ohl.application.port.in.SchoolService;
 import com.project.ohl.application.port.in.RoleService;
 import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.application.port.out.ClassroomRepositoryPort;
@@ -21,7 +21,7 @@ import static com.project.ohl.application.error.ExceptionMessageConstants.USER_N
 public class UserServiceImpl implements UserService {
 
     private final UserRepositoryPort userRepository;
-    private final InstitutionService institutionService;
+    private final SchoolService schoolService;
     private final RoleService roleService;
     private final PasswordHasher passwordHasher;
 
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
         userToUpdate.setMobile(userDto.getMobile());
         userToUpdate.setAddress(userDto.getAddress());
         userToUpdate.setBirthday(userDto.getBirthday());
-        userToUpdate.setInstitution(institutionService.getInstitutionEntityById(userDto.getInstitutionId()));
+        userToUpdate.setSchool(schoolService.getSchoolEntityById(userDto.getSchoolId()));
         userToUpdate.setRole(roleService.getRoleEntityById(userDto.getRoleId()));
         User updatedUser = userRepository.update(userToUpdate);
         return mapper.convertToDto(updatedUser);
@@ -75,8 +75,8 @@ public class UserServiceImpl implements UserService {
     private void validateClassroom(UserDto dto) {
         if (dto.getClassroomId() == null) return;
         var classroom = classrooms.findById(dto.getClassroomId()).orElseThrow(() -> new ResourceNotFoundException("Classroom was not found"));
-        if (!classroom.getInstitutionId().equals(dto.getInstitutionId()))
-            throw new InvalidRequestException("Classroom must belong to the selected institution.");
+        if (!classroom.getSchoolId().equals(dto.getSchoolId()))
+            throw new InvalidRequestException("Classroom must belong to the selected school.");
     }
 
     @Override

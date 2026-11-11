@@ -18,11 +18,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import tools.jackson.databind.json.JsonMapper;
 
-import static com.project.ohl.TestIds.INSTITUTION_A;
 import static com.project.ohl.TestIds.CATEGORY_CHILD;
 import static com.project.ohl.TestIds.CATEGORY_PARENT;
-import static com.project.ohl.TestIds.SECTION_VIDEO;
+import static com.project.ohl.TestIds.SCHOOL_A;
 import static com.project.ohl.TestIds.ROLE_USER;
+import static com.project.ohl.TestIds.SECTION_VIDEO;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -48,6 +48,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(ana.path("mobile").asText()).isEqualTo("0712345678");
         assertThat(users.get(0).has("password")).isFalse();
     }
+
 
     @Test
     void checkedInContractMatchesEveryHttpOperation() throws Exception {
@@ -92,7 +93,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         request.put("password", "\u00e9".repeat(37));
         request.put("mobile", "0712345678");
         request.put("address", "Bucharest");
-        request.put("institutionId", INSTITUTION_A.toString());
+        request.put("schoolId", SCHOOL_A.toString());
         request.put("roleId", ROLE_USER.toString());
         var response = send("POST", "/api/users", json.writeValueAsString(request));
         assertThat(response.statusCode()).isEqualTo(400);
@@ -153,13 +154,6 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(contract.path("components").path("schemas").has("LetterSignPairDto")).isFalse();
     }
 
-    private HttpResponse<String> send(String method, String path, String body) throws Exception {
-        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
-                .timeout(Duration.ofSeconds(30)).header("Content-Type", "application/json")
-                .method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(body))
-                .build();
-        return client.send(request, HttpResponse.BodyHandlers.ofString());
-    }
     @Test
     void categoryPagesKeepParentsAndChildrenSeparateAndAlphabetical() throws Exception {
         database.update("UPDATE categories SET name = ? WHERE id = ?", "Zebră", CATEGORY_PARENT);
@@ -204,4 +198,11 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
                 .containsExactly("Șarpe", "Țară");
     }
 
+    private HttpResponse<String> send(String method, String path, String body) throws Exception {
+        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
+                .timeout(Duration.ofSeconds(30)).header("Content-Type", "application/json")
+                .method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(body))
+                .build();
+        return client.send(request, HttpResponse.BodyHandlers.ofString());
+    }
 }

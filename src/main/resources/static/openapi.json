@@ -692,11 +692,11 @@
         ]
       }
     },
-    "/api/institutions": {
+    "/api/schools": {
       "get": {
-        "operationId": "getAllInstitutions",
+        "operationId": "getAllSchools",
         "tags": [
-          "institutions"
+          "schools"
         ],
         "responses": {
           "200": {
@@ -706,7 +706,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/InstitutionDto"
+                    "$ref": "#/components/schemas/SchoolDto"
                   }
                 }
               }
@@ -725,9 +725,9 @@
         }
       },
       "post": {
-        "operationId": "saveInstitution",
+        "operationId": "saveSchool",
         "tags": [
-          "institutions"
+          "schools"
         ],
         "responses": {
           "201": {
@@ -735,7 +735,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InstitutionDto"
+                  "$ref": "#/components/schemas/SchoolDto"
                 }
               }
             }
@@ -756,18 +756,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InstitutionDto"
+                "$ref": "#/components/schemas/SchoolDto"
               }
             }
           }
         }
       }
     },
-    "/api/institutions/{id}": {
+    "/api/schools/{id}": {
       "get": {
-        "operationId": "getInstitutionById",
+        "operationId": "getSchoolById",
         "tags": [
-          "institutions"
+          "schools"
         ],
         "responses": {
           "200": {
@@ -775,7 +775,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InstitutionDto"
+                  "$ref": "#/components/schemas/SchoolDto"
                 }
               }
             }
@@ -804,9 +804,9 @@
         ]
       },
       "put": {
-        "operationId": "updateInstitutionById",
+        "operationId": "updateSchoolById",
         "tags": [
-          "institutions"
+          "schools"
         ],
         "responses": {
           "200": {
@@ -814,7 +814,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InstitutionDto"
+                  "$ref": "#/components/schemas/SchoolDto"
                 }
               }
             }
@@ -835,7 +835,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/InstitutionDto"
+                "$ref": "#/components/schemas/SchoolDto"
               }
             }
           }
@@ -853,9 +853,9 @@
         ]
       },
       "delete": {
-        "operationId": "deleteInstitutionById",
+        "operationId": "deleteSchoolById",
         "tags": [
-          "institutions"
+          "schools"
         ],
         "responses": {
           "204": {
@@ -1687,6 +1687,161 @@
         ]
       }
     },
+    "/api/counties": {
+      "get": {
+        "operationId": "getCounties",
+        "tags": [
+          "school-directory"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Directory entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/County"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          }
+        }
+      }
+    },
+    "/api/cities": {
+      "get": {
+        "operationId": "getCities",
+        "tags": [
+          "school-directory"
+        ],
+        "parameters": [
+          {
+            "name": "countyId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Directory entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/City"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          }
+        }
+      }
+    },
+    "/api/schools/search": {
+      "get": {
+        "operationId": "searchSchools",
+        "tags": [
+          "school-directory"
+        ],
+        "parameters": [
+          {
+            "name": "cityId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Directory entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SchoolDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters"
+          }
+        }
+      }
+    },
     "/api/classrooms": {
       "get": {
         "operationId": "getAllClassrooms",
@@ -1963,20 +2118,25 @@
           "userId"
         ]
       },
-      "InstitutionDto": {
+      "SchoolDto": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "school": {
+          "name": {
             "type": "string",
             "minLength": 1
+          },
+          "cityId": {
+            "type": "string",
+            "format": "uuid"
           }
         },
         "required": [
-          "school"
+          "name",
+          "cityId"
         ]
       },
       "NotificationDto": {
@@ -2105,7 +2265,7 @@
             ],
             "format": "date"
           },
-          "institutionId": {
+          "schoolId": {
             "type": "string",
             "format": "uuid"
           },
@@ -2127,7 +2287,7 @@
           "password",
           "mobile",
           "address",
-          "institutionId",
+          "schoolId",
           "roleId"
         ]
       },
@@ -2175,7 +2335,7 @@
             ],
             "format": "date"
           },
-          "institutionId": {
+          "schoolId": {
             "type": [
               "string",
               "null"
@@ -2226,6 +2386,43 @@
           }
         }
       },
+      "County": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "City": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "countyId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "countyId"
+        ]
+      },
       "ClassroomDto": {
         "type": "object",
         "properties": {
@@ -2237,14 +2434,14 @@
             "type": "string",
             "minLength": 1
           },
-          "institutionId": {
+          "schoolId": {
             "type": "string",
             "format": "uuid"
           }
         },
         "required": [
           "name",
-          "institutionId"
+          "schoolId"
         ]
       }
     }
