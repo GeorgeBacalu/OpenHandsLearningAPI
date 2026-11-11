@@ -11,8 +11,8 @@
     <groupId>com.project</groupId>
     <artifactId>OpenHandsLearningAPI</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>OpenHands Learning API</name>
-    <description>REST API for the OpenHands Learning Android application</description>
+    <name>OpenHandsLearning</name>
+    <description>REST API for the OpenHandsLearning Android application</description>
     <properties>
         <java.version>25</java.version>
         <mapstruct.version>1.6.3</mapstruct.version>

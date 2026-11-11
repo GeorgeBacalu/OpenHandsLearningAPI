@@ -1,4 +1,4 @@
-# OpenHandsLearning API
+# OpenHandsLearning
 
 REST API for the OpenHandsLearning Android application.
 
@@ -25,8 +25,9 @@ To run against a dedicated PostgreSQL test database, set
 
 Provide PostgreSQL and set `DATABASE_URL`, `DATABASE_USERNAME`, and
 `DATABASE_PASSWORD`. Spring's `SPRING_DATASOURCE_*` environment variables also
-work. The default URL is `jdbc:postgresql://localhost:5432/open-hands-learning`;
-no password is checked in.
+work. The default URL is `jdbc:postgresql://localhost:5432/OpenHandsLearning`;
+no password is checked in. Set `DATABASE_URL` when connecting to an existing
+database with a different name.
 
 ```powershell
 .\mvnw.cmd spring-boot:run

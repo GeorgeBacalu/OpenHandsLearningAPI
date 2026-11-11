@@ -1,7 +1,7 @@
 {
   "openapi": "3.2.1",
   "info": {
-    "title": "OpenHandsLearning API",
+    "title": "OpenHandsLearning",
     "version": "1.0.0"
   },
   "servers": [
