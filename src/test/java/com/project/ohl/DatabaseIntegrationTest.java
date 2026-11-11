@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class DatabaseIntegrationTest {
     private static final String[] TABLES = {"classrooms", "user_favorites", "institutions", "roles", "sections", "categories",
-            "letter_sign_pairs", "users", "feedbacks", "notifications"};
+            "users", "feedbacks", "notifications"};
     @Autowired private DataSource dataSource;
 
     @BeforeEach

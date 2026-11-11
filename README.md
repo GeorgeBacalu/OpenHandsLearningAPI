@@ -42,7 +42,7 @@ HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Andro
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V6 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V7 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
@@ -57,7 +57,7 @@ content. Space characters remain valid sign entries. New empty databases contain
 no application records after V1 through V4. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails or ambiguous
 classroom names must be resolved explicitly; migration failures roll back V2.
-Migrate the database through V6 before running this backend.
+Migrate the database through V7 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
@@ -89,6 +89,12 @@ V6 removes category codes. Category navigation and direct-child filters use UUID
 the category filter requires sectionId and accepts optional parentId and name.
 Renaming a parent leaves its UUID, children, and media keys unchanged. Section
 codes remain available for selecting the application's main sections.
+
+V7 removes the letter-sign table and its CRUD API. The fixed alphabet mappings
+are an immutable Android dictionary shared by text and voice conversion.
+No backend request is needed for letter-to-sign lookup. The previous mappings
+are preserved in the local dictionary, including Romanian aliases and spaces.
+The pre-migration database backup retains the retired table.
 
 For a separate empty PostgreSQL database:
 

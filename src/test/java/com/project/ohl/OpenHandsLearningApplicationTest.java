@@ -146,15 +146,11 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     }
 
     @Test
-    void catalogExposesStableKeysAndRejectsDuplicateLetters() throws Exception {
-        var letters = json.readTree(send("GET", "/api/letter-sign-pairs", null).body());
-        assertThat(letters.get(0).has("imageId")).isFalse();
-        assertThat(letters.get(0).path("mediaKey").asText()).startsWith("dactilema_");
-        var request = json.createObjectNode().put("letter", letters.get(0).path("letter").asText())
-                .put("mediaKey", "dactilema_a");
-        assertThat(send("POST", "/api/letter-sign-pairs", json.writeValueAsString(request)).statusCode()).isEqualTo(409);
-        request.put("letter", "X").put("mediaKey", "Invalid Key");
-        assertThat(send("POST", "/api/letter-sign-pairs", json.writeValueAsString(request)).statusCode()).isEqualTo(400);
+    void letterSignCrudIsNoLongerExposed() throws Exception {
+        assertThat(send("GET", "/api/letter-sign-pairs", null).statusCode()).isEqualTo(404);
+        var contract = json.readTree(send("GET", "/openapi.json", null).body());
+        assertThat(contract.path("paths").has("/api/letter-sign-pairs")).isFalse();
+        assertThat(contract.path("components").path("schemas").has("LetterSignPairDto")).isFalse();
     }
 
     private HttpResponse<String> send(String method, String path, String body) throws Exception {

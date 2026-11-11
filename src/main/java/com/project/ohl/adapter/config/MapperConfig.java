@@ -4,7 +4,6 @@ import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.mapper.ClassroomMapper;
 import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.mapper.InstitutionMapper;
-import com.project.ohl.application.mapper.LetterSignPairMapper;
 import com.project.ohl.application.mapper.NotificationMapper;
 import com.project.ohl.application.mapper.RoleMapper;
 import com.project.ohl.application.mapper.SectionMapper;
@@ -35,10 +34,6 @@ public class MapperConfig {
         return Mappers.getMapper(InstitutionMapper.class);
     }
 
-    @Bean
-    public LetterSignPairMapper letterSignPairMapper() {
-        return Mappers.getMapper(LetterSignPairMapper.class);
-    }
 
     @Bean
     public NotificationMapper notificationMapper() {

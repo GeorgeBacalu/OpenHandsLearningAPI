@@ -4,7 +4,6 @@ import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.mapper.ClassroomMapper;
 import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.mapper.InstitutionMapper;
-import com.project.ohl.application.mapper.LetterSignPairMapper;
 import com.project.ohl.application.mapper.NotificationMapper;
 import com.project.ohl.application.mapper.RoleMapper;
 import com.project.ohl.application.mapper.SectionMapper;
@@ -13,7 +12,6 @@ import com.project.ohl.application.port.in.CategoryService;
 import com.project.ohl.application.port.in.ClassroomService;
 import com.project.ohl.application.port.in.FeedbackService;
 import com.project.ohl.application.port.in.InstitutionService;
-import com.project.ohl.application.port.in.LetterSignPairService;
 import com.project.ohl.application.port.in.NotificationService;
 import com.project.ohl.application.port.in.RoleService;
 import com.project.ohl.application.port.in.SectionService;
@@ -23,7 +21,6 @@ import com.project.ohl.application.port.out.ClassroomRepositoryPort;
 import com.project.ohl.application.port.out.FavoriteRepositoryPort;
 import com.project.ohl.application.port.out.FeedbackRepositoryPort;
 import com.project.ohl.application.port.out.InstitutionRepositoryPort;
-import com.project.ohl.application.port.out.LetterSignPairRepositoryPort;
 import com.project.ohl.application.port.out.NotificationRepositoryPort;
 import com.project.ohl.application.port.out.PasswordHasher;
 import com.project.ohl.application.port.out.RoleRepositoryPort;
@@ -33,7 +30,6 @@ import com.project.ohl.application.service.CategoryServiceImpl;
 import com.project.ohl.application.service.ClassroomServiceImpl;
 import com.project.ohl.application.service.FeedbackServiceImpl;
 import com.project.ohl.application.service.InstitutionServiceImpl;
-import com.project.ohl.application.service.LetterSignPairServiceImpl;
 import com.project.ohl.application.service.NotificationServiceImpl;
 import com.project.ohl.application.service.RoleServiceImpl;
 import com.project.ohl.application.service.SectionServiceImpl;
@@ -74,10 +70,6 @@ public class ApplicationConfig {
         return transactional(RoleService.class, new RoleServiceImpl(roles, mapper));
     }
 
-    @Bean
-    public LetterSignPairService letterSignPairService(LetterSignPairRepositoryPort letters, LetterSignPairMapper mapper) {
-        return transactional(LetterSignPairService.class, new LetterSignPairServiceImpl(letters, mapper));
-    }
 
     @Bean
     public CategoryService categoryService(CategoryRepositoryPort categories, SectionService sections, CategoryMapper mapper, FavoriteRepositoryPort favorites, UserRepositoryPort users) {

@@ -8,4 +8,3 @@ DELETE FROM roles;
 DELETE FROM classrooms;
 DELETE FROM institutions;
 DELETE FROM sections;
-DELETE FROM letter_sign_pairs;

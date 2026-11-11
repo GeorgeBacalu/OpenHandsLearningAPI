@@ -18,9 +18,7 @@ INSERT INTO categories (id, name, parent_id, section_id, media_key) VALUES
     ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 'Alphabet', NULL, '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'alfabet'),
     ('f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185', 'Letter A', '176ccfb5-fe9b-484c-a799-310eb72a02a5', '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'dactilema_a');
 
-INSERT INTO letter_sign_pairs (id, letter, media_key, display_order) VALUES
-    ('ce98a927-206e-4e7e-8039-1c696792a988', 'A', 'dactilema_a', 1),
-    ('468c6514-a939-458d-8caa-9a999c6e4956', 'B', 'dactilema_b', 2);
+
 
 INSERT INTO users (id, name, email, password, mobile, address, birthday, institution_id, role_id, classroom_id) VALUES
     ('4b16f89f-f513-4723-9d19-5750cf7199d6', 'Ana', 'ana@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0712345678', 'Bucharest', '2000-01-01', 'e882d373-7f2f-44b2-8c87-530cd04964d4', '99d0dd27-ea57-42b3-8fd8-64e3973a05d3', '00000000-0000-4000-8000-00000000000b'),

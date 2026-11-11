@@ -52,10 +52,6 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
                 .extracting(value -> value.getId()).containsExactly(CATEGORY_CHILD);
     }
 
-    @Test void whitespaceSignSeparatorsRemainValidCatalogEntries() {
-        database.update("UPDATE letter_sign_pairs SET letter = ' ' WHERE id = (SELECT id FROM letter_sign_pairs LIMIT 1)");
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM letter_sign_pairs WHERE letter = ' '", Long.class)).isEqualTo(1);
-    }
 
     @Test void parentAndChildMustBelongToTheSameSection() {
         var child = categories.getCategoryById(CATEGORY_CHILD);
