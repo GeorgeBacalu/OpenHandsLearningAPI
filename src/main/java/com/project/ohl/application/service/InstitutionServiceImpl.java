@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import com.project.ohl.application.mapper.InstitutionMapper;
 import com.project.ohl.application.model.InstitutionDto;
 import com.project.ohl.application.port.in.InstitutionService;
 import com.project.ohl.application.port.out.InstitutionRepositoryPort;
@@ -10,31 +11,31 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.INSTITUTION_NOT_FOUND;
-import static com.project.ohl.application.mapper.InstitutionMapper.convertToDto;
-import static com.project.ohl.application.mapper.InstitutionMapper.convertToEntity;
 
 @RequiredArgsConstructor
 public class InstitutionServiceImpl implements InstitutionService {
 
     private final InstitutionRepositoryPort institutionRepository;
 
+    private final InstitutionMapper mapper;
+
     @Override
     public List<InstitutionDto> getAllInstitutions() {
         List<Institution> institutions = institutionRepository.findAll();
-        return institutions.stream().map(institution -> convertToDto(institution)).toList();
+        return institutions.stream().map(mapper::convertToDto).toList();
     }
 
     @Override
     public InstitutionDto getInstitutionById(Long id) {
         Institution institution = getInstitutionEntityById(id);
-        return convertToDto(institution);
+        return mapper.convertToDto(institution);
     }
 
     @Override
     public InstitutionDto saveInstitution(InstitutionDto institutionDto) {
-        Institution institution = convertToEntity(institutionDto);
+        Institution institution = mapper.convertToEntity(institutionDto);
         Institution savedInstitution = institutionRepository.save(institution);
-        return convertToDto(savedInstitution);
+        return mapper.convertToDto(savedInstitution);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class InstitutionServiceImpl implements InstitutionService {
         institutionToUpdate.setSchool(institutionDto.getSchool());
         institutionToUpdate.setClassroom(institutionDto.getClassroom());
         Institution updatedInstitution = institutionRepository.update(institutionToUpdate);
-        return convertToDto(updatedInstitution);
+        return mapper.convertToDto(updatedInstitution);
     }
 
     @Override

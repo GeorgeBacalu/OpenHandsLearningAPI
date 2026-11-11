@@ -2,20 +2,11 @@ package com.project.ohl.application.mapper;
 
 import com.project.ohl.domain.model.Role;
 import com.project.ohl.application.model.RoleDto;
+import org.mapstruct.Mapper;
 
-public final class RoleMapper {
-    private RoleMapper() {
-    }
+@Mapper(config = MappingConfiguration.class)
+public interface RoleMapper {
+    RoleDto convertToDto(Role model);
 
-    public static RoleDto convertToDto(Role model) {
-        return RoleDto.builder().id(model.getId())
-              .authority(model.getAuthority())
-              .build();
-    }
-
-    public static Role convertToEntity(RoleDto dto) {
-        return Role.builder().id(dto.getId())
-              .authority(dto.getAuthority())
-              .build();
-    }
+    Role convertToEntity(RoleDto dto);
 }

@@ -25,6 +25,14 @@ import com.project.ohl.application.service.RoleServiceImpl;
 import com.project.ohl.application.service.SectionServiceImpl;
 import com.project.ohl.application.service.UserServiceImpl;
 import com.project.ohl.application.port.out.PasswordHasher;
+import com.project.ohl.application.mapper.CategoryMapper;
+import com.project.ohl.application.mapper.FeedbackMapper;
+import com.project.ohl.application.mapper.InstitutionMapper;
+import com.project.ohl.application.mapper.LetterSignPairMapper;
+import com.project.ohl.application.mapper.NotificationMapper;
+import com.project.ohl.application.mapper.RoleMapper;
+import com.project.ohl.application.mapper.SectionMapper;
+import com.project.ohl.application.mapper.UserMapper;
 import java.time.Clock;
 import java.util.Objects;
 import java.util.Properties;
@@ -42,43 +50,43 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public SectionService sectionService(SectionRepositoryPort sections) {
-        return transactional(SectionService.class, new SectionServiceImpl(sections));
+    public SectionService sectionService(SectionRepositoryPort sections, SectionMapper mapper) {
+        return transactional(SectionService.class, new SectionServiceImpl(sections, mapper));
     }
 
     @Bean
-    public InstitutionService institutionService(InstitutionRepositoryPort institutions) {
-        return transactional(InstitutionService.class, new InstitutionServiceImpl(institutions));
+    public InstitutionService institutionService(InstitutionRepositoryPort institutions, InstitutionMapper mapper) {
+        return transactional(InstitutionService.class, new InstitutionServiceImpl(institutions, mapper));
     }
 
     @Bean
-    public RoleService roleService(RoleRepositoryPort roles) {
-        return transactional(RoleService.class, new RoleServiceImpl(roles));
+    public RoleService roleService(RoleRepositoryPort roles, RoleMapper mapper) {
+        return transactional(RoleService.class, new RoleServiceImpl(roles, mapper));
     }
 
     @Bean
-    public LetterSignPairService letterSignPairService(LetterSignPairRepositoryPort letters) {
-        return transactional(LetterSignPairService.class, new LetterSignPairServiceImpl(letters));
+    public LetterSignPairService letterSignPairService(LetterSignPairRepositoryPort letters, LetterSignPairMapper mapper) {
+        return transactional(LetterSignPairService.class, new LetterSignPairServiceImpl(letters, mapper));
     }
 
     @Bean
-    public CategoryService categoryService(CategoryRepositoryPort categories, SectionService sections) {
-        return transactional(CategoryService.class, new CategoryServiceImpl(categories, sections));
+    public CategoryService categoryService(CategoryRepositoryPort categories, SectionService sections, CategoryMapper mapper) {
+        return transactional(CategoryService.class, new CategoryServiceImpl(categories, sections, mapper));
     }
 
     @Bean
-    public UserService userService(UserRepositoryPort users, InstitutionService institutions, RoleService roles, PasswordHasher passwordHasher) {
-        return transactional(UserService.class, new UserServiceImpl(users, institutions, roles, passwordHasher));
+    public UserService userService(UserRepositoryPort users, InstitutionService institutions, RoleService roles, PasswordHasher passwordHasher, UserMapper mapper) {
+        return transactional(UserService.class, new UserServiceImpl(users, institutions, roles, passwordHasher, mapper));
     }
 
     @Bean
-    public FeedbackService feedbackService(FeedbackRepositoryPort feedbacks, UserService users, Clock clock) {
-        return transactional(FeedbackService.class, new FeedbackServiceImpl(feedbacks, users, clock));
+    public FeedbackService feedbackService(FeedbackRepositoryPort feedbacks, UserService users, Clock clock, FeedbackMapper mapper) {
+        return transactional(FeedbackService.class, new FeedbackServiceImpl(feedbacks, users, clock, mapper));
     }
 
     @Bean
-    public NotificationService notificationService(NotificationRepositoryPort notifications, UserService users, Clock clock) {
-        return transactional(NotificationService.class, new NotificationServiceImpl(notifications, users, clock));
+    public NotificationService notificationService(NotificationRepositoryPort notifications, UserService users, Clock clock, NotificationMapper mapper) {
+        return transactional(NotificationService.class, new NotificationServiceImpl(notifications, users, clock, mapper));
     }
 
     private <T> T transactional(Class<T> port, T target) {

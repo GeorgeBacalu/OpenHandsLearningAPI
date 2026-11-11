@@ -63,15 +63,15 @@ exclude passwords. Existing plaintext database values are not silently rewritten
 ## Structure
 
 - `domain`: framework-independent models and domain exceptions.
-- `application`: input/output ports, use cases, validation models, and explicit mappings.
+- `application`: input/output ports, use cases, validation models, and MapStruct mappings.
 - `adapter/web`: HTTP controllers, response projections, and error handling.
 - `adapter/persistence`: JPA entities, Spring Data repositories, and persistence adapters.
 - `adapter/config`: dependency wiring, service transaction boundaries, password hashing, and clock configuration.
 
 Application use cases depend on ports. Web and persistence adapters do not call
 each other. Service transactions wrap complete use cases, JPA uses optimistic
-locking, and DTO mapping uses scalar reference IDs without recursive entity
-loading. ArchUnit tests enforce these boundaries.
+locking, and MapStruct-generated DTO mapping uses scalar reference IDs without
+recursive entity loading. ArchUnit tests enforce these boundaries.
 
 ## Dependency baseline
 
@@ -79,12 +79,17 @@ The Java 25 baseline uses Spring Boot 4.1.2, Maven 3.10.0, and Maven Wrapper 3.3
 Spring Boot manages the compatible Spring Framework, Hibernate, Jackson 3,
 PostgreSQL driver, Spring Security Crypto, and Lombok versions. Explicit overrides
 keep H2, JUnit, Mockito, and Maven plugins current. ArchUnit 1.5.1 and Bouncy Castle
-1.86 support architecture checks and Argon2id respectively. Versions and plugin
+1.86 support architecture checks and Argon2id respectively. MapStruct 1.6.3
+provides compile-time DTO mapping; its processor and Lombok binding 0.2.0 are
+configured explicitly for Java 25. Unmapped target fields fail compilation.
+Generated mapper implementations stay in `target/`; stateless mappers are wired
+as Spring beans and injected into application use cases. Versions and plugin
 configuration live in `pom.xml`; wrapper settings and checksum live in
 `.mvn/wrapper/maven-wrapper.properties`.
 
 Release references: [Spring Boot](https://docs.spring.io/spring-boot/),
-[Maven](https://maven.apache.org/download.cgi), and
+[Maven](https://maven.apache.org/download.cgi),
+[MapStruct](https://mapstruct.org/documentation/reference-guide/), and
 [OpenAPI](https://spec.openapis.org/oas/v3.2.1.html).
 
 IDE configuration, including `.idea` directories, and generated build output are

@@ -1,5 +1,7 @@
 package com.project.ohl.feedback;
 
+import com.project.ohl.application.mapper.FeedbackMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.FeedbackDto;
 import com.project.ohl.application.port.out.FeedbackRepositoryPort;
 import com.project.ohl.application.service.FeedbackServiceImpl;
@@ -25,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static com.project.ohl.application.error.ExceptionMessageConstants.FEEDBACK_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.FeedbackMapper.convertToDto;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedback1;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedback2;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedbacks;
@@ -40,6 +41,9 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class FeedbackServiceImplTest {
+
+    @org.mockito.Spy
+    private final FeedbackMapper mapper = Mappers.getMapper(FeedbackMapper.class);
 
     @InjectMocks
     private FeedbackServiceImpl feedbackService;
@@ -72,9 +76,9 @@ class FeedbackServiceImplTest {
         feedback2 = getMockedFeedback2();
         feedbacks = getMockedFeedbacks();
         user = getMockedUser2();
-        feedbackDto1 = convertToDto(feedback1);
-        feedbackDto2 = convertToDto(feedback2);
-        feedbackDtos = feedbacks.stream().map(feedback -> convertToDto(feedback)).toList();
+        feedbackDto1 = mapper.convertToDto(feedback1);
+        feedbackDto2 = mapper.convertToDto(feedback2);
+        feedbackDtos = feedbacks.stream().map(feedback -> mapper.convertToDto(feedback)).toList();
     }
 
     @Test
@@ -106,7 +110,7 @@ class FeedbackServiceImplTest {
         given(feedbackRepository.save(any(Feedback.class))).willReturn(feedback1);
         FeedbackDto result = feedbackService.saveFeedback(feedbackDto1);
         verify(feedbackRepository).save(feedbackCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(feedbackCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(feedbackCaptor.getValue()));
     }
 
     @Test
@@ -118,7 +122,7 @@ class FeedbackServiceImplTest {
         given(feedbackRepository.update(any(Feedback.class))).willReturn(feedback);
         FeedbackDto result = feedbackService.updateFeedbackById(feedbackDto2, VALID_ID);
         verify(feedbackRepository).update(feedbackCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(feedbackCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(feedbackCaptor.getValue()));
     }
 
     @Test

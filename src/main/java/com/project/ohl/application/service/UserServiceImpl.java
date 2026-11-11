@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.application.port.out.UserRepositoryPort;
@@ -13,8 +14,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.USER_NOT_FOUND;
-import static com.project.ohl.application.mapper.UserMapper.convertToDto;
-import static com.project.ohl.application.mapper.UserMapper.convertToEntity;
 
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -24,24 +23,26 @@ public class UserServiceImpl implements UserService {
     private final RoleService roleService;
     private final PasswordHasher passwordHasher;
 
+    private final UserMapper mapper;
+
     @Override
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
-        return users.stream().map(user -> convertToDto(user)).toList();
+        return users.stream().map(mapper::convertToDto).toList();
     }
 
     @Override
     public UserDto getUserById(Long id) {
         User user = getUserEntityById(id);
-        return convertToDto(user);
+        return mapper.convertToDto(user);
     }
 
     @Override
     public UserDto saveUser(UserDto userDto) {
-        User user = convertToEntity(userDto);
+        User user = mapper.convertToEntity(userDto);
         user.setPassword(passwordHasher.hash(userDto.getPassword()));
         User savedUser = userRepository.save(user);
-        return convertToDto(savedUser);
+        return mapper.convertToDto(savedUser);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class UserServiceImpl implements UserService {
         userToUpdate.setInstitution(institutionService.getInstitutionEntityById(userDto.getInstitutionId()));
         userToUpdate.setRole(roleService.getRoleEntityById(userDto.getRoleId()));
         User updatedUser = userRepository.update(userToUpdate);
-        return convertToDto(updatedUser);
+        return mapper.convertToDto(updatedUser);
     }
 
     @Override

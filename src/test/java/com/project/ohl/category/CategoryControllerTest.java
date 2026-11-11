@@ -1,5 +1,7 @@
 package com.project.ohl.category;
 
+import com.project.ohl.application.mapper.CategoryMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.CategoryController;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.in.CategoryService;
@@ -15,8 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.CategoryMapper.convertToDto;
-import static com.project.ohl.application.mapper.CategoryMapper.convertToDtoList;
 import static com.project.ohl.mock.CategoryMock.getMockedCategories;
 import static com.project.ohl.mock.CategoryMock.getMockedCategoryAlphabet;
 import static com.project.ohl.mock.CategoryMock.getMockedCategoryNumbers;
@@ -34,6 +34,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class CategoryControllerTest {
 
+    private final CategoryMapper mapper = Mappers.getMapper(CategoryMapper.class);
+
     @InjectMocks
     private CategoryController categoryController;
 
@@ -49,12 +51,12 @@ class CategoryControllerTest {
 
     @BeforeEach
     void setUp() {
-        categoryDtoOne = convertToDto(getMockedCategoryAlphabet());
-        categoryDtoTwo = convertToDto(getMockedCategoryNumbers());
-        categoryDtos = convertToDtoList(getMockedCategories());
-        filteredCategoryDtos = convertToDtoList(getMockedParentCategoriesFilteredByName());
-        favoriteCategoryDtos = convertToDtoList(getMockedFavoriteCategories());
-        filteredFavoriteCategoryDtos = convertToDtoList(getMockedFavoriteCategoriesFilteredByName());
+        categoryDtoOne = mapper.convertToDto(getMockedCategoryAlphabet());
+        categoryDtoTwo = mapper.convertToDto(getMockedCategoryNumbers());
+        categoryDtos = mapper.convertToDtoList(getMockedCategories());
+        filteredCategoryDtos = mapper.convertToDtoList(getMockedParentCategoriesFilteredByName());
+        favoriteCategoryDtos = mapper.convertToDtoList(getMockedFavoriteCategories());
+        filteredFavoriteCategoryDtos = mapper.convertToDtoList(getMockedFavoriteCategoriesFilteredByName());
     }
 
     @Test

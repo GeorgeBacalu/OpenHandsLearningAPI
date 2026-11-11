@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import com.project.ohl.application.mapper.SectionMapper;
 import com.project.ohl.application.model.SectionDto;
 import com.project.ohl.application.port.in.SectionService;
 import com.project.ohl.application.port.out.SectionRepositoryPort;
@@ -10,31 +11,31 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.SECTION_NOT_FOUND;
-import static com.project.ohl.application.mapper.SectionMapper.convertToDto;
-import static com.project.ohl.application.mapper.SectionMapper.convertToEntity;
 
 @RequiredArgsConstructor
 public class SectionServiceImpl implements SectionService {
 
     private final SectionRepositoryPort sectionRepository;
 
+    private final SectionMapper mapper;
+
     @Override
     public List<SectionDto> getAllSections() {
         List<Section> sections = sectionRepository.findAll();
-        return sections.stream().map(section -> convertToDto(section)).toList();
+        return sections.stream().map(mapper::convertToDto).toList();
     }
 
     @Override
     public SectionDto getSectionById(Long id) {
         Section section = getSectionEntityById(id);
-        return convertToDto(section);
+        return mapper.convertToDto(section);
     }
 
     @Override
     public SectionDto saveSection(SectionDto sectionDto) {
-        Section section = convertToEntity(sectionDto);
+        Section section = mapper.convertToEntity(sectionDto);
         Section savedSection = sectionRepository.save(section);
-        return convertToDto(savedSection);
+        return mapper.convertToDto(savedSection);
     }
 
     @Override
@@ -44,7 +45,7 @@ public class SectionServiceImpl implements SectionService {
         sectionToUpdate.setIconId(sectionDto.getIconId());
         sectionToUpdate.setImageId(sectionDto.getImageId());
         Section updatedSection = sectionRepository.update(sectionToUpdate);
-        return convertToDto(updatedSection);
+        return mapper.convertToDto(updatedSection);
     }
 
     @Override

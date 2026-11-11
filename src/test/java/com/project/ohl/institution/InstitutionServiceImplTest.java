@@ -1,5 +1,7 @@
 package com.project.ohl.institution;
 
+import com.project.ohl.application.mapper.InstitutionMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.InstitutionDto;
 import com.project.ohl.application.port.out.InstitutionRepositoryPort;
 import com.project.ohl.application.service.InstitutionServiceImpl;
@@ -20,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static com.project.ohl.application.error.ExceptionMessageConstants.INSTITUTION_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.InstitutionMapper.convertToDto;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitution1;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitution2;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitutions;
@@ -34,6 +35,9 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class InstitutionServiceImplTest {
+
+    @org.mockito.Spy
+    private final InstitutionMapper mapper = Mappers.getMapper(InstitutionMapper.class);
     
     @InjectMocks
     private InstitutionServiceImpl institutionService;
@@ -57,9 +61,9 @@ class InstitutionServiceImplTest {
         institution1 = getMockedInstitution1();
         institution2 = getMockedInstitution2();
         institutions = getMockedInstitutions();
-        institutionDto1 = convertToDto(institution1);
-        institutionDto2 = convertToDto(institution2);
-        institutionDtos = institutions.stream().map(institution -> convertToDto(institution)).toList();
+        institutionDto1 = mapper.convertToDto(institution1);
+        institutionDto2 = mapper.convertToDto(institution2);
+        institutionDtos = institutions.stream().map(institution -> mapper.convertToDto(institution)).toList();
     }
 
     @Test
@@ -88,7 +92,7 @@ class InstitutionServiceImplTest {
         given(institutionRepository.save(any(Institution.class))).willReturn(institution1);
         InstitutionDto result = institutionService.saveInstitution(institutionDto1);
         verify(institutionRepository).save(institutionCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(institutionCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(institutionCaptor.getValue()));
     }
 
     @Test
@@ -98,7 +102,7 @@ class InstitutionServiceImplTest {
         given(institutionRepository.update(any(Institution.class))).willReturn(institution);
         InstitutionDto result = institutionService.updateInstitutionById(institutionDto2, VALID_ID);
         verify(institutionRepository).update(institutionCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(institutionCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(institutionCaptor.getValue()));
     }
 
     @Test

@@ -1,5 +1,7 @@
 package com.project.ohl.section;
 
+import com.project.ohl.application.mapper.SectionMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.SectionDto;
 import com.project.ohl.application.port.out.SectionRepositoryPort;
 import com.project.ohl.application.service.SectionServiceImpl;
@@ -20,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static com.project.ohl.application.error.ExceptionMessageConstants.SECTION_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.SectionMapper.convertToDto;
 import static com.project.ohl.mock.SectionMock.getMockedSection1;
 import static com.project.ohl.mock.SectionMock.getMockedSection2;
 import static com.project.ohl.mock.SectionMock.getMockedSections;
@@ -34,6 +35,9 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class SectionServiceImplTest {
+
+    @org.mockito.Spy
+    private final SectionMapper mapper = Mappers.getMapper(SectionMapper.class);
 
     @InjectMocks
     private SectionServiceImpl sectionService;
@@ -56,9 +60,9 @@ class SectionServiceImplTest {
         section1 = getMockedSection1();
         section2 = getMockedSection2();
         sections = getMockedSections();
-        sectionDto1 = convertToDto(section1);
-        sectionDto2 = convertToDto(section2);
-        sectionDtos = sections.stream().map(section -> convertToDto(section)).toList();
+        sectionDto1 = mapper.convertToDto(section1);
+        sectionDto2 = mapper.convertToDto(section2);
+        sectionDtos = sections.stream().map(section -> mapper.convertToDto(section)).toList();
     }
 
     @Test
@@ -87,7 +91,7 @@ class SectionServiceImplTest {
         given(sectionRepository.save(any(Section.class))).willReturn(section1);
         SectionDto result = sectionService.saveSection(sectionDto1);
         verify(sectionRepository).save(sectionCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(sectionCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(sectionCaptor.getValue()));
     }
 
     @Test
@@ -97,7 +101,7 @@ class SectionServiceImplTest {
         given(sectionRepository.update(any(Section.class))).willReturn(section);
         SectionDto result = sectionService.updateSectionById(sectionDto2, VALID_ID);
         verify(sectionRepository).update(sectionCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(sectionCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(sectionCaptor.getValue()));
     }
 
     @Test

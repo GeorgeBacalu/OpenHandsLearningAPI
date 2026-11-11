@@ -27,7 +27,7 @@ class ArchitectureTest {
         classes().that().resideInAPackage("..application..")
               .should().onlyDependOnClassesThat()
               .resideInAnyPackage("java..", "com.project.ohl.application..", "com.project.ohl.domain..",
-                    "jakarta.validation..", "lombok..")
+                    "jakarta.validation..", "lombok..", "org.mapstruct..")
               .check(PRODUCTION);
     }
 

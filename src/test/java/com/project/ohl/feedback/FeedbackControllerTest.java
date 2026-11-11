@@ -1,5 +1,7 @@
 package com.project.ohl.feedback;
 
+import com.project.ohl.application.mapper.FeedbackMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.FeedbackController;
 import com.project.ohl.application.model.FeedbackDto;
 import com.project.ohl.application.port.in.FeedbackService;
@@ -16,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.FeedbackMapper.convertToDto;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedback1;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedback2;
 import static com.project.ohl.mock.FeedbackMock.getMockedFeedbacks;
@@ -30,6 +31,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class FeedbackControllerTest {
 
+    private final FeedbackMapper mapper = Mappers.getMapper(FeedbackMapper.class);
+
     @InjectMocks
     private FeedbackController feedbackController;
 
@@ -42,9 +45,9 @@ class FeedbackControllerTest {
 
     @BeforeEach
     void setUp() {
-        feedbackDto1 = convertToDto(getMockedFeedback1());
-        feedbackDto2 = convertToDto(getMockedFeedback2());
-        feedbackDtos = getMockedFeedbacks().stream().map(Feedback -> convertToDto(Feedback)).toList();
+        feedbackDto1 = mapper.convertToDto(getMockedFeedback1());
+        feedbackDto2 = mapper.convertToDto(getMockedFeedback2());
+        feedbackDtos = getMockedFeedbacks().stream().map(Feedback -> mapper.convertToDto(Feedback)).toList();
     }
 
     @Test

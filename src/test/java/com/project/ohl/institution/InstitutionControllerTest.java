@@ -1,5 +1,7 @@
 package com.project.ohl.institution;
 
+import com.project.ohl.application.mapper.InstitutionMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.InstitutionController;
 import com.project.ohl.application.model.InstitutionDto;
 import com.project.ohl.application.port.in.InstitutionService;
@@ -16,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.InstitutionMapper.convertToDto;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitution1;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitution2;
 import static com.project.ohl.mock.InstitutionMock.getMockedInstitutions;
@@ -30,6 +31,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class InstitutionControllerTest {
 
+    private final InstitutionMapper mapper = Mappers.getMapper(InstitutionMapper.class);
+
     @InjectMocks
     private InstitutionController institutionController;
 
@@ -42,9 +45,9 @@ class InstitutionControllerTest {
 
     @BeforeEach
     void setUp() {
-        institutionDto1 = convertToDto(getMockedInstitution1());
-        institutionDto2 = convertToDto(getMockedInstitution2());
-        institutionDtos = getMockedInstitutions().stream().map(Institution -> convertToDto(Institution)).toList();
+        institutionDto1 = mapper.convertToDto(getMockedInstitution1());
+        institutionDto2 = mapper.convertToDto(getMockedInstitution2());
+        institutionDtos = getMockedInstitutions().stream().map(Institution -> mapper.convertToDto(Institution)).toList();
     }
 
     @Test

@@ -2,22 +2,11 @@ package com.project.ohl.application.mapper;
 
 import com.project.ohl.domain.model.Institution;
 import com.project.ohl.application.model.InstitutionDto;
+import org.mapstruct.Mapper;
 
-public final class InstitutionMapper {
-    private InstitutionMapper() {
-    }
+@Mapper(config = MappingConfiguration.class)
+public interface InstitutionMapper {
+    InstitutionDto convertToDto(Institution model);
 
-    public static InstitutionDto convertToDto(Institution model) {
-        return InstitutionDto.builder().id(model.getId())
-              .school(model.getSchool())
-              .classroom(model.getClassroom())
-              .build();
-    }
-
-    public static Institution convertToEntity(InstitutionDto dto) {
-        return Institution.builder().id(dto.getId())
-              .school(dto.getSchool())
-              .classroom(dto.getClassroom())
-              .build();
-    }
+    Institution convertToEntity(InstitutionDto dto);
 }

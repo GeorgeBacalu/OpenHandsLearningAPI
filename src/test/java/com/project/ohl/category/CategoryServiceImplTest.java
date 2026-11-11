@@ -1,5 +1,7 @@
 package com.project.ohl.category;
 
+import com.project.ohl.application.mapper.CategoryMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.out.CategoryRepositoryPort;
 import com.project.ohl.application.service.CategoryServiceImpl;
@@ -21,8 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static com.project.ohl.application.error.ExceptionMessageConstants.CATEGORY_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.CategoryMapper.convertToDto;
-import static com.project.ohl.application.mapper.CategoryMapper.convertToDtoList;
 import static com.project.ohl.mock.CategoryMock.getMockedCategories;
 import static com.project.ohl.mock.CategoryMock.getMockedCategoryOne;
 import static com.project.ohl.mock.CategoryMock.getMockedCategoryTwo;
@@ -43,6 +43,9 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceImplTest {
+
+    @org.mockito.Spy
+    private final CategoryMapper mapper = Mappers.getMapper(CategoryMapper.class);
 
     @InjectMocks
     private CategoryServiceImpl categoryService;
@@ -86,15 +89,15 @@ class CategoryServiceImplTest {
         filteredChildrenCategoriesAlphabet = getMockedChildrenCategoriesAlphabetFilteredByName();
         favoriteCategories = getMockedFavoriteCategories();
         filteredFavoriteCategories = getMockedFavoriteCategoriesFilteredByName();
-        categoryDtoOne = convertToDto(categoryOne);
-        categoryDtoTwo = convertToDto(categoryTwo);
-        categoryDtos = convertToDtoList(categories);
-        parentCategoryDtos = convertToDtoList(parentCategories);
-        filteredParentCategoryDtos = convertToDtoList(filteredParentCategories);
-        childrenCategoryDtosAlphabet = convertToDtoList(childrenCategoriesAlphabet);
-        filteredChildrenCategoryDtosAlphabet = convertToDtoList(filteredChildrenCategoriesAlphabet);
-        favoriteCategoryDtos = convertToDtoList(favoriteCategories);
-        filteredFavoriteCategoryDtos = convertToDtoList(filteredFavoriteCategories);
+        categoryDtoOne = mapper.convertToDto(categoryOne);
+        categoryDtoTwo = mapper.convertToDto(categoryTwo);
+        categoryDtos = mapper.convertToDtoList(categories);
+        parentCategoryDtos = mapper.convertToDtoList(parentCategories);
+        filteredParentCategoryDtos = mapper.convertToDtoList(filteredParentCategories);
+        childrenCategoryDtosAlphabet = mapper.convertToDtoList(childrenCategoriesAlphabet);
+        filteredChildrenCategoryDtosAlphabet = mapper.convertToDtoList(filteredChildrenCategoriesAlphabet);
+        favoriteCategoryDtos = mapper.convertToDtoList(favoriteCategories);
+        filteredFavoriteCategoryDtos = mapper.convertToDtoList(filteredFavoriteCategories);
     }
 
     @Test
@@ -123,7 +126,7 @@ class CategoryServiceImplTest {
         given(categoryRepository.save(any(Category.class))).willReturn(categoryOne);
         CategoryDto result = categoryService.saveCategory(categoryDtoOne);
         verify(categoryRepository).save(categoryCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(categoryCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(categoryCaptor.getValue()));
     }
 
     @Test
@@ -134,7 +137,7 @@ class CategoryServiceImplTest {
         given(categoryRepository.update(any(Category.class))).willReturn(category);
         CategoryDto result = categoryService.updateCategoryById(categoryDtoTwo, VALID_ID);
         verify(categoryRepository).update(categoryCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(categoryCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(categoryCaptor.getValue()));
     }
 
     @Test
@@ -216,7 +219,7 @@ class CategoryServiceImplTest {
         given(categoryRepository.update(any(Category.class))).willReturn(category);
         CategoryDto result = categoryService.saveFavorite(categoryOne.getId());
         verify(categoryRepository).update(categoryCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(categoryCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(categoryCaptor.getValue()));
     }
 
     @Test
@@ -226,6 +229,6 @@ class CategoryServiceImplTest {
         given(categoryRepository.update(any(Category.class))).willReturn(category);
         CategoryDto result = categoryService.deleteFavorite(categoryOne.getId());
         verify(categoryRepository).update(categoryCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(categoryCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(categoryCaptor.getValue()));
     }
 }

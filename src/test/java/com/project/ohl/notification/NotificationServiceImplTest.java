@@ -1,5 +1,7 @@
 package com.project.ohl.notification;
 
+import com.project.ohl.application.mapper.NotificationMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.NotificationDto;
 import com.project.ohl.application.port.out.NotificationRepositoryPort;
 import com.project.ohl.application.service.NotificationServiceImpl;
@@ -25,7 +27,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static com.project.ohl.application.error.ExceptionMessageConstants.NOTIFICATION_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.NotificationMapper.convertToDto;
 import static com.project.ohl.mock.NotificationMock.getMockedNotification1;
 import static com.project.ohl.mock.NotificationMock.getMockedNotification2;
 import static com.project.ohl.mock.NotificationMock.getMockedNotifications;
@@ -41,6 +42,9 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
+
+    @org.mockito.Spy
+    private final NotificationMapper mapper = Mappers.getMapper(NotificationMapper.class);
 
     @InjectMocks
     private NotificationServiceImpl notificationService;
@@ -75,9 +79,9 @@ class NotificationServiceImplTest {
         notifications = getMockedNotifications();
         user1 = getMockedUser1();
         user2 = getMockedUser2();
-        notificationDto1 = convertToDto(notification1);
-        notificationDto2 = convertToDto(notification2);
-        notificationDtos = notifications.stream().map(notification -> convertToDto(notification)).toList();
+        notificationDto1 = mapper.convertToDto(notification1);
+        notificationDto2 = mapper.convertToDto(notification2);
+        notificationDtos = notifications.stream().map(notification -> mapper.convertToDto(notification)).toList();
     }
 
     @Test
@@ -109,7 +113,7 @@ class NotificationServiceImplTest {
         given(notificationRepository.save(any(Notification.class))).willReturn(notification1);
         NotificationDto result = notificationService.saveNotification(notificationDto1);
         verify(notificationRepository).save(notificationCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(notificationCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(notificationCaptor.getValue()));
     }
 
     @Test
@@ -122,7 +126,7 @@ class NotificationServiceImplTest {
         given(notificationRepository.update(any(Notification.class))).willReturn(notification);
         NotificationDto result = notificationService.updateNotificationById(notificationDto2, VALID_ID);
         verify(notificationRepository).update(notificationCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(notificationCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(notificationCaptor.getValue()));
     }
 
     @Test

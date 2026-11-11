@@ -1,5 +1,7 @@
 package com.project.ohl.role;
 
+import com.project.ohl.application.mapper.RoleMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.RoleController;
 import com.project.ohl.application.model.RoleDto;
 import com.project.ohl.application.port.in.RoleService;
@@ -16,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.RoleMapper.convertToDto;
 import static com.project.ohl.mock.RoleMock.getMockedRole1;
 import static com.project.ohl.mock.RoleMock.getMockedRole2;
 import static com.project.ohl.mock.RoleMock.getMockedRoles;
@@ -30,6 +31,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class RoleControllerTest {
 
+    private final RoleMapper mapper = Mappers.getMapper(RoleMapper.class);
+
     @InjectMocks
     private RoleController roleController;
 
@@ -42,9 +45,9 @@ class RoleControllerTest {
 
     @BeforeEach
     void setUp() {
-        roleDto1 = convertToDto(getMockedRole1());
-        roleDto2 = convertToDto(getMockedRole2());
-        roleDtos = getMockedRoles().stream().map(Role -> convertToDto(Role)).toList();
+        roleDto1 = mapper.convertToDto(getMockedRole1());
+        roleDto2 = mapper.convertToDto(getMockedRole2());
+        roleDtos = getMockedRoles().stream().map(Role -> mapper.convertToDto(Role)).toList();
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import com.project.ohl.application.mapper.NotificationMapper;
 import com.project.ohl.application.model.NotificationDto;
 import com.project.ohl.application.port.in.NotificationService;
 import com.project.ohl.application.port.out.NotificationRepositoryPort;
@@ -13,8 +14,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.NOTIFICATION_NOT_FOUND;
-import static com.project.ohl.application.mapper.NotificationMapper.convertToDto;
-import static com.project.ohl.application.mapper.NotificationMapper.convertToEntity;
 
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
@@ -23,24 +22,26 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserService userService;
     private final Clock clock;
 
+    private final NotificationMapper mapper;
+
     @Override
     public List<NotificationDto> getAllNotifications() {
         List<Notification> notifications = notificationRepository.findAll();
-        return notifications.stream().map(notification -> convertToDto(notification)).toList();
+        return notifications.stream().map(mapper::convertToDto).toList();
     }
 
     @Override
     public NotificationDto getNotificationById(Long id) {
         Notification notification = getNotificationEntityById(id);
-        return convertToDto(notification);
+        return mapper.convertToDto(notification);
     }
 
     @Override
     public NotificationDto saveNotification(NotificationDto notificationDto) {
-        Notification notification = convertToEntity(notificationDto);
+        Notification notification = mapper.convertToEntity(notificationDto);
         notification.setSentAt(LocalDateTime.now(clock));
         Notification savedNotification = notificationRepository.save(notification);
-        return convertToDto(savedNotification);
+        return mapper.convertToDto(savedNotification);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationToUpdate.setSender(userService.getUserEntityById(notificationDto.getSenderId()));
         notificationToUpdate.setReceiver(userService.getUserEntityById(notificationDto.getReceiverId()));
         Notification updatedNotification = notificationRepository.update(notificationToUpdate);
-        return convertToDto(updatedNotification);
+        return mapper.convertToDto(updatedNotification);
     }
 
     @Override

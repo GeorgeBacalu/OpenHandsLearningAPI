@@ -2,36 +2,19 @@ package com.project.ohl.application.mapper;
 
 import com.project.ohl.domain.model.Category;
 import com.project.ohl.application.model.CategoryDto;
-import com.project.ohl.domain.model.Section;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import java.util.List;
 
-public final class CategoryMapper {
-    private CategoryMapper() {
-    }
+@Mapper(config = MappingConfiguration.class, uses = ReferenceMapper.class)
+public interface CategoryMapper {
+    @Mapping(target = "parentId", source = "parent.id")
+    @Mapping(target = "sectionId", source = "section.id")
+    CategoryDto convertToDto(Category model);
 
-    public static CategoryDto convertToDto(Category model) {
-        return CategoryDto.builder().id(model.getId())
-              .name(model.getName())
-              .imageId(model.getImageId())
-              .isExpanded(model.getIsExpanded())
-              .isFavorite(model.getIsFavorite())
-              .parentId(model.getParent() == null ? null : model.getParent().getId())
-              .sectionId(model.getSection() == null ? null : model.getSection().getId())
-              .build();
-    }
+    @Mapping(target = "parent", source = "parentId")
+    @Mapping(target = "section", source = "sectionId")
+    Category convertToEntity(CategoryDto dto);
 
-    public static Category convertToEntity(CategoryDto dto) {
-        return Category.builder().id(dto.getId())
-              .name(dto.getName())
-              .imageId(dto.getImageId())
-              .isExpanded(dto.getIsExpanded())
-              .isFavorite(dto.getIsFavorite())
-              .parent(dto.getParentId() == null ? null : Category.builder().id(dto.getParentId()).build())
-              .section(dto.getSectionId() == null ? null : Section.builder().id(dto.getSectionId()).build())
-              .build();
-    }
-
-    public static List<CategoryDto> convertToDtoList(List<Category> categories) {
-        return categories.stream().map(CategoryMapper::convertToDto).toList();
-    }
+    List<CategoryDto> convertToDtoList(List<Category> categories);
 }

@@ -1,5 +1,7 @@
 package com.project.ohl.section;
 
+import com.project.ohl.application.mapper.SectionMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.SectionController;
 import com.project.ohl.application.model.SectionDto;
 import com.project.ohl.application.port.in.SectionService;
@@ -16,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.SectionMapper.convertToDto;
 import static com.project.ohl.mock.SectionMock.getMockedSection1;
 import static com.project.ohl.mock.SectionMock.getMockedSection2;
 import static com.project.ohl.mock.SectionMock.getMockedSections;
@@ -30,6 +31,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class SectionControllerTest {
 
+    private final SectionMapper mapper = Mappers.getMapper(SectionMapper.class);
+
     @InjectMocks
     private SectionController sectionController;
 
@@ -42,9 +45,9 @@ class SectionControllerTest {
 
     @BeforeEach
     void setUp() {
-        sectionDto1 = convertToDto(getMockedSection1());
-        sectionDto2 = convertToDto(getMockedSection2());
-        sectionDtos = getMockedSections().stream().map(Section -> convertToDto(Section)).toList();
+        sectionDto1 = mapper.convertToDto(getMockedSection1());
+        sectionDto2 = mapper.convertToDto(getMockedSection2());
+        sectionDtos = getMockedSections().stream().map(Section -> mapper.convertToDto(Section)).toList();
     }
 
     @Test

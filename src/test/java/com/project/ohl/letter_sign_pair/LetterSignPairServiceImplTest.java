@@ -1,5 +1,7 @@
 package com.project.ohl.letter_sign_pair;
 
+import com.project.ohl.application.mapper.LetterSignPairMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.LetterSignPairDto;
 import com.project.ohl.application.port.out.LetterSignPairRepositoryPort;
 import com.project.ohl.application.service.LetterSignPairServiceImpl;
@@ -20,7 +22,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static com.project.ohl.application.error.ExceptionMessageConstants.LETTER_SIGN_PAIR_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.LetterSignPairMapper.convertToDto;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPair1;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPair2;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPairs;
@@ -34,6 +35,9 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class LetterSignPairServiceImplTest {
+
+    @org.mockito.Spy
+    private final LetterSignPairMapper mapper = Mappers.getMapper(LetterSignPairMapper.class);
 
     @InjectMocks
     private LetterSignPairServiceImpl letterSignPairService;
@@ -56,9 +60,9 @@ class LetterSignPairServiceImplTest {
         letterSignPair1 = getMockedLetterSignPair1();
         letterSignPair2 = getMockedLetterSignPair2();
         letterSignPairs = getMockedLetterSignPairs();
-        letterSignPairDto1 = convertToDto(letterSignPair1);
-        letterSignPairDto2 = convertToDto(letterSignPair2);
-        letterSignPairDtos = letterSignPairs.stream().map(letterSignPair -> convertToDto(letterSignPair)).toList();
+        letterSignPairDto1 = mapper.convertToDto(letterSignPair1);
+        letterSignPairDto2 = mapper.convertToDto(letterSignPair2);
+        letterSignPairDtos = letterSignPairs.stream().map(letterSignPair -> mapper.convertToDto(letterSignPair)).toList();
     }
 
     @Test
@@ -87,7 +91,7 @@ class LetterSignPairServiceImplTest {
         given(letterSignPairRepository.save(any(LetterSignPair.class))).willReturn(letterSignPair1);
         LetterSignPairDto result = letterSignPairService.saveLetterSignPair(letterSignPairDto1);
         verify(letterSignPairRepository).save(letterSignPairCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(letterSignPairCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(letterSignPairCaptor.getValue()));
     }
 
     @Test
@@ -97,7 +101,7 @@ class LetterSignPairServiceImplTest {
         given(letterSignPairRepository.update(any(LetterSignPair.class))).willReturn(letterSignPair);
         LetterSignPairDto result = letterSignPairService.updateLetterSignPairById(letterSignPairDto2, VALID_ID);
         verify(letterSignPairRepository).update(letterSignPairCaptor.capture());
-        assertThat(result).isEqualTo(convertToDto(letterSignPairCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(letterSignPairCaptor.getValue()));
     }
 
     @Test

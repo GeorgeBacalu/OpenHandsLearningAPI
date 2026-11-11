@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.in.CategoryService;
 import com.project.ohl.application.port.out.CategoryRepositoryPort;
@@ -11,9 +12,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.CATEGORY_NOT_FOUND;
-import static com.project.ohl.application.mapper.CategoryMapper.convertToDto;
-import static com.project.ohl.application.mapper.CategoryMapper.convertToDtoList;
-import static com.project.ohl.application.mapper.CategoryMapper.convertToEntity;
 
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -21,23 +19,25 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepositoryPort categoryRepository;
     private final SectionService sectionService;
 
+    private final CategoryMapper mapper;
+
     @Override
     public List<CategoryDto> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
-        return convertToDtoList(categories);
+        return mapper.convertToDtoList(categories);
     }
 
     @Override
     public CategoryDto getCategoryById(Long id) {
         Category category = getCategoryEntityById(id);
-        return convertToDto(category);
+        return mapper.convertToDto(category);
     }
 
     @Override
     public CategoryDto saveCategory(CategoryDto categoryDto) {
-        Category category = convertToEntity(categoryDto);
+        Category category = mapper.convertToEntity(categoryDto);
         Category savedCategory = categoryRepository.save(category);
-        return convertToDto(savedCategory);
+        return mapper.convertToDto(savedCategory);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryToUpdate.setParent(categoryDto.getParentId() == null ? null : getCategoryEntityById(categoryDto.getParentId()));
         categoryToUpdate.setSection(sectionService.getSectionEntityById(categoryDto.getSectionId()));
         Category updatedCategory = categoryRepository.update(categoryToUpdate);
-        return convertToDto(updatedCategory);
+        return mapper.convertToDto(updatedCategory);
     }
 
     @Override
@@ -72,13 +72,13 @@ public class CategoryServiceImpl implements CategoryService {
                   ? categoryRepository.findByParentIdAndSectionId(parentId, sectionId)
                   : categoryRepository.findByParentIdAndSectionIdAndNameContaining(parentId, sectionId, name);
         }
-        return convertToDtoList(categories);
+        return mapper.convertToDtoList(categories);
     }
 
     @Override
     public List<CategoryDto> getFavoriteCategories() {
         List<Category> favorites = categoryRepository.findFavorites();
-        return convertToDtoList(favorites);
+        return mapper.convertToDtoList(favorites);
     }
 
     @Override
@@ -86,21 +86,21 @@ public class CategoryServiceImpl implements CategoryService {
         List<Category> filteredFavorites = name == null || name.isBlank()
               ? categoryRepository.findFavorites()
               : categoryRepository.findFavoritesByNameContaining(name);
-        return convertToDtoList(filteredFavorites);
+        return mapper.convertToDtoList(filteredFavorites);
     }
 
     @Override
     public CategoryDto saveFavorite(Long categoryId) {
         Category favoriteToSave = getCategoryEntityById(categoryId);
         favoriteToSave.setIsFavorite(true);
-        return convertToDto(categoryRepository.update(favoriteToSave));
+        return mapper.convertToDto(categoryRepository.update(favoriteToSave));
     }
 
     @Override
     public CategoryDto deleteFavorite(Long categoryId) {
         Category favoriteToDelete = getCategoryEntityById(categoryId);
         favoriteToDelete.setIsFavorite(false);
-        return convertToDto(categoryRepository.update(favoriteToDelete));
+        return mapper.convertToDto(categoryRepository.update(favoriteToDelete));
     }
 
     private void validateParent(Long categoryId, Long parentId) {

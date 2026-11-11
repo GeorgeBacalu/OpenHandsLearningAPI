@@ -1,5 +1,7 @@
 package com.project.ohl.notification;
 
+import com.project.ohl.application.mapper.NotificationMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.NotificationController;
 import com.project.ohl.application.model.NotificationDto;
 import com.project.ohl.application.port.in.NotificationService;
@@ -16,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.NotificationMapper.convertToDto;
 import static com.project.ohl.mock.NotificationMock.getMockedNotification1;
 import static com.project.ohl.mock.NotificationMock.getMockedNotification2;
 import static com.project.ohl.mock.NotificationMock.getMockedNotifications;
@@ -30,6 +31,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class NotificationControllerTest {
 
+    private final NotificationMapper mapper = Mappers.getMapper(NotificationMapper.class);
+
     @InjectMocks
     private NotificationController notificationController;
 
@@ -42,9 +45,9 @@ class NotificationControllerTest {
 
     @BeforeEach
     void setUp() {
-        notificationDto1 = convertToDto(getMockedNotification1());
-        notificationDto2 = convertToDto(getMockedNotification2());
-        notificationDtos = getMockedNotifications().stream().map(Notification -> convertToDto(Notification)).toList();
+        notificationDto1 = mapper.convertToDto(getMockedNotification1());
+        notificationDto2 = mapper.convertToDto(getMockedNotification2());
+        notificationDtos = getMockedNotifications().stream().map(Notification -> mapper.convertToDto(Notification)).toList();
     }
 
     @Test

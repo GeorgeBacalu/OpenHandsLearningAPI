@@ -1,5 +1,7 @@
 package com.project.ohl.user;
 
+import com.project.ohl.application.mapper.UserMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.UserController;
 import com.project.ohl.adapter.web.model.UserResponse;
 import com.project.ohl.application.model.UserDto;
@@ -17,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.UserMapper.convertToDto;
 import static com.project.ohl.mock.UserMock.getMockedUser1;
 import static com.project.ohl.mock.UserMock.getMockedUser2;
 import static com.project.ohl.mock.UserMock.getMockedUsers;
@@ -31,6 +32,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {
 
+    private final UserMapper mapper = Mappers.getMapper(UserMapper.class);
+
     @InjectMocks
     private UserController userController;
 
@@ -43,9 +46,9 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        userDto1 = convertToDto(getMockedUser1());
-        userDto2 = convertToDto(getMockedUser2());
-        userDtos = getMockedUsers().stream().map(User -> convertToDto(User)).toList();
+        userDto1 = mapper.convertToDto(getMockedUser1());
+        userDto2 = mapper.convertToDto(getMockedUser2());
+        userDtos = getMockedUsers().stream().map(User -> mapper.convertToDto(User)).toList();
     }
 
     @Test

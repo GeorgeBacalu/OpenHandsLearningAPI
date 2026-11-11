@@ -45,6 +45,7 @@ class PersistenceIntegrationTest {
     @Autowired private UserRepositoryPort users;
     @Autowired private CategoryRepositoryPort categories;
     @Autowired private CategoryService categoryService;
+    @Autowired private com.project.ohl.application.mapper.CategoryMapper categoryMapper;
     @Autowired private LetterSignPairRepositoryPort letters;
     @Autowired private FeedbackRepositoryPort feedbacks;
     @Autowired private NotificationRepositoryPort notifications;
@@ -58,7 +59,7 @@ class PersistenceIntegrationTest {
         var section = sections.save(Section.builder().name("Tree").build());
         var parent = categories.save(Category.builder().name("Parent").section(section).build());
         var child = categories.save(Category.builder().name("Child").parent(parent).section(section).build());
-        var update = com.project.ohl.application.mapper.CategoryMapper.convertToDto(parent);
+        var update = categoryMapper.convertToDto(parent);
         update.setParentId(parent.getId());
         assertThatThrownBy(() -> categoryService.updateCategoryById(update, parent.getId()))
                 .isInstanceOf(com.project.ohl.domain.exception.InvalidRequestException.class);

@@ -1,5 +1,7 @@
 package com.project.ohl.letter_sign_pair;
 
+import com.project.ohl.application.mapper.LetterSignPairMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.adapter.web.LetterSignPairController;
 import com.project.ohl.application.model.LetterSignPairDto;
 import com.project.ohl.application.port.in.LetterSignPairService;
@@ -15,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.LetterSignPairMapper.convertToDto;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPair1;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPair2;
 import static com.project.ohl.mock.LetterSignPairMock.getMockedLetterSignPairs;
@@ -29,6 +30,8 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class LetterSignPairControllerTest {
 
+    private final LetterSignPairMapper mapper = Mappers.getMapper(LetterSignPairMapper.class);
+
     @InjectMocks
     private LetterSignPairController letterSignPairController;
 
@@ -41,9 +44,9 @@ class LetterSignPairControllerTest {
 
     @BeforeEach
     void setUp() {
-        letterSignPairDto1 = convertToDto(getMockedLetterSignPair1());
-        letterSignPairDto2 = convertToDto(getMockedLetterSignPair2());
-        letterSignPairDtos = getMockedLetterSignPairs().stream().map(letterSignPair -> convertToDto(letterSignPair)).toList();
+        letterSignPairDto1 = mapper.convertToDto(getMockedLetterSignPair1());
+        letterSignPairDto2 = mapper.convertToDto(getMockedLetterSignPair2());
+        letterSignPairDtos = getMockedLetterSignPairs().stream().map(letterSignPair -> mapper.convertToDto(letterSignPair)).toList();
     }
 
     @Test

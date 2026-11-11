@@ -1,5 +1,7 @@
 package com.project.ohl.user;
 
+import com.project.ohl.application.mapper.UserMapper;
+import org.mapstruct.factory.Mappers;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.application.port.out.UserRepositoryPort;
 import com.project.ohl.application.service.UserServiceImpl;
@@ -22,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static com.project.ohl.application.error.ExceptionMessageConstants.USER_NOT_FOUND;
 import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
 import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
-import static com.project.ohl.application.mapper.UserMapper.convertToDto;
 import static com.project.ohl.mock.UserMock.getMockedUser1;
 import static com.project.ohl.mock.UserMock.getMockedUser2;
 import static com.project.ohl.mock.UserMock.getMockedUsers;
@@ -36,6 +37,9 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
+
+    @org.mockito.Spy
+    private final UserMapper mapper = Mappers.getMapper(UserMapper.class);
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -67,9 +71,9 @@ class UserServiceImplTest {
         user1 = getMockedUser1();
         user2 = getMockedUser2();
         users = getMockedUsers();
-        userDto1 = convertToDto(user1);
-        userDto2 = convertToDto(user2);
-        userDtos = users.stream().map(user -> convertToDto(user)).toList();
+        userDto1 = mapper.convertToDto(user1);
+        userDto2 = mapper.convertToDto(user2);
+        userDtos = users.stream().map(user -> mapper.convertToDto(user)).toList();
     }
 
     @Test
@@ -100,7 +104,7 @@ class UserServiceImplTest {
         UserDto result = userService.saveUser(userDto1);
         verify(userRepository).save(userCaptor.capture());
         assertThat(userCaptor.getValue().getPassword()).isEqualTo("encoded-password");
-        assertThat(result).isEqualTo(convertToDto(userCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(userCaptor.getValue()));
     }
 
     @Test
@@ -112,7 +116,7 @@ class UserServiceImplTest {
         UserDto result = userService.updateUserById(userDto2, VALID_ID);
         verify(userRepository).update(userCaptor.capture());
         assertThat(userCaptor.getValue().getPassword()).isEqualTo("encoded-password");
-        assertThat(result).isEqualTo(convertToDto(userCaptor.getValue()));
+        assertThat(result).isEqualTo(mapper.convertToDto(userCaptor.getValue()));
     }
 
     @Test

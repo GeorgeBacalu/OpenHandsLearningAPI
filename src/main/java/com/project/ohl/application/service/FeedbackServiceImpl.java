@@ -1,5 +1,6 @@
 package com.project.ohl.application.service;
 
+import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.model.FeedbackDto;
 import com.project.ohl.application.port.in.FeedbackService;
 import com.project.ohl.application.port.out.FeedbackRepositoryPort;
@@ -13,8 +14,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.FEEDBACK_NOT_FOUND;
-import static com.project.ohl.application.mapper.FeedbackMapper.convertToDto;
-import static com.project.ohl.application.mapper.FeedbackMapper.convertToEntity;
 
 @RequiredArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
@@ -23,24 +22,26 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final UserService userService;
     private final Clock clock;
 
+    private final FeedbackMapper mapper;
+
     @Override
     public List<FeedbackDto> getAllFeedbacks() {
         List<Feedback> feedbacks = feedbackRepository.findAll();
-        return feedbacks.stream().map(feedback -> convertToDto(feedback)).toList();
+        return feedbacks.stream().map(mapper::convertToDto).toList();
     }
 
     @Override
     public FeedbackDto getFeedbackById(Long id) {
         Feedback feedback = getFeedbackEntityById(id);
-        return convertToDto(feedback);
+        return mapper.convertToDto(feedback);
     }
 
     @Override
     public FeedbackDto saveFeedback(FeedbackDto feedbackDto) {
-        Feedback feedback = convertToEntity(feedbackDto);
+        Feedback feedback = mapper.convertToEntity(feedbackDto);
         feedback.setSentAt(LocalDateTime.now(clock));
         Feedback savedFeedback = feedbackRepository.save(feedback);
-        return convertToDto(savedFeedback);
+        return mapper.convertToDto(savedFeedback);
     }
 
     @Override
@@ -50,7 +51,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         feedbackToUpdate.setDescription(feedbackDto.getDescription());
         feedbackToUpdate.setUser(userService.getUserEntityById(feedbackDto.getUserId()));
         Feedback updatedFeedback = feedbackRepository.update(feedbackToUpdate);
-        return convertToDto(updatedFeedback);
+        return mapper.convertToDto(updatedFeedback);
     }
 
     @Override
