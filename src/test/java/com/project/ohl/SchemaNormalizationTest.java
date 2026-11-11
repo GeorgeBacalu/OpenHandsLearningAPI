@@ -42,16 +42,14 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
         assertThat(categories.getCategoryById(CATEGORY_PARENT, dan).getIsFavorite()).isTrue();
     }
 
-    @Test void renamingCatalogLabelsPreservesCodesAndMediaKeys() {
+    @Test void renamingCategoriesPreservesTheirUuidChildrenAndMediaKeys() {
         var parent = categories.getCategoryById(CATEGORY_PARENT);
-        parent.setName("Translated alphabet"); parent.setCode(null); parent.setMediaKey(null);
+        parent.setName("Translated alphabet"); parent.setMediaKey(null);
         var changed = categories.updateCategoryById(parent, parent.getId());
-        assertThat(changed.getCode()).isEqualTo("ALPHABET");
+        assertThat(changed.getId()).isEqualTo(CATEGORY_PARENT);
         assertThat(changed.getMediaKey()).isEqualTo("alfabet");
-        assertThat(categories.getCategoriesByFilters(null, null, "ALPHABET", "VIDEO", ""))
+        assertThat(categories.getCategoriesByParentIdAndSectionIdAndName(CATEGORY_PARENT, parent.getSectionId(), ""))
                 .extracting(value -> value.getId()).containsExactly(CATEGORY_CHILD);
-        changed.setCode("DIFFERENT");
-        assertThatThrownBy(() -> categories.updateCategoryById(changed, changed.getId())).isInstanceOf(InvalidRequestException.class);
     }
 
     @Test void whitespaceSignSeparatorsRemainValidCatalogEntries() {

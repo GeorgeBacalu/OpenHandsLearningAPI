@@ -256,7 +256,7 @@
           {
             "name": "sectionId",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -265,27 +265,9 @@
           {
             "name": "name",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "string",
               "default": ""
-            }
-          },
-          {
-            "name": "parentCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sectionCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "VIDEO"
             }
           }
         ]
@@ -2115,14 +2097,6 @@
           "sectionId": {
             "type": "string",
             "format": "uuid"
-          },
-          "code": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[A-Z][A-Z0-9_]*$",
-            "maxLength": 120
           },
           "mediaKey": {
             "type": "string",

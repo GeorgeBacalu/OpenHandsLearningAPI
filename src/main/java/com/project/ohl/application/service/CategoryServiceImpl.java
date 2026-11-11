@@ -58,7 +58,6 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategoryById(CategoryDto categoryDto, UUID id) {
         Category categoryToUpdate = getCategoryEntityById(id);
         validateParent(id, categoryDto.getParentId(), categoryDto.getSectionId());
-        categoryToUpdate.setCode(categoryDto.getCode());
         categoryToUpdate.setMediaKey(categoryDto.getMediaKey());
         categoryToUpdate.setName(categoryDto.getName());
 
@@ -99,14 +98,6 @@ public class CategoryServiceImpl implements CategoryService {
             result.setIsFavorite(favorites.exists(userId, id));
         }
         return result;
-    }
-
-    @Override
-    public List<CategoryDto> getCategoriesByFilters(UUID parentId, UUID sectionId, String parentCode, String sectionCode, String name) {
-        if (parentCode != null) parentId = categoryRepository.findByCode(parentCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Category " + parentCode + " was not found")).getId();
-        if (sectionId == null) sectionId = sectionService.getSectionEntityByCode(sectionCode == null ? "VIDEO" : sectionCode).getId();
-        return getCategoriesByParentIdAndSectionIdAndName(parentId, sectionId, name);
     }
 
     @Override

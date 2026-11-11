@@ -106,7 +106,7 @@ class CategoryControllerTest {
     @Test
     void getCategoriesByParentIdAndSectionIdAndName_shouldReturnListOfCategoriesFilteredByName() {
         given(categoryService.getCategoriesByParentIdAndSectionIdAndName(any(UUID.class), any(UUID.class), anyString())).willReturn(filteredCategoryDtos);
-        ResponseEntity<List<CategoryDto>> response = categoryController.getCategoriesByParentIdAndSectionIdAndName(VALID_ID, VALID_ID, "a", null, "VIDEO");
+        ResponseEntity<List<CategoryDto>> response = categoryController.getCategoriesByParentIdAndSectionIdAndName(VALID_ID, VALID_ID, "a");
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(filteredCategoryDtos);

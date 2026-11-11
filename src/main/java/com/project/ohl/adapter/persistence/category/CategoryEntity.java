@@ -23,8 +23,6 @@ import org.hibernate.annotations.Check;
 public class CategoryEntity extends PersistentEntity {
     @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "code", nullable = false, unique = true, length = 120)
-    private String code;
     @Column(name = "media_key", nullable = false)
     private String mediaKey;
     @ManyToOne(fetch = FetchType.LAZY)

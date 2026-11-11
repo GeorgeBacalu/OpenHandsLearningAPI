@@ -14,7 +14,6 @@ public class Category {
 
     private UUID id;
     private String name;
-    private String code;
     private String mediaKey;
     private Boolean isExpanded;
     private Boolean isFavorite;

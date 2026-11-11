@@ -10,7 +10,6 @@ public interface CategoryService {
 
     CategoryDto getCategoryById(UUID id);
     CategoryDto getCategoryById(UUID id, UUID userId);
-    List<CategoryDto> getCategoriesByFilters(UUID parentId, UUID sectionId, String parentCode, String sectionCode, String name);
 
     CategoryDto saveCategory(CategoryDto categoryDto);
 

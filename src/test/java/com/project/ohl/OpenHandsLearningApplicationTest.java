@@ -176,6 +176,8 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
 
         var roots = json.readTree(send("GET", "/api/categories/filter?sectionId=" + SECTION_VIDEO, null).body());
         assertThat(roots.size()).isEqualTo(2);
+        assertThat(roots.get(0).has("code")).isFalse();
+        assertThat(send("GET", "/api/categories/filter", null).statusCode()).isEqualTo(400);
         assertThat(List.of(roots.get(0).path("name").asText(), roots.get(1).path("name").asText()))
                 .containsExactly("Arici", "Zebră");
         assertThat(roots.get(0).path("parentId").isNull()).isTrue();
