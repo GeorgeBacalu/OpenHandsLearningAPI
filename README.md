@@ -19,7 +19,7 @@ when the context closes. Each database-backed test loads `src/test/resources/tes
 with two records per table. The shared fixture clears all rows
 before and after each test, and verifies the row counts. The full catalog is not loaded.
 
-Tests cover persistence, optimistic locking, foreign keys, HTTP errors, BCrypt,
+Tests cover persistence, foreign keys, HTTP errors, BCrypt,
 MapStruct mappings, OpenAPI coverage, and architecture boundaries. A separate
 Flyway test verifies schema creation, empty application tables, and repeat runs.
 
@@ -42,7 +42,7 @@ HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Andro
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 and V3 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V4 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
@@ -54,10 +54,10 @@ the previous UUID schema. V2 adds:
 
 V2 transforms existing records and memberships; it seeds no users or catalog
 content. Space characters remain valid sign entries. New empty databases contain
-no application records after V1 through V3. Back up and rehearse upgrades on a copy
+no application records after V1 through V4. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails or ambiguous
 classroom names must be resolved explicitly; migration failures roll back V2.
-The new backend requires V3 before it can validate its schema.
+Migrate the database through V4 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
@@ -73,6 +73,9 @@ timezone, and preserves those instants. New responses use UTC ISO timestamps.
 Notification lists accept `receiverId`, feedback lists accept `userId`, and both
 accept `page` (default 0) and `size` (default 50, maximum 100), ordered by newest
 event then UUID. Existing user/time indexes support the filtered reads.
+
+V4 removes the row revision counters from all nine entity tables. Applied
+migration files remain unchanged so Flyway can validate existing installations.
 
 For a separate empty PostgreSQL database:
 
@@ -124,9 +127,8 @@ updates store BCrypt.
 - `adapter/config`: dependency wiring, service transaction boundaries, password hashing, and clock configuration.
 
 Application use cases depend on ports. Web and persistence adapters do not call
-each other. Service transactions wrap complete use cases, JPA uses optimistic
-locking, and MapStruct-generated DTO mapping uses scalar reference IDs without
-recursive entity loading. ArchUnit tests enforce these boundaries.
+each other. Service transactions wrap complete use cases, and MapStruct-generated
+DTO mapping uses scalar reference IDs without recursive entity loading. ArchUnit tests enforce these boundaries.
 
 ## Dependency baseline
 

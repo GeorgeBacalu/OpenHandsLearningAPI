@@ -5,7 +5,6 @@ import com.project.ohl.domain.exception.ResourceNotFoundException;
 import java.util.LinkedHashMap;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -30,10 +29,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
-    @ExceptionHandler({DataIntegrityViolationException.class, OptimisticLockingFailureException.class})
+    @ExceptionHandler(DataIntegrityViolationException.class)
     ProblemDetail conflict(DataAccessException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
-                "The change conflicts with existing or concurrently modified data.");
+                "The change conflicts with existing data.");
     }
 
     @ExceptionHandler(DataAccessException.class)

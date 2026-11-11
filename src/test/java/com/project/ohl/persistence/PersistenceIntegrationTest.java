@@ -1,7 +1,6 @@
 package com.project.ohl.persistence;
 
 import com.project.ohl.DatabaseIntegrationTest;
-import com.project.ohl.adapter.persistence.section.SectionEntity;
 import com.project.ohl.adapter.persistence.section.SectionJpaRepository;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.model.UserDto;
@@ -34,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static com.project.ohl.TestIds.CATEGORY_CHILD;
@@ -174,19 +172,6 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         }
         assertThat(categories.findByParentIdAndSectionIdAndNameContaining(parent.getId(), SECTION_VIDEO, "letter"))
               .extracting(Category::getId).containsExactly(child.getId());
-    }
-
-    @Test
-    void staleWritesCannotOverwriteAConcurrentUpdate() {
-        SectionEntity first = sectionJpaRepository.findById(SECTION_VIDEO).orElseThrow();
-        SectionEntity stale = sectionJpaRepository.findById(SECTION_VIDEO).orElseThrow();
-        first.setName("First change");
-        sectionJpaRepository.saveAndFlush(first);
-        stale.setName("Stale change");
-
-        assertThatThrownBy(() -> sectionJpaRepository.saveAndFlush(stale))
-                .isInstanceOf(ObjectOptimisticLockingFailureException.class);
-        assertThat(sections.findById(SECTION_VIDEO).orElseThrow().getName()).isEqualTo("First change");
     }
 
     @Test
