@@ -7,23 +7,17 @@ import com.project.ohl.application.model.UserDto;
 import com.project.ohl.application.port.in.CategoryService;
 import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.application.port.out.CategoryRepositoryPort;
-import com.project.ohl.application.port.out.FeedbackRepositoryPort;
 import com.project.ohl.application.port.out.SchoolRepositoryPort;
-import com.project.ohl.application.port.out.NotificationRepositoryPort;
 import com.project.ohl.application.port.out.RoleRepositoryPort;
 import com.project.ohl.application.port.out.SectionRepositoryPort;
 import com.project.ohl.application.port.out.UserRepositoryPort;
 import com.project.ohl.domain.exception.InvalidRequestException;
 import com.project.ohl.domain.model.Authority;
 import com.project.ohl.domain.model.Category;
-import com.project.ohl.domain.model.Feedback;
-import com.project.ohl.domain.model.FeedbackType;
 import com.project.ohl.domain.model.School;
-import com.project.ohl.domain.model.Notification;
 import com.project.ohl.domain.model.Section;
 import com.project.ohl.domain.model.User;
 import jakarta.persistence.EntityManagerFactory;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -52,8 +46,6 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
     @Autowired private CategoryRepositoryPort categories;
     @Autowired private CategoryService categoryService;
     @Autowired private CategoryMapper categoryMapper;
-    @Autowired private FeedbackRepositoryPort feedbacks;
-    @Autowired private NotificationRepositoryPort notifications;
     @Autowired private SectionJpaRepository sectionJpaRepository;
     @Autowired private EntityManagerFactory entityManagerFactory;
 
@@ -102,40 +94,27 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
         var child = categories.save(Category.builder().name("C").parent(parent)
                 .section(sections.findById(SECTION_VIDEO).orElseThrow()).build());
-        var sentAt = Instant.parse("2026-01-01T08:00:00Z");
-        var feedback = feedbacks.save(Feedback.builder().description("Useful lesson")
-              .type(FeedbackType.IMPROVEMENT).sentAt(sentAt).user(user).build());
-        var notification = notifications.save(Notification.builder().message("Welcome")
-              .sender(user).receiver(user).sentAt(sentAt).isRead(false).build());
 
         assertThat(List.of(section.getId(), school.getId(), role.getId(), user.getId(),
-                child.getId(), feedback.getId(), notification.getId()))
+                child.getId()))
                 .allSatisfy(value -> assertThat(value.version()).isEqualTo(4));
 
         assertThat(users.findById(user.getId()).orElseThrow().getSchool().getId()).isEqualTo(school.getId());
         assertThat(users.findById(user.getId()).orElseThrow().getRole().getId()).isEqualTo(role.getId());
         assertThat(categories.findById(child.getId()).orElseThrow().getParent().getId()).isEqualTo(parent.getId());
-        assertThat(feedbacks.findById(feedback.getId()).orElseThrow().getUser().getId()).isEqualTo(user.getId());
-        assertThat(notifications.findById(notification.getId()).orElseThrow().getReceiver().getId()).isEqualTo(user.getId());
 
         section.setName("Updated video");
         school.setName("Updated School");
         role.setAuthority(Authority.USER);
         user.setName("Updated Ana");
         child.setName("Updated category");
-        feedback.setDescription("Updated feedback");
-        notification.setIsRead(true);
 
         assertThat(sections.update(section).getName()).isEqualTo("Updated video");
         assertThat(schools.update(school).getName()).isEqualTo("Updated School");
         assertThat(roles.update(role).getAuthority()).isEqualTo(Authority.USER);
         assertThat(users.update(user).getName()).isEqualTo("Updated Ana");
         assertThat(categories.update(child).getName()).isEqualTo("Updated category");
-        assertThat(feedbacks.update(feedback).getDescription()).isEqualTo("Updated feedback");
-        assertThat(notifications.update(notification).getIsRead()).isTrue();
 
-        notifications.delete(notification);
-        feedbacks.delete(feedback);
         categories.delete(child);
         users.delete(user);
         schools.delete(school);

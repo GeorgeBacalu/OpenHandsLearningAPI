@@ -42,13 +42,13 @@ HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Andro
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V9 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V10 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
 - Per-user favorites; existing shared favorites are copied to each existing user.
 - Schools and normalized user membership.
-- Unique normalized account emails, required values, and supported role/feedback values.
+- Unique normalized account emails, required values, and supported role values.
 - Stable catalog `code`, `mediaKey`, and section `iconKey` fields, independent of translated display names.
 - Query indexes, matching-section parent relationships, and a serialized database trigger preventing hierarchy cycles.
 
@@ -57,7 +57,7 @@ content. Space characters remain valid sign entries. New empty databases contain
 no application records after V1 through V7. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
 roll back V2.
-Migrate the database through V9 before running this backend.
+Migrate the database through V10 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
@@ -65,14 +65,6 @@ The retained `dactilema_a` illustration matches the text/voice sign collection;
 the alphabet category uses that asset too. Letters are unique with case preserved,
 and normalized category names are unique within their section and parent, including
 root categories. Shared media keys remain allowed.
-
-Feedback descriptions and notification messages use PostgreSQL `text`, with a
-10,000-character API limit. Their event times use `timestamptz` and Java `Instant`;
-V3 interprets existing local timestamps in `Europe/Bucharest`, the application
-timezone, and preserves those instants. New responses use UTC ISO timestamps.
-Notification lists accept `receiverId`, feedback lists accept `userId`, and both
-accept `page` (default 0) and `size` (default 50, maximum 100), ordered by newest
-event then UUID. Existing user/time indexes support the filtered reads.
 
 V4 removes the row revision counters from all nine entity tables. Applied
 migration files remain unchanged so Flyway can validate existing installations.
@@ -132,6 +124,10 @@ V9 removes classroom management, its table, and user classroom assignments.
 Users retain their school memberships and all other account data. The API no
 longer exposes classroom endpoints or a classroom reference on users.
 
+V10 removes feedback and notification management, both tables, and their API
+contracts. Remaining account, school, category and favorite data are preserved.
+The event-only clock configuration and timezone property are no longer needed.
+
 For a separate empty PostgreSQL database:
 
 ```powershell
@@ -177,7 +173,7 @@ updates store BCrypt.
 - `application`: input/output ports, use cases, validation models, and MapStruct mappings.
 - `adapter/web`: HTTP controllers, response projections, and error handling.
 - `adapter/persistence`: JPA entities, Spring Data repositories, and persistence adapters.
-- `adapter/config`: dependency wiring, service transaction boundaries, password hashing, and clock configuration.
+- `adapter/config`: dependency wiring, service transaction boundaries, password hashing.
 - `adapter/directory`: opt-in government catalog downloads and parsing.
 
 Application use cases depend on ports. Web and persistence adapters do not call

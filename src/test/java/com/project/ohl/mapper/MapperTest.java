@@ -1,12 +1,8 @@
 package com.project.ohl.mapper;
 
 import com.project.ohl.application.mapper.CategoryMapper;
-import com.project.ohl.application.mapper.FeedbackMapper;
-import com.project.ohl.application.mapper.NotificationMapper;
 import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.model.CategoryDto;
-import com.project.ohl.application.model.FeedbackDto;
-import com.project.ohl.application.model.NotificationDto;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.domain.model.Category;
 import com.project.ohl.domain.model.Section;
@@ -20,8 +16,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MapperTest {
     private final CategoryMapper categories = Mappers.getMapper(CategoryMapper.class);
     private final UserMapper users = Mappers.getMapper(UserMapper.class);
-    private final NotificationMapper notifications = Mappers.getMapper(NotificationMapper.class);
-    private final FeedbackMapper feedback = Mappers.getMapper(FeedbackMapper.class);
 
     @Test
     void categoryMappingPreservesParentIdWithoutCopyingTheParentGraph() {
@@ -50,10 +44,6 @@ class MapperTest {
         var user = users.convertToEntity(new UserDto());
         assertThat(user.getSchool()).isNull();
         assertThat(user.getRole()).isNull();
-        var notification = notifications.convertToEntity(new NotificationDto());
-        assertThat(notification.getSender()).isNull();
-        assertThat(notification.getReceiver()).isNull();
-        assertThat(feedback.convertToEntity(new FeedbackDto()).getUser()).isNull();
         assertThat(categories.convertToDto(Category.builder().id(id(17)).build()).getParentId()).isNull();
     }
 
@@ -62,12 +52,5 @@ class MapperTest {
         var user = users.convertToEntity(UserDto.builder().schoolId(id(19)).roleId(id(4)).build());
         assertThat(user.getSchool().getId()).isEqualTo(id(19));
         assertThat(user.getRole().getId()).isEqualTo(id(4));
-        var notification = notifications.convertToEntity(NotificationDto.builder().senderId(id(43)).receiverId(id(56)).build());
-        assertThat(notification.getSender().getId()).isEqualTo(id(43));
-        assertThat(notification.getReceiver().getId()).isEqualTo(id(56));
-        var dto = notifications.convertToDto(notification);
-        assertThat(dto.getSenderId()).isEqualTo(id(43));
-        assertThat(dto.getReceiverId()).isEqualTo(id(56));
-        assertThat(feedback.convertToEntity(FeedbackDto.builder().userId(id(71)).build()).getUser().getId()).isEqualTo(id(71));
     }
 }

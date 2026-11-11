@@ -1,9 +1,7 @@
 package com.project.ohl.adapter.config;
 
 import com.project.ohl.application.mapper.CategoryMapper;
-import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.mapper.SchoolMapper;
-import com.project.ohl.application.mapper.NotificationMapper;
 import com.project.ohl.application.mapper.RoleMapper;
 import com.project.ohl.application.mapper.SectionMapper;
 import com.project.ohl.application.mapper.UserMapper;
@@ -19,18 +17,8 @@ public class MapperConfig {
     }
 
     @Bean
-    public FeedbackMapper feedbackMapper() {
-        return Mappers.getMapper(FeedbackMapper.class);
-    }
-
-    @Bean
     public SchoolMapper schoolMapper() {
         return Mappers.getMapper(SchoolMapper.class);
-    }
-
-    @Bean
-    public NotificationMapper notificationMapper() {
-        return Mappers.getMapper(NotificationMapper.class);
     }
 
     @Bean

@@ -4,7 +4,6 @@ import com.project.ohl.domain.model.Category;
 import com.project.ohl.domain.model.School;
 import com.project.ohl.domain.model.Role;
 import com.project.ohl.domain.model.Section;
-import com.project.ohl.domain.model.User;
 import java.util.UUID;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -27,8 +26,4 @@ public interface ReferenceMapper {
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")
     Section section(UUID id);
-
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    User user(UUID id);
 }

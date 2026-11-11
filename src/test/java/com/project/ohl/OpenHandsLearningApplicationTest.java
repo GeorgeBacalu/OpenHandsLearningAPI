@@ -5,7 +5,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -116,48 +115,15 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     }
 
     @Test
-    void eventListsAreBoundedFilteredAndOrdered() throws Exception {
-        var first = json.readTree(send("GET", "/api/notifications?size=1", null).body());
-        var second = json.readTree(send("GET", "/api/notifications?page=1&size=1", null).body());
-        assertThat(first.size()).isEqualTo(1);
-        assertThat(second.size()).isEqualTo(1);
-        assertThat(first.get(0).path("id").asText()).isNotEqualTo(second.get(0).path("id").asText());
-        assertThat(Instant.parse(first.get(0).path("sentAt").asText()))
-                .isAfter(Instant.parse(second.get(0).path("sentAt").asText()));
-        assertThat(json.readTree(send("GET", "/api/notifications?page=2&size=1", null).body()).size()).isZero();
-        String receiver = first.get(0).path("receiverId").asText();
-        var inbox = json.readTree(send("GET", "/api/notifications?receiverId=" + receiver, null).body());
-        assertThat(inbox.size()).isEqualTo(1);
-        assertThat(inbox.get(0).path("receiverId").asText()).isEqualTo(receiver);
-        var feedback = json.readTree(send("GET", "/api/feedbacks?size=1", null).body());
-        String user = feedback.get(0).path("userId").asText();
-        var filtered = json.readTree(send("GET", "/api/feedbacks?userId=" + user, null).body());
-        assertThat(filtered.size()).isEqualTo(1);
-        assertThat(filtered.get(0).path("userId").asText()).isEqualTo(user);
-        assertThat(send("GET", "/api/notifications?size=101", null).statusCode()).isEqualTo(400);
-        assertThat(send("GET", "/api/feedbacks?page=-1", null).statusCode()).isEqualTo(400);
-    }
-
-    @Test
-    void feedbackSupportsLongTextWithAnExplicitLimitAndUtcTimestamp() throws Exception {
-        var users = json.readTree(send("GET", "/api/users", null).body());
-        var request = json.createObjectNode().put("type", "ISSUE").put("description", "x".repeat(1000))
-                .put("userId", users.get(0).path("id").asText());
-        var response = send("POST", "/api/feedbacks", json.writeValueAsString(request));
-        assertThat(response.statusCode()).isEqualTo(201);
-        var saved = json.readTree(response.body());
-        assertThat(saved.path("description").asText()).hasSize(1000);
-        assertThat(saved.path("sentAt").asText()).endsWith("Z");
-        assertThat(json.readTree(send("GET", "/api/feedbacks/" + saved.path("id").asText(), null).body())
-                .path("description").asText()).hasSize(1000);
-        request.put("description", "x".repeat(10001));
-        assertThat(send("POST", "/api/feedbacks", json.writeValueAsString(request)).statusCode()).isEqualTo(400);
-        var notice = json.createObjectNode().put("message", "x".repeat(1000)).put("isRead", false)
-                .put("senderId", users.get(0).path("id").asText())
-                .put("receiverId", users.get(1).path("id").asText());
-        assertThat(send("POST", "/api/notifications", json.writeValueAsString(notice)).statusCode()).isEqualTo(201);
-        notice.put("message", "x".repeat(10001));
-        assertThat(send("POST", "/api/notifications", json.writeValueAsString(notice)).statusCode()).isEqualTo(400);
+    void feedbackAndNotificationFeaturesAreRemoved() throws Exception {
+        for (String endpoint : List.of("/api/feedbacks", "/api/notifications")) {
+            assertThat(send("GET", endpoint, null).statusCode()).isEqualTo(404);
+            assertThat(send("GET", endpoint + "/" + UUID.randomUUID(), null).statusCode()).isEqualTo(404);
+        }
+        String contract = send("GET", "/openapi.json", null).body();
+        assertThat(contract).doesNotContain("/api/feedbacks", "/api/notifications", "FeedbackDto", "FeedbackType", "NotificationDto");
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) IN ('feedbacks', 'notifications')", Long.class)).isZero();
+        assertThat(json.readTree(send("GET", "/api/users", null).body()).size()).isEqualTo(2);
     }
 
     @Test
