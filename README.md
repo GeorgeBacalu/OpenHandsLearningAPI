@@ -20,7 +20,8 @@ with two records per table. The shared fixture clears all rows
 before and after each test, and verifies the row counts. The full catalog is not loaded.
 
 Tests cover persistence, optimistic locking, foreign keys, HTTP errors, BCrypt,
-MapStruct mappings, OpenAPI coverage, and architecture boundaries.
+MapStruct mappings, OpenAPI coverage, and architecture boundaries. A separate
+Flyway test verifies schema creation, empty application tables, and repeat runs.
 
 ## Run locally
 
@@ -38,21 +39,30 @@ schema; startup does not create tables or seed data. No dev profile is required.
 All entity IDs and foreign keys use UUIDs. New records receive random UUIDs;
 HTTP IDs are UUID strings. Resource image/icon numbers remain integers.
 
-For an existing database with numeric IDs, back it up with `pg_dump -Fc`, restore
-that backup into a separate demo database, and rehearse this migration first:
+## Database migrations
+
+Flyway 13.12.1 uses `src/main/resources/db/migration/V1__initial_schema.sql` to
+create the current PostgreSQL schema, including UUID defaults, primary keys,
+foreign keys, and catalog ordering. It contains no records. The earlier manual
+UUID conversion is superseded by this initial schema migration.
+
+Flyway is disabled by default (`FLYWAY_ENABLED=false`) so starting the API against
+the existing development database does not create a history table or change its
+schema or data. Automatic baselining is disabled. Existing databases are not
+enrolled in Flyway by this change.
+
+To initialize a separate, empty PostgreSQL database, set its connection and enable
+Flyway for that process before starting the API:
 
 ```powershell
-psql -h localhost -U postgres -d open-hands-learning-demo -v ON_ERROR_STOP=1 -f database/migrations/20261111_uuid_ids.sql
+$env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/open-hands-learning-new"
+$env:FLYWAY_ENABLED = "true"
+.\mvnw.cmd spring-boot:run
 ```
 
-Stop API writes and apply the same command with `-d open-hands-learning` after
-verification. The migration runs once, in a transaction, and compares every row
-and relationship before committing. It maps old IDs to stable UUIDs using
-`UUID.nameUUIDFromBytes` semantics over UTF-8 `OpenHandsLearning:<table>:<old-id>`.
-It also adds missing optimistic-lock versions and preserves catalog ordering in
-`display_order`. New IDs use UUID v4. For rollback, restore the pre-migration
-backup into a separate database and switch the previous API/client versions to
-that database; restoring an old backup omits subsequent writes.
+Flyway applies V1 once and records its checksum; Hibernate then validates the
+schema. Do not edit an applied migration; add V2 for subsequent schema changes.
+The H2 tests retain Hibernate schema creation and their separate minimal fixtures.
 
 ## HTTP contract
 
@@ -88,7 +98,7 @@ recursive entity loading. ArchUnit tests enforce these boundaries.
 The Java 25 baseline uses Spring Boot 4.1.2, Maven 3.10.0, and Maven Wrapper 3.3.4.
 Spring Boot manages the compatible Spring Framework, Hibernate, Jackson 3,
 PostgreSQL driver, Spring Security Crypto, and Lombok versions. Explicit overrides
-keep H2, JUnit, Mockito, and Maven plugins current. ArchUnit 1.5.1 enforces
+keep Flyway, H2, JUnit, Mockito, and Maven plugins current. ArchUnit 1.5.1 enforces
 architecture boundaries. MapStruct 1.6.3
 provides compile-time DTO mapping; its processor and Lombok binding 0.2.0 are
 configured explicitly for Java 25. Unmapped target fields fail compilation.
@@ -99,6 +109,7 @@ configuration live in `pom.xml`; wrapper settings and checksum live in
 
 Release references: [Spring Boot](https://docs.spring.io/spring-boot/),
 [Maven](https://maven.apache.org/download.cgi),
+[Flyway](https://documentation.red-gate.com/fd/release-notes-for-flyway-engine-179732572.html),
 [MapStruct](https://mapstruct.org/documentation/reference-guide/), and
 [OpenAPI](https://spec.openapis.org/oas/v3.2.1.html).
 

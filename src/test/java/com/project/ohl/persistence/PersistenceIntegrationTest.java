@@ -1,5 +1,10 @@
 package com.project.ohl.persistence;
 
+import static com.project.ohl.TestIds.CATEGORY_PARENT;
+import static com.project.ohl.TestIds.CATEGORY_CHILD;
+import static com.project.ohl.TestIds.SECTION_VIDEO;
+import static com.project.ohl.TestIds.INSTITUTION_A;
+import static com.project.ohl.TestIds.ROLE_USER;
 import static com.project.ohl.TestIds.id;
 import com.project.ohl.adapter.persistence.section.SectionEntity;
 import com.project.ohl.adapter.persistence.section.SectionJpaRepository;
@@ -54,8 +59,8 @@ class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest
 
     @Test
     void rejectsSelfParentsAndDescendantParents() {
-        var parent = categories.findById(id(1)).orElseThrow();
-        var child = categories.findById(id(2)).orElseThrow();
+        var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
+        var child = categories.findById(CATEGORY_CHILD).orElseThrow();
         var update = categoryMapper.convertToDto(parent);
         update.setParentId(parent.getId());
         assertThatThrownBy(() -> categoryService.updateCategoryById(update, parent.getId()))
@@ -67,8 +72,8 @@ class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest
 
     @Test
     void hashesPasswordsBeforeSavingUsers() {
-        var institution = institutions.findById(id(1)).orElseThrow();
-        var role = roles.findById(id(1)).orElseThrow();
+        var institution = institutions.findById(INSTITUTION_A).orElseThrow();
+        var role = roles.findById(ROLE_USER).orElseThrow();
         var request = com.project.ohl.application.model.UserDto.builder().name("Ana")
                 .email("hashed@example.test").password("long-test-password").mobile("0712345678")
                 .address("Bucharest").institutionId(institution.getId()).roleId(role.getId()).build();
@@ -92,9 +97,9 @@ class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest
         var user = users.save(User.builder().name("Ana").email("ana@example.test")
               .password("test-password").mobile("0712345678").address("Bucharest")
               .birthday(LocalDate.of(2000, 1, 1)).institution(institution).role(role).build());
-        var parent = categories.findById(id(1)).orElseThrow();
+        var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
         var child = categories.save(Category.builder().name("C").parent(parent)
-                .section(sections.findById(id(1)).orElseThrow()).build());
+                .section(sections.findById(SECTION_VIDEO).orElseThrow()).build());
         var letter = letters.save(LetterSignPair.builder().letter("A").imageId(3).build());
         var sentAt = LocalDateTime.of(2026, 1, 1, 10, 0);
         var feedback = feedbacks.save(Feedback.builder().description("Useful lesson")
@@ -146,8 +151,8 @@ class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest
 
     @Test
     void categoryListsUseOneQueryAndReturnTheActualParentId() {
-        var parent = categories.findById(id(1)).orElseThrow();
-        var child = categories.findById(id(2)).orElseThrow();
+        var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
+        var child = categories.findById(CATEGORY_CHILD).orElseThrow();
         var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
         statistics.setStatisticsEnabled(true);
         statistics.clear();
@@ -157,26 +162,26 @@ class PersistenceIntegrationTest extends com.project.ohl.DatabaseIntegrationTest
             assertThat(result).filteredOn(value -> value.getId().equals(child.getId())).singleElement()
                     .satisfies(value -> {
                         assertThat(value.getParentId()).isEqualTo(parent.getId());
-                        assertThat(value.getSectionId()).isEqualTo(id(1));
+                        assertThat(value.getSectionId()).isEqualTo(SECTION_VIDEO);
                     });
         } finally {
             statistics.setStatisticsEnabled(false);
         }
-        assertThat(categories.findByParentIdAndSectionIdAndNameContaining(parent.getId(), id(1), "letter"))
+        assertThat(categories.findByParentIdAndSectionIdAndNameContaining(parent.getId(), SECTION_VIDEO, "letter"))
               .extracting(Category::getId).containsExactly(child.getId());
     }
 
     @Test
     void staleWritesCannotOverwriteAConcurrentUpdate() {
-        SectionEntity first = sectionJpaRepository.findById(id(1)).orElseThrow();
-        SectionEntity stale = sectionJpaRepository.findById(id(1)).orElseThrow();
+        SectionEntity first = sectionJpaRepository.findById(SECTION_VIDEO).orElseThrow();
+        SectionEntity stale = sectionJpaRepository.findById(SECTION_VIDEO).orElseThrow();
         first.setName("First change");
         sectionJpaRepository.saveAndFlush(first);
         stale.setName("Stale change");
 
         assertThatThrownBy(() -> sectionJpaRepository.saveAndFlush(stale))
                 .isInstanceOf(ObjectOptimisticLockingFailureException.class);
-        assertThat(sections.findById(id(1)).orElseThrow().getName()).isEqualTo("First change");
+        assertThat(sections.findById(SECTION_VIDEO).orElseThrow().getName()).isEqualTo("First change");
     }
 
     @Test

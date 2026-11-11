@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import tools.jackson.databind.json.JsonMapper;
+import static com.project.ohl.TestIds.INSTITUTION_A;
+import static com.project.ohl.TestIds.ROLE_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -31,9 +33,10 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(response.headers().firstValue("Content-Type").orElse("")).contains("application/json");
         var users = json.readTree(response.body());
         assertThat(users.size()).isEqualTo(2);
-        assertThat(users.get(0).path("name").asText()).isEqualTo("Ana");
-        assertThat(users.get(1).path("name").asText()).isEqualTo("Dan");
-        assertThat(users.get(0).path("mobile").asText()).isEqualTo("0712345678");
+        assertThat(java.util.List.of(users.get(0).path("name").asText(), users.get(1).path("name").asText()))
+                .containsExactlyInAnyOrder("Ana", "Dan");
+        var ana = users.get(0).path("name").asText().equals("Ana") ? users.get(0) : users.get(1);
+        assertThat(ana.path("mobile").asText()).isEqualTo("0712345678");
         assertThat(users.get(0).has("password")).isFalse();
     }
 
@@ -80,8 +83,8 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         request.put("password", "\u00e9".repeat(37));
         request.put("mobile", "0712345678");
         request.put("address", "Bucharest");
-        request.put("institutionId", "00000000-0000-4000-8000-000000000001");
-        request.put("roleId", "00000000-0000-4000-8000-000000000001");
+        request.put("institutionId", INSTITUTION_A.toString());
+        request.put("roleId", ROLE_USER.toString());
         var response = send("POST", "/api/users", json.writeValueAsString(request));
         assertThat(response.statusCode()).isEqualTo(400);
         assertThat(json.readTree(response.body()).path("detail").asText())
