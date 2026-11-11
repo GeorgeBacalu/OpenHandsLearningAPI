@@ -1,7 +1,6 @@
 package com.project.ohl.adapter.persistence.user;
 
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
-import com.project.ohl.adapter.persistence.classroom.ClassroomEntity;
 import com.project.ohl.adapter.persistence.school.SchoolEntity;
 import com.project.ohl.adapter.persistence.role.RoleEntity;
 import com.project.ohl.application.port.out.UserRepositoryPort;
@@ -32,7 +31,7 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
     @Override
     protected User toDomain(UserEntity entity) {
         return User.builder().id(entity.getId())
-              .classroomId(entity.getClassroom() == null ? null : entity.getClassroom().getId()).name(entity.getName())
+              .name(entity.getName())
               .email(entity.getEmail())
               .password(entity.getPassword())
               .mobile(entity.getMobile())
@@ -47,7 +46,6 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
     protected void apply(User model, UserEntity entity) {
         entity.setName(model.getName());
         entity.setEmail(model.getEmail() == null ? null : model.getEmail().strip().toLowerCase(Locale.ROOT));
-        entity.setClassroom(reference(ClassroomEntity.class, model.getClassroomId()));
         entity.setPassword(model.getPassword());
         entity.setMobile(model.getMobile());
         entity.setAddress(model.getAddress());

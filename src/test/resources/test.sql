@@ -8,10 +8,6 @@ INSERT INTO schools (id, name, city_id) VALUES
     ('e882d373-7f2f-44b2-8c87-530cd04964d4', 'School A', '00000000-0000-4000-8000-000000000104'),
     ('5d958f7d-3407-49ff-b7c1-91098cc5e9e0', 'School B', '00000000-0000-4000-8000-000000000105');
 
-INSERT INTO classrooms (id, name, school_id) VALUES
-    ('00000000-0000-4000-8000-00000000000b', 'A', 'e882d373-7f2f-44b2-8c87-530cd04964d4'),
-    ('00000000-0000-4000-8000-00000000000c', 'B', '5d958f7d-3407-49ff-b7c1-91098cc5e9e0');
-
 INSERT INTO roles (id, authority) VALUES
     ('99d0dd27-ea57-42b3-8fd8-64e3973a05d3', 'USER'),
     ('4c517662-ab55-47ea-b758-84c1af759525', 'ADMIN');
@@ -24,9 +20,9 @@ INSERT INTO categories (id, name, parent_id, section_id, media_key) VALUES
     ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 'Alphabet', NULL, '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'alfabet'),
     ('f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185', 'Letter A', '176ccfb5-fe9b-484c-a799-310eb72a02a5', '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'dactilema_a');
 
-INSERT INTO users (id, name, email, password, mobile, address, birthday, school_id, role_id, classroom_id) VALUES
-    ('4b16f89f-f513-4723-9d19-5750cf7199d6', 'Ana', 'ana@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0712345678', 'Bucharest', '2000-01-01', 'e882d373-7f2f-44b2-8c87-530cd04964d4', '99d0dd27-ea57-42b3-8fd8-64e3973a05d3', '00000000-0000-4000-8000-00000000000b'),
-    ('0f7cc0da-f19f-48b7-ae3b-5139cdfbd690', 'Dan', 'dan@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0798765432', 'Cluj', '2001-02-02', '5d958f7d-3407-49ff-b7c1-91098cc5e9e0', '4c517662-ab55-47ea-b758-84c1af759525', '00000000-0000-4000-8000-00000000000c');
+INSERT INTO users (id, name, email, password, mobile, address, birthday, school_id, role_id) VALUES
+    ('4b16f89f-f513-4723-9d19-5750cf7199d6', 'Ana', 'ana@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0712345678', 'Bucharest', '2000-01-01', 'e882d373-7f2f-44b2-8c87-530cd04964d4', '99d0dd27-ea57-42b3-8fd8-64e3973a05d3'),
+    ('0f7cc0da-f19f-48b7-ae3b-5139cdfbd690', 'Dan', 'dan@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0798765432', 'Cluj', '2001-02-02', '5d958f7d-3407-49ff-b7c1-91098cc5e9e0', '4c517662-ab55-47ea-b758-84c1af759525');
 
 INSERT INTO feedbacks (id, type, description, sent_at, user_id) VALUES
     ('bc1ff3a7-cbd1-4972-a335-1ba02e3c4bea', 'ISSUE', 'Test issue', '2026-01-01 08:00:00+00', '4b16f89f-f513-4723-9d19-5750cf7199d6'),

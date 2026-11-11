@@ -19,7 +19,6 @@ import lombok.ToString;
 public class UserDto {
 
     private UUID id;
-    private UUID classroomId;
 
     @NotBlank(message = "Name must not be blank")
     private String name;

@@ -1841,199 +1841,6 @@
           }
         }
       }
-    },
-    "/api/classrooms": {
-      "get": {
-        "operationId": "getAllClassrooms",
-        "tags": [
-          "classrooms"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ClassroomDto"
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "saveClassroom",
-        "tags": [
-          "classrooms"
-        ],
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClassroomDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ClassroomDto"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/classrooms/{id}": {
-      "get": {
-        "operationId": "getClassroomById",
-        "tags": [
-          "classrooms"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClassroomDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "put": {
-        "operationId": "updateClassroomById",
-        "tags": [
-          "classrooms"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClassroomDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ClassroomDto"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deleteClassroomById",
-        "tags": [
-          "classrooms"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      }
     }
   },
   "components": {
@@ -2272,13 +2079,6 @@
           "roleId": {
             "type": "string",
             "format": "uuid"
-          },
-          "classroomId": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
           }
         },
         "required": [
@@ -2343,13 +2143,6 @@
             "format": "uuid"
           },
           "roleId": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
-          },
-          "classroomId": {
             "type": [
               "string",
               "null"
@@ -2421,27 +2214,6 @@
           "id",
           "name",
           "countyId"
-        ]
-      },
-      "ClassroomDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1
-          },
-          "schoolId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "name",
-          "schoolId"
         ]
       }
     }

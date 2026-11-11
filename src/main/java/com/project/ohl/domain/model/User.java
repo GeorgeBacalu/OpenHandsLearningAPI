@@ -15,7 +15,6 @@ import lombok.ToString;
 public class User {
 
     private UUID id;
-    private UUID classroomId;
     private String name;
     private String email;
     @ToString.Exclude

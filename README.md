@@ -42,7 +42,7 @@ HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Andro
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V8 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V9 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
@@ -57,7 +57,7 @@ content. Space characters remain valid sign entries. New empty databases contain
 no application records after V1 through V7. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
 roll back V2.
-Migrate the database through V8 before running this backend.
+Migrate the database through V9 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
@@ -128,7 +128,9 @@ City and school searches accept `name`, `offset` (default 0), and `limit`
 (default 50, maximum 200). School CRUD is at `/api/schools`; requests use
 `name` and `cityId`. User requests use `schoolId`.
 
-Classroom CRUD remains available at `/api/classrooms`; users can reference `classroomId`.
+V9 removes classroom management, its table, and user classroom assignments.
+Users retain their school memberships and all other account data. The API no
+longer exposes classroom endpoints or a classroom reference on users.
 
 For a separate empty PostgreSQL database:
 

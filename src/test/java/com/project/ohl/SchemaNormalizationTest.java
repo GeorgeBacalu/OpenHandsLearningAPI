@@ -1,10 +1,8 @@
 package com.project.ohl;
 
 import com.project.ohl.application.model.UserDto;
-import com.project.ohl.application.model.ClassroomDto;
 import com.project.ohl.application.port.in.CategoryService;
 import com.project.ohl.application.port.in.UserService;
-import com.project.ohl.application.port.in.ClassroomService;
 import com.project.ohl.domain.exception.InvalidRequestException;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -24,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SchemaNormalizationTest extends DatabaseIntegrationTest {
     @Autowired CategoryService categories;
     @Autowired UserService users;
-    @Autowired ClassroomService classrooms;
     @Autowired JdbcTemplate database;
 
     private UUID user(String name) { return database.queryForObject("SELECT id FROM users WHERE name = ?", UUID.class, name); }
@@ -69,15 +66,6 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
         assertThat(users.saveUser(request).getEmail()).isEqualTo("created@example.test");
         request.setEmail(" ANA@example.TEST ");
         assertThatThrownBy(() -> users.saveUser(request)).isInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test void classroomsHaveSchoolMembershipAndUsersCannotJoinAnotherSchoolsClassroom() {
-        var created = classrooms.saveClassroom(ClassroomDto.builder().name("Class C").schoolId(SCHOOL_A).build());
-        assertThat(classrooms.getClassroomById(created.getId()).getSchoolId()).isEqualTo(SCHOOL_A);
-        var ana = users.getUserById(user("Ana"));
-        ana.setPassword("test-password");
-        ana.setClassroomId(database.queryForObject("SELECT id FROM classrooms WHERE name = 'B'", UUID.class));
-        assertThatThrownBy(() -> users.updateUserById(ana, ana.getId())).isInstanceOf(InvalidRequestException.class);
     }
 
 }

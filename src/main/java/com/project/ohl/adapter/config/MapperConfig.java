@@ -1,7 +1,6 @@
 package com.project.ohl.adapter.config;
 
 import com.project.ohl.application.mapper.CategoryMapper;
-import com.project.ohl.application.mapper.ClassroomMapper;
 import com.project.ohl.application.mapper.FeedbackMapper;
 import com.project.ohl.application.mapper.SchoolMapper;
 import com.project.ohl.application.mapper.NotificationMapper;
@@ -14,11 +13,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration(proxyBeanMethods = false)
 public class MapperConfig {
-    @Bean
-    public ClassroomMapper classroomMapper() {
-        return Mappers.getMapper(ClassroomMapper.class);
-    }
-
     @Bean
     public CategoryMapper categoryMapper() {
         return Mappers.getMapper(CategoryMapper.class);
@@ -33,7 +27,6 @@ public class MapperConfig {
     public SchoolMapper schoolMapper() {
         return Mappers.getMapper(SchoolMapper.class);
     }
-
 
     @Bean
     public NotificationMapper notificationMapper() {

@@ -1,7 +1,6 @@
 package com.project.ohl.adapter.persistence.user;
 
 import com.project.ohl.adapter.persistence.PersistentEntity;
-import com.project.ohl.adapter.persistence.classroom.ClassroomEntity;
 import com.project.ohl.adapter.persistence.school.SchoolEntity;
 import com.project.ohl.adapter.persistence.role.RoleEntity;
 import jakarta.persistence.Column;
@@ -27,9 +26,6 @@ import org.hibernate.annotations.Check;
 })
 @Check(constraints = "trim(name) <> '' AND trim(email) <> '' AND trim(password) <> '' AND trim(mobile) <> '' AND trim(address) <> ''")
 public class UserEntity extends PersistentEntity {
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "classroom_id")
-    private ClassroomEntity classroom;
     @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "email", nullable = false, unique = true)

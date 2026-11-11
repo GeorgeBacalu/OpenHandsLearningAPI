@@ -78,7 +78,6 @@ public class SchoolDirectoryPersistenceAdapter implements SchoolDirectoryPort {
                 UUID.fromString("103ac659-e577-388b-a794-67fff7f04ca3"), new String[]{"Scoala Gimnaziala Nr. 1", "2361101277"},
                 UUID.fromString("d507dc18-15f4-35b8-83ec-548ee8b2ffc6"), new String[]{"Scoala Gimnaziala Nr. 2", "2362101883"},
                 UUID.fromString("e5bfa376-f632-3683-8207-91fc4924cc50"), new String[]{"Scoala Gimnaziala Nr. 3", "2362100534"});
-        database.execute("SET CONSTRAINTS users_classroom_school_fkey DEFERRED");
         replacements.forEach((oldId, school) -> {
             var existing = database.queryForList("SELECT name FROM schools WHERE id = ? FOR UPDATE", String.class, oldId);
             if (existing.isEmpty()) return;
@@ -86,10 +85,8 @@ public class SchoolDirectoryPersistenceAdapter implements SchoolDirectoryPort {
             UUID replacement = sourceId("school", school[1]);
             if (database.queryForObject("SELECT COUNT(*) FROM schools WHERE id = ?", Integer.class, replacement) != 1)
                 throw new IllegalStateException("Replacement school is absent from the government dataset");
-            database.update("UPDATE classrooms SET school_id = ? WHERE school_id = ?", replacement, oldId);
             database.update("UPDATE users SET school_id = ? WHERE school_id = ?", replacement, oldId);
             database.update("DELETE FROM schools WHERE id = ?", oldId);
         });
-        database.execute("SET CONSTRAINTS users_classroom_school_fkey IMMEDIATE");
     }
 }

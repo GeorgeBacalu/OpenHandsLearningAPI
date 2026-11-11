@@ -5,7 +5,6 @@ DELETE FROM feedbacks;
 DELETE FROM categories;
 DELETE FROM users;
 DELETE FROM roles;
-DELETE FROM classrooms;
 DELETE FROM schools;
 DELETE FROM sections;
 DELETE FROM cities;

@@ -49,6 +49,20 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(users.get(0).has("password")).isFalse();
     }
 
+    @Test
+    void classroomManagementAndAssignmentsAreRemoved() throws Exception {
+        assertThat(send("GET", "/api/classrooms", null).statusCode()).isEqualTo(404);
+        assertThat(send("GET", "/api/classrooms/" + UUID.randomUUID(), null).statusCode()).isEqualTo(404);
+        String contract = send("GET", "/openapi.json", null).body();
+        assertThat(contract).doesNotContain("/api/classrooms", "ClassroomDto", "classroomId");
+        var users = json.readTree(send("GET", "/api/users", null).body());
+        for (var user : users) {
+            assertThat(user.has("classroomId")).isFalse();
+            assertThat(user.has("schoolId")).isTrue();
+        }
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) = 'classrooms'", Long.class)).isZero();
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE LOWER(TABLE_NAME) = 'users' AND LOWER(COLUMN_NAME) = 'classroom_id'", Long.class)).isZero();
+    }
 
     @Test
     void checkedInContractMatchesEveryHttpOperation() throws Exception {
