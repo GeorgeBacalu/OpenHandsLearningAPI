@@ -75,30 +75,28 @@ class SectionServiceImplTest {
     @Test
     void getAllSections_shouldKeepMenuOrderAfterRenamingAndAppendOtherSections() {
         UUID video = UUID.fromString("20a6880c-2e37-32e3-8e45-07a17e99a000");
-        UUID text = UUID.fromString("80008ad8-872e-3c12-96a0-209f2b699d92");
         UUID voice = UUID.fromString("07329929-eb4b-3793-8b2d-f6364d711a79");
         UUID expressions = UUID.fromString("1deb5200-b06d-3977-9426-e2ea373195f9");
         var renamedVideo = Section.builder().id(video).name("Z translated video").build();
-        var renamedText = Section.builder().id(text).name("C translated text").build();
         var renamedVoice = Section.builder().id(voice).name("B translated voice").build();
         var renamedExpressions = Section.builder().id(expressions).name("A translated expressions").build();
         given(sectionRepository.findAll()).willReturn(List.of(section2, renamedExpressions,
-                renamedVoice, section1, renamedVideo, renamedText));
+                renamedVoice, section1, renamedVideo));
 
         assertThat(sectionService.getAllSections()).extracting(SectionDto::getId)
-                .containsExactly(video, text, voice, expressions, section1.getId(), section2.getId());
+                .containsExactly(video, voice, expressions, section1.getId(), section2.getId());
     }
 
     @Test
     void getAllSections_shouldKeepRelativeOrderWhenBuiltInSectionsAreMissing() {
-        UUID text = UUID.fromString("80008ad8-872e-3c12-96a0-209f2b699d92");
+        UUID voice = UUID.fromString("07329929-eb4b-3793-8b2d-f6364d711a79");
         UUID expressions = UUID.fromString("1deb5200-b06d-3977-9426-e2ea373195f9");
         given(sectionRepository.findAll()).willReturn(List.of(
                 Section.builder().id(expressions).name("Expressions").build(),
-                Section.builder().id(text).name("Text").build()));
+                Section.builder().id(voice).name("Voice").build()));
 
         assertThat(sectionService.getAllSections()).extracting(SectionDto::getId)
-                .containsExactly(text, expressions);
+                .containsExactly(voice, expressions);
     }
 
     @Test

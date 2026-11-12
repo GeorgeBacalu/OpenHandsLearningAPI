@@ -42,7 +42,7 @@ HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Andro
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V13 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V14 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
@@ -57,7 +57,7 @@ content. Space characters remain valid sign entries. New empty databases contain
 no application records after V1 through V7. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
 roll back V2.
-Migrate the database through V13 before running this backend.
+Migrate the database through V14 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
@@ -138,10 +138,15 @@ only a user/category UUID pair. Existing pairs, composite uniqueness and cascadi
 foreign keys are preserved; favorite lists continue to use alphabetical category order.
 
 V13 removes section `display_order` and `code`. The section service uses Stream
-sorting with a fixed UUID list: Video → Text to Sign → Voice to Sign → Expressions.
+sorting with a fixed UUID list: Video → Voice to Sign → Expressions (after V14).
 Other section UUIDs follow in UUID-string order. Renaming a section does not change
 its position or Android screen; existing IDs, media keys and category links are preserved.
 Changing the fixed menu order requires a code change.
+
+V14 removes the retired Text to Sign section by its canonical UUID. It has no
+linked categories in development. Remaining section IDs and all other records
+are preserved; category references prevent deleting a section that still has content.
+Voice to Sign retains both typed input and speech recognition unchanged.
 
 For a separate empty PostgreSQL database:
 
