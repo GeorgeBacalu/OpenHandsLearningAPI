@@ -3,7 +3,6 @@ package com.project.ohl.adapter.config;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.mapper.SchoolMapper;
 import com.project.ohl.application.mapper.RoleMapper;
-import com.project.ohl.application.mapper.SectionMapper;
 import com.project.ohl.application.mapper.UserMapper;
 import org.mapstruct.factory.Mappers;
 import org.springframework.context.annotation.Bean;
@@ -24,11 +23,6 @@ public class MapperConfig {
     @Bean
     public RoleMapper roleMapper() {
         return Mappers.getMapper(RoleMapper.class);
-    }
-
-    @Bean
-    public SectionMapper sectionMapper() {
-        return Mappers.getMapper(SectionMapper.class);
     }
 
     @Bean

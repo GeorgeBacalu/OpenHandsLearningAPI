@@ -37,12 +37,12 @@ validation, and timezone settings. Hibernate validates the existing development
 schema; startup does not create tables or seed data. No dev profile is required.
 
 All entity IDs and foreign keys use UUIDs. New records receive random UUIDs;
-HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Android resource IDs remain local to the client.
+Persisted entity IDs are UUID strings. The read-only section menu uses fixed type identifiers. Catalog images and icons use stable media keys; Android resource IDs remain local to the client.
 
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V14 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V15 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
@@ -57,7 +57,7 @@ content. Space characters remain valid sign entries. New empty databases contain
 no application records after V1 through V7. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
 roll back V2.
-Migrate the database through V14 before running this backend.
+Migrate the database through V15 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
@@ -137,11 +137,8 @@ V12 renames `user_favorites` to `favorites` and drops `created_at`. Each row is
 only a user/category UUID pair. Existing pairs, composite uniqueness and cascading
 foreign keys are preserved; favorite lists continue to use alphabetical category order.
 
-V13 removes section `display_order` and `code`. The section service uses Stream
-sorting with a fixed UUID list: Video → Voice to Sign.
-Other section UUIDs follow in UUID-string order. Renaming a section does not change
-its position or Android screen; existing IDs, media keys and category links are preserved.
-Changing the fixed menu order requires a code change.
+V13 removes section `display_order` and `code`. V15 replaces UUID-based section
+ordering with the fixed declaration order of the API's Section enum.
 
 The retired Text to Sign section was deleted directly as a catalog record change,
 without a schema migration. It had no linked categories in development. Remaining
@@ -174,6 +171,12 @@ WHERE section_id = '1deb5200-b06d-3977-9426-e2ea373195f9';
 DELETE FROM sections WHERE id = '1deb5200-b06d-3977-9426-e2ea373195f9';
 COMMIT;
 ```
+
+V15 drops the unreferenced `sections` table. `GET /api/sections` remains a read-only,
+database-independent menu in fixed order: VIDEO, then VOICE_TO_SIGN. Each response
+entry has type, name, mediaKey and iconKey; section UUIDs and section mutation/detail
+endpoints are removed. Menu definitions and ordering can only change in API code.
+All remaining application records are preserved. Applied migration files remain immutable.
 
 For a separate empty PostgreSQL database:
 

@@ -3,7 +3,6 @@ package com.project.ohl.adapter.config;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.mapper.SchoolMapper;
 import com.project.ohl.application.mapper.RoleMapper;
-import com.project.ohl.application.mapper.SectionMapper;
 import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.port.in.CategoryService;
 import com.project.ohl.application.port.in.SchoolService;
@@ -15,7 +14,6 @@ import com.project.ohl.application.port.out.FavoriteRepositoryPort;
 import com.project.ohl.application.port.out.SchoolRepositoryPort;
 import com.project.ohl.application.port.out.PasswordHasher;
 import com.project.ohl.application.port.out.RoleRepositoryPort;
-import com.project.ohl.application.port.out.SectionRepositoryPort;
 import com.project.ohl.application.port.out.UserRepositoryPort;
 import com.project.ohl.application.service.CategoryServiceImpl;
 import com.project.ohl.application.service.SchoolServiceImpl;
@@ -38,8 +36,8 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public SectionService sectionService(SectionRepositoryPort sections, SectionMapper mapper) {
-        return transactional(SectionService.class, new SectionServiceImpl(sections, mapper));
+    public SectionService sectionService() {
+        return new SectionServiceImpl();
     }
 
     @Bean

@@ -877,166 +877,6 @@
             }
           }
         }
-      },
-      "post": {
-        "operationId": "saveSection",
-        "tags": [
-          "sections"
-        ],
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SectionDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SectionDto"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sections/{id}": {
-      "get": {
-        "operationId": "getSectionById",
-        "tags": [
-          "sections"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SectionDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "put": {
-        "operationId": "updateSectionById",
-        "tags": [
-          "sections"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SectionDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SectionDto"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deleteSectionById",
-        "tags": [
-          "sections"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
       }
     },
     "/api/users": {
@@ -1470,9 +1310,12 @@
       "SectionDto": {
         "type": "object",
         "properties": {
-          "id": {
+          "type": {
             "type": "string",
-            "format": "uuid"
+            "enum": [
+              "VIDEO",
+              "VOICE_TO_SIGN"
+            ]
           },
           "name": {
             "type": "string",
@@ -1490,7 +1333,10 @@
           }
         },
         "required": [
-          "name"
+          "type",
+          "name",
+          "mediaKey",
+          "iconKey"
         ]
       },
       "UserDto": {

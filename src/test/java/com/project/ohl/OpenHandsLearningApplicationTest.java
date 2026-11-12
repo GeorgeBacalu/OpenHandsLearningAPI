@@ -48,29 +48,27 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     }
 
     @Test
-    void sectionsUseOnlyUuidIdentityAndStableMediaKeys() throws Exception {
-        var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'sections'", String.class);
-        assertThat(columns).containsExactlyInAnyOrder("id", "name", "media_key", "icon_key");
-        var sections = json.readTree(send("GET", "/api/sections", null).body());
+    void sectionsAreFixedReadOnlyAndIndependentOfDatabaseRecords() throws Exception {
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'sections'", Long.class)).isZero();
+        var response = send("GET", "/api/sections", null);
+        assertThat(response.statusCode()).isEqualTo(200);
+        var sections = json.readTree(response.body());
         assertThat(sections.size()).isEqualTo(2);
+        assertThat(List.of(sections.get(0).path("type").asText(), sections.get(1).path("type").asText()))
+                .containsExactly("VIDEO", "VOICE_TO_SIGN");
+        assertThat(sections.get(0).path("name").asText()).isEqualTo("Video Section");
+        assertThat(sections.get(0).path("mediaKey").asText()).isEqualTo("video_section");
+        assertThat(sections.get(1).path("name").asText()).isEqualTo("Voice to Sign Section");
+        assertThat(sections.get(1).path("iconKey").asText()).isEqualTo("ic_voice_to_sign_section");
         for (var section : sections) {
             assertThat(section.size()).isEqualTo(4);
-            assertThat(section.has("code") || section.has("displayOrder")).isFalse();
+            assertThat(section.has("id") || section.has("displayOrder")).isFalse();
         }
-        var request = json.createObjectNode().put("name", "New section")
-                .put("mediaKey", "new_section").put("iconKey", "ic_new_section");
-        var created = send("POST", "/api/sections", json.writeValueAsString(request));
-        assertThat(created.statusCode()).isEqualTo(201);
-        String id = json.readTree(created.body()).path("id").asText();
-        request.put("name", "Renamed section");
-        var updated = send("PUT", "/api/sections/" + id, json.writeValueAsString(request));
-        assertThat(updated.statusCode()).isEqualTo(200);
-        var section = json.readTree(updated.body());
-        assertThat(section.path("id").asText()).isEqualTo(id);
-        assertThat(section.path("name").asText()).isEqualTo("Renamed section");
-        assertThat(section.path("mediaKey").asText()).isEqualTo("new_section");
-        assertThat(section.path("iconKey").asText()).isEqualTo("ic_new_section");
-        assertThat(send("DELETE", "/api/sections/" + id, null).statusCode()).isEqualTo(204);
+        assertThat(send("POST", "/api/sections", "{}").statusCode()).isEqualTo(405);
+        String path = "/api/sections/" + UUID.randomUUID();
+        assertThat(send("GET", path, null).statusCode()).isEqualTo(404);
+        assertThat(send("PUT", path, "{}").statusCode()).isEqualTo(404);
+        assertThat(send("DELETE", path, null).statusCode()).isEqualTo(404);
     }
 
     @Test
