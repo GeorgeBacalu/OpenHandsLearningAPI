@@ -1492,14 +1492,6 @@
             "type": "string",
             "minLength": 1
           },
-          "code": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[A-Z][A-Z0-9_]*$",
-            "maxLength": 120
-          },
           "mediaKey": {
             "type": "string",
             "pattern": "^[a-z0-9_]+$",

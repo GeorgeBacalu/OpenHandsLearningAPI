@@ -14,7 +14,6 @@ public class Section {
 
     private UUID id;
     private String name;
-    private String code;
     private String mediaKey;
     private String iconKey;
 }

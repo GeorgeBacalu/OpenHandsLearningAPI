@@ -12,9 +12,9 @@ INSERT INTO roles (id, authority) VALUES
     ('99d0dd27-ea57-42b3-8fd8-64e3973a05d3', 'USER'),
     ('4c517662-ab55-47ea-b758-84c1af759525', 'ADMIN');
 
-INSERT INTO sections (id, name, display_order, code, media_key, icon_key) VALUES
-    ('7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'Video', 1, 'VIDEO', 'video_section', 'ic_video_section'),
-    ('d65b741b-1b28-451f-9faa-51763b236348', 'Expressions', 2, 'EXPRESSIONS', 'expressions_section', 'ic_expressions_section');
+INSERT INTO sections (id, name, media_key, icon_key) VALUES
+    ('7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'Video', 'video_section', 'ic_video_section'),
+    ('d65b741b-1b28-451f-9faa-51763b236348', 'Expressions', 'expressions_section', 'ic_expressions_section');
 
 INSERT INTO categories (id, name, parent_id, section_id, media_key) VALUES
     ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 'Alphabet', NULL, '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'alfabet'),

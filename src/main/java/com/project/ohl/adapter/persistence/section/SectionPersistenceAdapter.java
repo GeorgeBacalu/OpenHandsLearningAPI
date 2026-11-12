@@ -4,9 +4,7 @@ import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.application.port.out.SectionRepositoryPort;
 import com.project.ohl.domain.model.CatalogMetadata;
 import com.project.ohl.domain.model.Section;
-import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -14,16 +12,6 @@ public class SectionPersistenceAdapter extends JpaPersistenceAdapter<Section, Se
 
     public SectionPersistenceAdapter(SectionJpaRepository repository) {
         super(repository);
-    }
-
-    @Override
-    protected Sort defaultSort() {
-        return Sort.by("displayOrder", "id");
-    }
-
-    @Override
-    public Optional<Section> findByCode(String code) {
-        return ((SectionJpaRepository) repository).findByCode(code).map(this::toDomain);
     }
 
     @Override
@@ -39,7 +27,7 @@ public class SectionPersistenceAdapter extends JpaPersistenceAdapter<Section, Se
     @Override
     public Section toDomain(SectionEntity entity) {
         return Section.builder().id(entity.getId())
-              .name(entity.getName()).code(entity.getCode()).mediaKey(entity.getMediaKey()).iconKey(entity.getIconKey())
+              .name(entity.getName()).mediaKey(entity.getMediaKey()).iconKey(entity.getIconKey())
 
               .build();
     }
@@ -47,7 +35,6 @@ public class SectionPersistenceAdapter extends JpaPersistenceAdapter<Section, Se
     @Override
     protected void apply(Section model, SectionEntity entity) {
         entity.setName(model.getName());
-        entity.setCode(CatalogMetadata.code(model.getCode(), entity.getCode(), "SECTION"));
         entity.setMediaKey(CatalogMetadata.mediaKey(model.getMediaKey(), entity.getMediaKey(), model.getName()));
         entity.setIconKey(CatalogMetadata.mediaKey(model.getIconKey(), entity.getIconKey(), "ic_" + model.getName()));
 

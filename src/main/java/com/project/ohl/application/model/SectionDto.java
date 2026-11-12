@@ -19,9 +19,6 @@ public class SectionDto {
 
     @NotBlank(message = "Name must not be blank")
     private String name;
-    @Pattern(regexp = "^[A-Z][A-Z0-9_]*$")
-    @Size(max = 120)
-    private String code;
     @Pattern(regexp = "^[a-z0-9_]+$")
     @Size(max = 255)
     private String mediaKey;

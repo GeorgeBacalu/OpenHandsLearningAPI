@@ -49,6 +49,32 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     }
 
     @Test
+    void sectionsUseOnlyUuidIdentityAndStableMediaKeys() throws Exception {
+        var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'sections'", String.class);
+        assertThat(columns).containsExactlyInAnyOrder("id", "name", "media_key", "icon_key");
+        var sections = json.readTree(send("GET", "/api/sections", null).body());
+        assertThat(sections.size()).isEqualTo(2);
+        for (var section : sections) {
+            assertThat(section.size()).isEqualTo(4);
+            assertThat(section.has("code") || section.has("displayOrder")).isFalse();
+        }
+        var request = json.createObjectNode().put("name", "New section")
+                .put("mediaKey", "new_section").put("iconKey", "ic_new_section");
+        var created = send("POST", "/api/sections", json.writeValueAsString(request));
+        assertThat(created.statusCode()).isEqualTo(201);
+        String id = json.readTree(created.body()).path("id").asText();
+        request.put("name", "Renamed section");
+        var updated = send("PUT", "/api/sections/" + id, json.writeValueAsString(request));
+        assertThat(updated.statusCode()).isEqualTo(200);
+        var section = json.readTree(updated.body());
+        assertThat(section.path("id").asText()).isEqualTo(id);
+        assertThat(section.path("name").asText()).isEqualTo("Renamed section");
+        assertThat(section.path("mediaKey").asText()).isEqualTo("new_section");
+        assertThat(section.path("iconKey").asText()).isEqualTo("ic_new_section");
+        assertThat(send("DELETE", "/api/sections/" + id, null).statusCode()).isEqualTo(204);
+    }
+
+    @Test
     void userProfilesContainOnlyTheSupportedFields() throws Exception {
         var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'users'", String.class);
         assertThat(columns).containsExactlyInAnyOrder("id", "name", "email", "phone", "password", "role_id", "school_id");

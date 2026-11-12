@@ -14,14 +14,10 @@ import org.hibernate.annotations.Check;
 @NoArgsConstructor
 @Entity
 @Table(name = "sections")
-@Check(constraints = "trim(name) <> '' AND display_order >= 0")
+@Check(constraints = "trim(name) <> ''")
 public class SectionEntity extends PersistentEntity {
-    @Column(name = "display_order", nullable = false)
-    private Integer displayOrder = Integer.MAX_VALUE;
     @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "code", nullable = false, unique = true, length = 120)
-    private String code;
     @Column(name = "media_key", nullable = false)
     private String mediaKey;
     @Column(name = "icon_key", nullable = false)

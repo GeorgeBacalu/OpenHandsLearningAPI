@@ -42,7 +42,7 @@ HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Andro
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V12 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V13 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
@@ -57,7 +57,7 @@ content. Space characters remain valid sign entries. New empty databases contain
 no application records after V1 through V7. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
 roll back V2.
-Migrate the database through V12 before running this backend.
+Migrate the database through V13 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
@@ -69,8 +69,8 @@ root categories. Shared media keys remain allowed.
 V4 removes the row revision counters from all nine entity tables. Applied
 migration files remain unchanged so Flyway can validate existing installations.
 
-V5 removes category display_order. Section ordering is retained. Category lists, including favorites and filtered searches, use Java
-Stream sorting with Romanian alphabetical collation, ignoring case and using UUID
+V5 removes category display_order. V13 defines section ordering by UUID in application
+code. Category lists, including favorites and filtered searches, use Java Stream sorting with Romanian alphabetical collation, ignoring case and using UUID
 as a stable tie-breaker. /api/categories/filter returns only root categories
 when no parent is supplied, or only the selected parent's direct children. Both
 levels are alphabetically ordered. The obsolete category ordering index and
@@ -79,8 +79,8 @@ and section filtering.
 
 V6 removes category codes. Category navigation and direct-child filters use UUIDs;
 the category filter requires sectionId and accepts optional parentId and name.
-Renaming a parent leaves its UUID, children, and media keys unchanged. Section
-codes remain available for selecting the application's main sections.
+Renaming a parent leaves its UUID, children, and media keys unchanged. V13 also
+removes section codes; Android selects main section screens by UUID.
 
 V7 removes the letter-sign table and its CRUD API. The fixed alphabet mappings
 are an immutable Android dictionary shared by text and voice conversion.
@@ -136,6 +136,12 @@ Existing user UUIDs, credentials, roles and school memberships are preserved.
 V12 renames `user_favorites` to `favorites` and drops `created_at`. Each row is
 only a user/category UUID pair. Existing pairs, composite uniqueness and cascading
 foreign keys are preserved; favorite lists continue to use alphabetical category order.
+
+V13 removes section `display_order` and `code`. The section service uses Stream
+sorting with a fixed UUID list: Video → Text to Sign → Voice to Sign → Expressions.
+Other section UUIDs follow in UUID-string order. Renaming a section does not change
+its position or Android screen; existing IDs, media keys and category links are preserved.
+Changing the fixed menu order requires a code change.
 
 For a separate empty PostgreSQL database:
 

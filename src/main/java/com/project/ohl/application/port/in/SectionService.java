@@ -18,5 +18,4 @@ public interface SectionService {
     void deleteSectionById(UUID id);
 
     Section getSectionEntityById(UUID id);
-    Section getSectionEntityByCode(String code);
 }

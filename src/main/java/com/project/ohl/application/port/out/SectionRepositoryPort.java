@@ -6,8 +6,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface SectionRepositoryPort {
-    Optional<Section> findByCode(String code);
-
     List<Section> findAll();
 
     Optional<Section> findById(UUID id);

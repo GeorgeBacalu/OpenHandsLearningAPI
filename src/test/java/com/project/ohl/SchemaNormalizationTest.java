@@ -58,7 +58,7 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
 
     @Test void parentAndChildMustBelongToTheSameSection() {
         var child = categories.getCategoryById(CATEGORY_CHILD);
-        UUID otherSection = database.queryForObject("SELECT id FROM sections WHERE code = 'EXPRESSIONS'", UUID.class);
+        UUID otherSection = database.queryForObject("SELECT id FROM sections WHERE id <> ?", UUID.class, child.getSectionId());
         child.setSectionId(otherSection);
         assertThatThrownBy(() -> categories.updateCategoryById(child, child.getId())).isInstanceOf(InvalidRequestException.class);
         assertThatThrownBy(() -> database.update("UPDATE categories SET parent_id = id WHERE id = ?", CATEGORY_PARENT))
