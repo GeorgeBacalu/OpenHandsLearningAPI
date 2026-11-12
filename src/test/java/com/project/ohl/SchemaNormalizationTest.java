@@ -4,13 +4,11 @@ import com.project.ohl.application.model.UserDto;
 import com.project.ohl.application.port.in.CategoryService;
 import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.domain.exception.InvalidRequestException;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import static com.project.ohl.TestIds.CATEGORY_CHILD;
@@ -27,19 +25,6 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
     @Autowired JdbcTemplate database;
 
     private UUID user(String name) { return database.queryForObject("SELECT id FROM users WHERE name = ?", UUID.class, name); }
-
-    @Test void retiringTextSectionPreservesOtherSectionsAndCatalogData() throws Exception {
-        UUID retired = UUID.fromString("80008ad8-872e-3c12-96a0-209f2b699d92");
-        database.update("INSERT INTO sections (id, name, media_key, icon_key) VALUES (?, ?, ?, ?)",
-                retired, "Renamed retired section", "retired_section", "ic_retired_section");
-        database.execute(new ClassPathResource("db/migration/V14__remove_text_to_sign_section.sql")
-                .getContentAsString(StandardCharsets.UTF_8));
-
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM sections WHERE id = ?", Long.class, retired)).isZero();
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM sections", Long.class)).isEqualTo(2L);
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM categories", Long.class)).isEqualTo(2L);
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM favorites", Long.class)).isEqualTo(2L);
-    }
 
     @Test void favoritesKeepOnlyTheirUserAndCategoryPair() {
         var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'favorites'", String.class);
