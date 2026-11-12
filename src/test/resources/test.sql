@@ -14,11 +14,11 @@ INSERT INTO roles (id, authority) VALUES
 
 INSERT INTO sections (id, name, media_key, icon_key) VALUES
     ('7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'Video', 'video_section', 'ic_video_section'),
-    ('d65b741b-1b28-451f-9faa-51763b236348', 'Expressions', 'expressions_section', 'ic_expressions_section');
+    ('d65b741b-1b28-451f-9faa-51763b236348', 'Voice to Sign', 'voice_to_sign_section', 'ic_voice_to_sign_section');
 
-INSERT INTO categories (id, name, parent_id, section_id, media_key) VALUES
-    ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 'Alphabet', NULL, '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'alfabet'),
-    ('f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185', 'Letter A', '176ccfb5-fe9b-484c-a799-310eb72a02a5', '7bfc50e0-5106-495b-b08a-5c04b8f5c6a2', 'dactilema_a');
+INSERT INTO categories (id, name, parent_id, media_key) VALUES
+    ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 'Alphabet', NULL, 'alfabet'),
+    ('f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185', 'Letter A', '176ccfb5-fe9b-484c-a799-310eb72a02a5', 'dactilema_a');
 
 INSERT INTO users (id, name, email, password, phone, school_id, role_id) VALUES
     ('4b16f89f-f513-4723-9d19-5750cf7199d6', 'Ana', 'ana@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0712345678', 'e882d373-7f2f-44b2-8c87-530cd04964d4', '99d0dd27-ea57-42b3-8fd8-64e3973a05d3'),

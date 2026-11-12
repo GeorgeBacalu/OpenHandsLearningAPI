@@ -31,7 +31,6 @@ import static com.project.ohl.TestIds.CATEGORY_CHILD;
 import static com.project.ohl.TestIds.CATEGORY_PARENT;
 import static com.project.ohl.TestIds.SCHOOL_A;
 import static com.project.ohl.TestIds.ROLE_USER;
-import static com.project.ohl.TestIds.SECTION_VIDEO;
 import static com.project.ohl.TestIds.id;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -91,8 +90,7 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
               .password("test-password").phone("0712345678")
               .school(school).role(role).build());
         var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
-        var child = categories.save(Category.builder().name("C").parent(parent)
-                .section(sections.findById(SECTION_VIDEO).orElseThrow()).build());
+        var child = categories.save(Category.builder().name("C").parent(parent).build());
 
         assertThat(List.of(section.getId(), school.getId(), role.getId(), user.getId(),
                 child.getId()))
@@ -136,19 +134,18 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
             assertThat(result).filteredOn(value -> value.getId().equals(child.getId())).singleElement()
                     .satisfies(value -> {
                         assertThat(value.getParentId()).isEqualTo(parent.getId());
-                        assertThat(value.getSectionId()).isEqualTo(SECTION_VIDEO);
                     });
         } finally {
             statistics.setStatisticsEnabled(false);
         }
-        assertThat(categories.findByParentIdAndSectionIdAndNameContaining(parent.getId(), SECTION_VIDEO, "letter"))
+        assertThat(categories.findByParentIdAndNameContaining(parent.getId(), "letter"))
               .extracting(Category::getId).containsExactly(child.getId());
     }
 
     @Test
     void databaseRejectsDanglingForeignKeys() {
         var invalid = Category.builder().name("Invalid")
-              .section(Section.builder().id(id(999999)).build()).build();
+              .parent(Category.builder().id(id(999999)).build()).build();
 
         assertThatThrownBy(() -> categories.save(invalid)).isInstanceOf(DataIntegrityViolationException.class);
     }

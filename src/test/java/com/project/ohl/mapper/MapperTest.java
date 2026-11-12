@@ -5,7 +5,6 @@ import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.domain.model.Category;
-import com.project.ohl.domain.model.Section;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -21,26 +20,21 @@ class MapperTest {
     void categoryMappingPreservesParentIdWithoutCopyingTheParentGraph() {
         var model = Category.builder().id(id(17)).name("Child")
                 .isExpanded(true).isFavorite(false)
-                .parent(Category.builder().id(id(3)).name("Parent").build())
-                .section(Section.builder().id(id(9)).name("Video").build()).build();
+                .parent(Category.builder().id(id(3)).name("Parent").build()).build();
         var dto = categories.convertToDtoList(List.of(model)).getFirst();
         assertThat(dto.getId()).isEqualTo(id(17));
         assertThat(dto.getParentId()).isEqualTo(id(3));
-        assertThat(dto.getSectionId()).isEqualTo(id(9));
         assertThat(dto.getIsExpanded()).isTrue();
         assertThat(dto.getIsFavorite()).isFalse();
         var restored = categories.convertToEntity(dto);
         assertThat(restored.getParent().getId()).isEqualTo(id(3));
         assertThat(restored.getParent().getName()).isNull();
-        assertThat(restored.getSection().getId()).isEqualTo(id(9));
-        assertThat(restored.getSection().getName()).isNull();
     }
 
     @Test
     void nullForeignKeysRemainNullReferences() {
         var category = categories.convertToEntity(new CategoryDto());
         assertThat(category.getParent()).isNull();
-        assertThat(category.getSection()).isNull();
         var user = users.convertToEntity(new UserDto());
         assertThat(user.getSchool()).isNull();
         assertThat(user.getRole()).isNull();

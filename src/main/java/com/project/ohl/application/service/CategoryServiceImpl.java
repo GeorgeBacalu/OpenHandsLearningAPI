@@ -3,7 +3,6 @@ package com.project.ohl.application.service;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.in.CategoryService;
-import com.project.ohl.application.port.in.SectionService;
 import com.project.ohl.application.port.out.CategoryRepositoryPort;
 import com.project.ohl.application.port.out.FavoriteRepositoryPort;
 import com.project.ohl.application.port.out.UserRepositoryPort;
@@ -17,7 +16,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +26,6 @@ public class CategoryServiceImpl implements CategoryService {
     private static final Collator ROMANIAN_COLLATOR = romanianCollator();
 
     private final CategoryRepositoryPort categoryRepository;
-    private final SectionService sectionService;
 
     private final CategoryMapper mapper;
     private final FavoriteRepositoryPort favorites;
@@ -48,7 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto saveCategory(CategoryDto categoryDto) {
-        validateParent(null, categoryDto.getParentId(), categoryDto.getSectionId());
+        validateParent(null, categoryDto.getParentId());
         Category category = mapper.convertToEntity(categoryDto);
         Category savedCategory = categoryRepository.save(category);
         return mapper.convertToDto(savedCategory);
@@ -57,14 +54,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategoryById(CategoryDto categoryDto, UUID id) {
         Category categoryToUpdate = getCategoryEntityById(id);
-        validateParent(id, categoryDto.getParentId(), categoryDto.getSectionId());
+        validateParent(id, categoryDto.getParentId());
         categoryToUpdate.setMediaKey(categoryDto.getMediaKey());
         categoryToUpdate.setName(categoryDto.getName());
 
         categoryToUpdate.setIsExpanded(categoryDto.getIsExpanded());
         categoryToUpdate.setIsFavorite(categoryDto.getIsFavorite());
         categoryToUpdate.setParent(categoryDto.getParentId() == null ? null : getCategoryEntityById(categoryDto.getParentId()));
-        categoryToUpdate.setSection(sectionService.getSectionEntityById(categoryDto.getSectionId()));
         Category updatedCategory = categoryRepository.update(categoryToUpdate);
         return mapper.convertToDto(updatedCategory);
     }
@@ -76,16 +72,16 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getCategoriesByParentIdAndSectionIdAndName(UUID parentId, UUID sectionId, String name) {
+    public List<CategoryDto> getCategoriesByParentIdAndName(UUID parentId, String name) {
         List<Category> categories;
         if(parentId == null) {
             categories = name == null || name.isBlank()
-                  ? categoryRepository.findByParentIdNullAndSectionId(sectionId)
-                  : categoryRepository.findByParentIdNullAndSectionIdAndNameContaining(sectionId, name);
+                  ? categoryRepository.findByParentIdNull()
+                  : categoryRepository.findByParentIdNullAndNameContaining(name);
         } else {
             categories = name == null || name.isBlank()
-                  ? categoryRepository.findByParentIdAndSectionId(parentId, sectionId)
-                  : categoryRepository.findByParentIdAndSectionIdAndNameContaining(parentId, sectionId, name);
+                  ? categoryRepository.findByParentId(parentId)
+                  : categoryRepository.findByParentIdAndNameContaining(parentId, name);
         }
         return alphabeticalCategories(categories);
     }
@@ -153,15 +149,13 @@ public class CategoryServiceImpl implements CategoryService {
         if (id == null || users.findById(id).isEmpty()) throw new ResourceNotFoundException("User " + id + " was not found");
     }
 
-    private void validateParent(UUID categoryId, UUID parentId, UUID sectionId) {
+    private void validateParent(UUID categoryId, UUID parentId) {
         var visited = new HashSet<UUID>();
         while (parentId != null) {
             if (parentId.equals(categoryId) || !visited.add(parentId)) {
                 throw new InvalidRequestException("Category hierarchy must not contain cycles.");
             }
             var current = getCategoryEntityById(parentId);
-            if (current.getSection() != null && !Objects.equals(current.getSection().getId(), sectionId))
-                throw new InvalidRequestException("Parent and child must belong to the same section.");
             var parent = current.getParent();
             parentId = parent == null ? null : parent.getId();
         }

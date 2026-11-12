@@ -1,6 +1,7 @@
 package com.project.ohl;
 
 import com.project.ohl.application.model.UserDto;
+import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.in.CategoryService;
 import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.domain.exception.InvalidRequestException;
@@ -25,6 +26,23 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
     @Autowired JdbcTemplate database;
 
     private UUID user(String name) { return database.queryForObject("SELECT id FROM users WHERE name = ?", UUID.class, name); }
+
+    @Test void expressionsCanBecomeChildrenWithoutChangingTheirIdentityOrFavorites() {
+        var parent = categories.saveCategory(CategoryDto.builder().name("Expresii").mediaKey("expressions_section").build());
+        var child = categories.getCategoryById(CATEGORY_CHILD);
+        String mediaKey = child.getMediaKey();
+        child.setParentId(parent.getId());
+        var moved = categories.updateCategoryById(child, child.getId());
+
+        assertThat(moved.getId()).isEqualTo(CATEGORY_CHILD);
+        assertThat(moved.getMediaKey()).isEqualTo(mediaKey);
+        assertThat(categories.getCategoriesByParentIdAndName(null, ""))
+                .extracting(CategoryDto::getName).containsExactly("Alphabet", "Expresii");
+        assertThat(categories.getCategoriesByParentIdAndName(parent.getId(), ""))
+                .extracting(CategoryDto::getId).containsExactly(CATEGORY_CHILD);
+        assertThat(categories.getFavoriteCategories(user("Ana")))
+                .extracting(CategoryDto::getId).containsExactly(CATEGORY_CHILD);
+    }
 
     @Test void favoritesKeepOnlyTheirUserAndCategoryPair() {
         var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'favorites'", String.class);
@@ -52,15 +70,16 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
         var changed = categories.updateCategoryById(parent, parent.getId());
         assertThat(changed.getId()).isEqualTo(CATEGORY_PARENT);
         assertThat(changed.getMediaKey()).isEqualTo("alfabet");
-        assertThat(categories.getCategoriesByParentIdAndSectionIdAndName(CATEGORY_PARENT, parent.getSectionId(), ""))
+        assertThat(categories.getCategoriesByParentIdAndName(CATEGORY_PARENT, ""))
                 .extracting(value -> value.getId()).containsExactly(CATEGORY_CHILD);
     }
 
-    @Test void parentAndChildMustBelongToTheSameSection() {
-        var child = categories.getCategoryById(CATEGORY_CHILD);
-        UUID otherSection = database.queryForObject("SELECT id FROM sections WHERE id <> ?", UUID.class, child.getSectionId());
-        child.setSectionId(otherSection);
-        assertThatThrownBy(() -> categories.updateCategoryById(child, child.getId())).isInstanceOf(InvalidRequestException.class);
+    @Test void categoriesHaveNoSectionReferenceAndRejectCycles() {
+        var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'categories'", String.class);
+        assertThat(columns).containsExactlyInAnyOrder("id", "name", "parent_id", "media_key");
+        var parent = categories.getCategoryById(CATEGORY_PARENT);
+        parent.setParentId(CATEGORY_CHILD);
+        assertThatThrownBy(() -> categories.updateCategoryById(parent, parent.getId())).isInstanceOf(InvalidRequestException.class);
         assertThatThrownBy(() -> database.update("UPDATE categories SET parent_id = id WHERE id = ?", CATEGORY_PARENT))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }

@@ -17,12 +17,12 @@ public interface CategoryRepositoryPort {
 
     void delete(Category category);
 
-    List<Category> findByParentIdNullAndSectionId(UUID sectionId);
+    List<Category> findByParentIdNull();
 
-    List<Category> findByParentIdNullAndSectionIdAndNameContaining(UUID sectionId, String name);
+    List<Category> findByParentIdNullAndNameContaining(String name);
 
-    List<Category> findByParentIdAndSectionId(UUID parentId, UUID sectionId);
+    List<Category> findByParentId(UUID parentId);
 
-    List<Category> findByParentIdAndSectionIdAndNameContaining(UUID parentId, UUID sectionId, String name);
+    List<Category> findByParentIdAndNameContaining(UUID parentId, String name);
 
 }

@@ -3,7 +3,6 @@ package com.project.ohl.application.mapper;
 import com.project.ohl.domain.model.Category;
 import com.project.ohl.domain.model.School;
 import com.project.ohl.domain.model.Role;
-import com.project.ohl.domain.model.Section;
 import java.util.UUID;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
@@ -23,7 +22,4 @@ public interface ReferenceMapper {
     @Mapping(target = "id", source = "id")
     Role role(UUID id);
 
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    Section section(UUID id);
 }

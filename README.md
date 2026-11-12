@@ -42,7 +42,7 @@ HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Andro
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V13 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V14 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
@@ -50,20 +50,20 @@ the previous UUID schema. V2 adds:
 - Schools and normalized user membership.
 - Unique normalized account emails, required values, and supported role values.
 - Stable catalog `code`, `mediaKey`, and section `iconKey` fields, independent of translated display names.
-- Query indexes, matching-section parent relationships, and a serialized database trigger preventing hierarchy cycles.
+- Query indexes, parent relationships, and a serialized database trigger preventing hierarchy cycles.
 
 V2 transforms existing records and memberships; it seeds no users or catalog
 content. Space characters remain valid sign entries. New empty databases contain
 no application records after V1 through V7. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
 roll back V2.
-Migrate the database through V13 before running this backend.
+Migrate the database through V14 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
 The retained `dactilema_a` illustration matches the text/voice sign collection;
 the alphabet category uses that asset too. Letters are unique with case preserved,
-and normalized category names are unique within their section and parent, including
+and normalized category names are unique among siblings, including
 root categories. Shared media keys remain allowed.
 
 V4 removes the row revision counters from all nine entity tables. Applied
@@ -75,10 +75,10 @@ as a stable tie-breaker. /api/categories/filter returns only root categories
 when no parent is supplied, or only the selected parent's direct children. Both
 levels are alphabetically ordered. The obsolete category ordering index and
 constraint are removed with the column; the sibling-name index supports parent
-and section filtering.
+filtering after V14.
 
 V6 removes category codes. Category navigation and direct-child filters use UUIDs;
-the category filter requires sectionId and accepts optional parentId and name.
+the category filter accepts optional parentId and name; V14 removes sectionId.
 Renaming a parent leaves its UUID, children, and media keys unchanged. V13 also
 removes section codes; Android selects main section screens by UUID.
 
@@ -138,15 +138,42 @@ only a user/category UUID pair. Existing pairs, composite uniqueness and cascadi
 foreign keys are preserved; favorite lists continue to use alphabetical category order.
 
 V13 removes section `display_order` and `code`. The section service uses Stream
-sorting with a fixed UUID list: Video → Voice to Sign → Expressions.
+sorting with a fixed UUID list: Video → Voice to Sign.
 Other section UUIDs follow in UUID-string order. Renaming a section does not change
 its position or Android screen; existing IDs, media keys and category links are preserved.
 Changing the fixed menu order requires a code change.
 
 The retired Text to Sign section was deleted directly as a catalog record change,
 without a schema migration. It had no linked categories in development. Remaining
-section IDs and all other records are preserved. Voice to Sign retains both typed
+retained section IDs and all other records are preserved. Voice to Sign retains both typed
 input and speech recognition unchanged.
+
+V14 removes `categories.section_id` and replaces the composite parent foreign key
+with a parent-only foreign key. Sibling-name uniqueness covers the entire catalog,
+including roots; the database trigger still prevents hierarchy cycles. Categories
+use UUID, name, parent UUID and media key only. `/api/categories/filter` returns
+alphabetical roots when parentId is absent and direct children when it is supplied.
+
+The six expression categories now sit under the `Expresii` parent inside Video.
+The parent reuses the former Expressions section UUID; existing expression IDs,
+media keys, descendant links and favorites are retained. The two remaining main
+sections are Video and Voice to Sign. Category creation and updates need no sectionId.
+
+Catalog record maintenance is separate from V14. On an existing V13 database,
+back up and regroup expressions before applying the schema migration:
+
+```sql
+BEGIN;
+INSERT INTO categories (id, name, parent_id, section_id, media_key)
+SELECT id, 'Expresii', NULL, '20a6880c-2e37-32e3-8e45-07a17e99a000', media_key
+FROM sections WHERE id = '1deb5200-b06d-3977-9426-e2ea373195f9';
+UPDATE categories
+SET parent_id = coalesce(parent_id, '1deb5200-b06d-3977-9426-e2ea373195f9'),
+    section_id = '20a6880c-2e37-32e3-8e45-07a17e99a000'
+WHERE section_id = '1deb5200-b06d-3977-9426-e2ea373195f9';
+DELETE FROM sections WHERE id = '1deb5200-b06d-3977-9426-e2ea373195f9';
+COMMIT;
+```
 
 For a separate empty PostgreSQL database:
 
@@ -168,7 +195,7 @@ there is no PostgreSQL provisioning or rehearsal configuration in the project.
 Favorites endpoints require `userId`; a category read accepts optional `userId`
 to return that user's favorite status. Profile selection is not authentication:
 the existing API remains public and needs an authentication layer before serving
-private accounts in production. Catalog filters use the selected parent UUID and section UUID. Clients can
+private accounts in production. Catalog filters use the selected parent UUID. Clients can
 rename category labels without changing UUIDs, children or media keys.
 
 ## HTTP contract

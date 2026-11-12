@@ -2,7 +2,6 @@ package com.project.ohl.category;
 
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.model.CategoryDto;
-import com.project.ohl.application.port.in.SectionService;
 import com.project.ohl.application.port.out.CategoryRepositoryPort;
 import com.project.ohl.application.port.out.FavoriteRepositoryPort;
 import com.project.ohl.application.port.out.UserRepositoryPort;
@@ -59,9 +58,6 @@ class CategoryServiceImplTest {
 
     @Mock
     private CategoryRepositoryPort categoryRepository;
-
-    @Mock
-    private SectionService sectionService;
 
     @Mock private FavoriteRepositoryPort favorites;
     @Mock private UserRepositoryPort users;
@@ -211,30 +207,30 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNullAndNameBlank_shouldReturnListOfParentCategories() {
-        given(categoryRepository.findByParentIdNullAndSectionId(any(UUID.class))).willReturn(parentCategories);
-        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(null, VALID_ID, "");
+    void getCategoriesByParentIdAndName_whenParentIdNullAndNameBlank_shouldReturnListOfParentCategories() {
+        given(categoryRepository.findByParentIdNull()).willReturn(parentCategories);
+        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(null, "");
         assertThat(result).isEqualTo(parentCategoryDtos);
     }
 
     @Test
-    void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNullAndNameNotBlank_shouldReturnListOfParentCategoriesFilteredByName() {
-        given(categoryRepository.findByParentIdNullAndSectionIdAndNameContaining(any(UUID.class), anyString())).willReturn(filteredParentCategories);
-        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(null, VALID_ID, "a");
+    void getCategoriesByParentIdAndName_whenParentIdNullAndNameNotBlank_shouldReturnListOfParentCategoriesFilteredByName() {
+        given(categoryRepository.findByParentIdNullAndNameContaining(anyString())).willReturn(filteredParentCategories);
+        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(null, "a");
         assertThat(result).isEqualTo(filteredParentCategoryDtos);
     }
 
     @Test
-    void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNotNullAndNameBlank_shouldReturnListOfChildrenCategories() {
-        given(categoryRepository.findByParentIdAndSectionId(any(UUID.class), any(UUID.class))).willReturn(childrenCategoriesAlphabet);
-        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(VALID_ID, VALID_ID, "");
+    void getCategoriesByParentIdAndName_whenParentIdNotNullAndNameBlank_shouldReturnListOfChildrenCategories() {
+        given(categoryRepository.findByParentId(any(UUID.class))).willReturn(childrenCategoriesAlphabet);
+        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(VALID_ID, "");
         assertThat(result).isEqualTo(childrenCategoryDtosAlphabet);
     }
 
     @Test
-    void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNotNullAndNameNotBlank_shouldReturnListOfChildrenCategoriesFilteredByName() {
-        given(categoryRepository.findByParentIdAndSectionIdAndNameContaining(any(UUID.class), any(UUID.class), anyString())).willReturn(filteredChildrenCategoriesAlphabet);
-        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(VALID_ID, VALID_ID, "a");
+    void getCategoriesByParentIdAndName_whenParentIdNotNullAndNameNotBlank_shouldReturnListOfChildrenCategoriesFilteredByName() {
+        given(categoryRepository.findByParentIdAndNameContaining(any(UUID.class), anyString())).willReturn(filteredChildrenCategoriesAlphabet);
+        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(VALID_ID, "a");
         assertThat(result).isEqualTo(filteredChildrenCategoryDtosAlphabet);
     }
 

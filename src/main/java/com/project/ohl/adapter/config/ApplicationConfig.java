@@ -53,8 +53,8 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public CategoryService categoryService(CategoryRepositoryPort categories, SectionService sections, CategoryMapper mapper, FavoriteRepositoryPort favorites, UserRepositoryPort users) {
-        return transactional(CategoryService.class, new CategoryServiceImpl(categories, sections, mapper, favorites, users));
+    public CategoryService categoryService(CategoryRepositoryPort categories, CategoryMapper mapper, FavoriteRepositoryPort favorites, UserRepositoryPort users) {
+        return transactional(CategoryService.class, new CategoryServiceImpl(categories, mapper, favorites, users));
     }
 
     @Bean

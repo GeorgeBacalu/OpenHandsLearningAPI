@@ -21,7 +21,6 @@ import static com.project.ohl.TestIds.CATEGORY_CHILD;
 import static com.project.ohl.TestIds.CATEGORY_PARENT;
 import static com.project.ohl.TestIds.SCHOOL_A;
 import static com.project.ohl.TestIds.ROLE_USER;
-import static com.project.ohl.TestIds.SECTION_VIDEO;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -184,34 +183,33 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         database.update("UPDATE categories SET name = ? WHERE id = ?", "Zebră", CATEGORY_PARENT);
         database.update("UPDATE categories SET name = ? WHERE id = ?", "Șarpe", CATEGORY_CHILD);
         var request = json.createObjectNode().put("name", "Arici")
-                .put("sectionId", SECTION_VIDEO.toString()).put("mediaKey", "arici");
+                .put("mediaKey", "arici");
         var created = send("POST", "/api/categories", json.writeValueAsString(request));
         assertThat(created.statusCode()).isEqualTo(201);
         String id = json.readTree(created.body()).path("id").asText();
 
-        var roots = json.readTree(send("GET", "/api/categories/filter?sectionId=" + SECTION_VIDEO, null).body());
+        var roots = json.readTree(send("GET", "/api/categories/filter", null).body());
         assertThat(roots.size()).isEqualTo(2);
         assertThat(roots.get(0).has("code")).isFalse();
-        assertThat(send("GET", "/api/categories/filter", null).statusCode()).isEqualTo(400);
+        assertThat(roots.get(0).has("sectionId")).isFalse();
         assertThat(List.of(roots.get(0).path("name").asText(), roots.get(1).path("name").asText()))
                 .containsExactly("Arici", "Zebră");
         assertThat(roots.get(0).path("parentId").isNull()).isTrue();
         assertThat(roots.get(1).path("parentId").isNull()).isTrue();
-        var searchedRoots = json.readTree(send("GET", "/api/categories/filter?sectionId=" + SECTION_VIDEO + "&name=ici", null).body());
+        var searchedRoots = json.readTree(send("GET", "/api/categories/filter?name=ici", null).body());
         assertThat(searchedRoots.size()).isEqualTo(1);
         assertThat(searchedRoots.get(0).path("name").asText()).isEqualTo("Arici");
 
         request.put("name", "Țară").put("parentId", CATEGORY_PARENT.toString());
         assertThat(send("PUT", "/api/categories/" + id, json.writeValueAsString(request)).statusCode()).isEqualTo(200);
-        var children = json.readTree(send("GET", "/api/categories/filter?parentId=" + CATEGORY_PARENT
-                + "&sectionId=" + SECTION_VIDEO, null).body());
+        var children = json.readTree(send("GET", "/api/categories/filter?parentId=" + CATEGORY_PARENT, null).body());
         assertThat(children.size()).isEqualTo(2);
         assertThat(List.of(children.get(0).path("name").asText(), children.get(1).path("name").asText()))
                 .containsExactly("Șarpe", "Țară");
         assertThat(children.get(0).path("parentId").asText()).isEqualTo(CATEGORY_PARENT.toString());
         assertThat(children.get(1).path("parentId").asText()).isEqualTo(CATEGORY_PARENT.toString());
         var searchedChildren = json.readTree(send("GET",
-                "/api/categories/filter?parentId=" + CATEGORY_PARENT + "&sectionId=" + SECTION_VIDEO + "&name=pe", null).body());
+                "/api/categories/filter?parentId=" + CATEGORY_PARENT + "&name=pe", null).body());
         assertThat(searchedChildren.size()).isEqualTo(1);
         assertThat(searchedChildren.get(0).path("name").asText()).isEqualTo("Șarpe");
         UUID ana = database.queryForObject("SELECT id FROM users WHERE name = 'Ana'", UUID.class);

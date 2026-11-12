@@ -55,10 +55,10 @@ public class CategoryController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<CategoryDto>> getCategoriesByParentIdAndSectionIdAndName(
-            @RequestParam(required = false) UUID parentId, @RequestParam UUID sectionId,
+    public ResponseEntity<List<CategoryDto>> getCategoriesByParentIdAndName(
+            @RequestParam(required = false) UUID parentId,
             @RequestParam(defaultValue = "") String name) {
-        return ResponseEntity.ok(categoryService.getCategoriesByParentIdAndSectionIdAndName(parentId, sectionId, name));
+        return ResponseEntity.ok(categoryService.getCategoriesByParentIdAndName(parentId, name));
     }
 
     @GetMapping("/favorites")

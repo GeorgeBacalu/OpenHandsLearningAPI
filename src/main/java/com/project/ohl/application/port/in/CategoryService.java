@@ -17,7 +17,7 @@ public interface CategoryService {
 
     void deleteCategoryById(UUID id);
 
-    List<CategoryDto> getCategoriesByParentIdAndSectionIdAndName(UUID parentId, UUID sectionId, String name);
+    List<CategoryDto> getCategoriesByParentIdAndName(UUID parentId, String name);
 
     List<CategoryDto> getFavoriteCategories(UUID userId);
 

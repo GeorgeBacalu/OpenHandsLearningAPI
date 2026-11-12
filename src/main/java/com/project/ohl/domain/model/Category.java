@@ -18,5 +18,4 @@ public class Category {
     private Boolean isExpanded;
     private Boolean isFavorite;
     private Category parent;
-    private Section section;
 }

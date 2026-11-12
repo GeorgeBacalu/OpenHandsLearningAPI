@@ -1,7 +1,6 @@
 package com.project.ohl.application.model;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
@@ -32,6 +31,4 @@ public class CategoryDto {
 
     private UUID parentId;
 
-    @NotNull(message = "Section ID must not be null")
-    private UUID sectionId;
 }

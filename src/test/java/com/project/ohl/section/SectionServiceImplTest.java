@@ -76,27 +76,23 @@ class SectionServiceImplTest {
     void getAllSections_shouldKeepMenuOrderAfterRenamingAndAppendOtherSections() {
         UUID video = UUID.fromString("20a6880c-2e37-32e3-8e45-07a17e99a000");
         UUID voice = UUID.fromString("07329929-eb4b-3793-8b2d-f6364d711a79");
-        UUID expressions = UUID.fromString("1deb5200-b06d-3977-9426-e2ea373195f9");
         var renamedVideo = Section.builder().id(video).name("Z translated video").build();
         var renamedVoice = Section.builder().id(voice).name("B translated voice").build();
-        var renamedExpressions = Section.builder().id(expressions).name("A translated expressions").build();
-        given(sectionRepository.findAll()).willReturn(List.of(section2, renamedExpressions,
-                renamedVoice, section1, renamedVideo));
+        given(sectionRepository.findAll()).willReturn(List.of(section2, renamedVoice, section1, renamedVideo));
 
         assertThat(sectionService.getAllSections()).extracting(SectionDto::getId)
-                .containsExactly(video, voice, expressions, section1.getId(), section2.getId());
+                .containsExactly(video, voice, section1.getId(), section2.getId());
     }
 
     @Test
     void getAllSections_shouldKeepRelativeOrderWhenBuiltInSectionsAreMissing() {
         UUID voice = UUID.fromString("07329929-eb4b-3793-8b2d-f6364d711a79");
-        UUID expressions = UUID.fromString("1deb5200-b06d-3977-9426-e2ea373195f9");
         given(sectionRepository.findAll()).willReturn(List.of(
-                Section.builder().id(expressions).name("Expressions").build(),
+                section1,
                 Section.builder().id(voice).name("Voice").build()));
 
         assertThat(sectionService.getAllSections()).extracting(SectionDto::getId)
-                .containsExactly(voice, expressions);
+                .containsExactly(voice, section1.getId());
     }
 
     @Test

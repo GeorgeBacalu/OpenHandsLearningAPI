@@ -1,7 +1,6 @@
 package com.project.ohl.adapter.persistence.category;
 
 import com.project.ohl.adapter.persistence.PersistentEntity;
-import com.project.ohl.adapter.persistence.section.SectionEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,7 +27,4 @@ public class CategoryEntity extends PersistentEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private CategoryEntity parent;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "section_id", nullable = false)
-    private SectionEntity section;
 }
