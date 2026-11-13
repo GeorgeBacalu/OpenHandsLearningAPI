@@ -10,7 +10,6 @@ public interface CategoryService {
 
     CategoryDto getCategoryById(UUID id);
     CategoryDto getCategoryById(UUID id, UUID userId);
-    List<CategoryDto> getCategoriesByFilters(UUID parentId, UUID sectionId, String parentCode, String sectionCode, String name);
 
     CategoryDto saveCategory(CategoryDto categoryDto);
 
@@ -18,7 +17,7 @@ public interface CategoryService {
 
     void deleteCategoryById(UUID id);
 
-    List<CategoryDto> getCategoriesByParentIdAndSectionIdAndName(UUID parentId, UUID sectionId, String name);
+    List<CategoryDto> getCategoriesByParentIdAndName(UUID parentId, String name);
 
     List<CategoryDto> getFavoriteCategories(UUID userId);
 

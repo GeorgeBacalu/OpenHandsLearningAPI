@@ -14,14 +14,14 @@ public class FavoritePersistenceAdapter implements FavoriteRepositoryPort {
     private final FavoriteJpaRepository favorites;
     private final CategoryPersistenceAdapter categories;
     public List<Category> findByUserAndName(UUID userId, String name) {
-        return favorites.findByUser_IdAndCategory_NameContainingIgnoreCaseOrderByCategory_DisplayOrderAscCategory_IdAsc(userId, name)
+        return favorites.findByUser_IdAndCategory_NameContainingIgnoreCase(userId, name)
                 .stream().map(value -> categories.toDomain(value.getCategory())).toList();
     }
     public boolean exists(UUID userId, UUID categoryId) { return favorites.existsById(new FavoriteId(userId, categoryId)); }
     @Transactional public void save(UUID userId, UUID categoryId) {
         var id = new FavoriteId(userId, categoryId);
         if (!favorites.existsById(id)) {
-            var entity = new UserFavoriteEntity(); entity.setId(id); favorites.saveAndFlush(entity);
+            var entity = new FavoriteEntity(); entity.setId(id); favorites.saveAndFlush(entity);
         }
     }
     @Transactional public void delete(UUID userId, UUID categoryId) { favorites.deleteById(new FavoriteId(userId, categoryId)); }

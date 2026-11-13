@@ -214,7 +214,7 @@
     },
     "/api/categories/filter": {
       "get": {
-        "operationId": "getCategoriesByParentIdAndSectionIdAndName",
+        "operationId": "getCategoriesByParentIdAndName",
         "tags": [
           "categories"
         ],
@@ -254,38 +254,11 @@
             }
           },
           {
-            "name": "sectionId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
             "name": "name",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "string",
               "default": ""
-            }
-          },
-          {
-            "name": "parentCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sectionCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": "VIDEO"
             }
           }
         ]
@@ -487,11 +460,11 @@
         ]
       }
     },
-    "/api/feedbacks": {
+    "/api/schools": {
       "get": {
-        "operationId": "getAllFeedbacks",
+        "operationId": "getAllSchools",
         "tags": [
-          "feedbacks"
+          "schools"
         ],
         "responses": {
           "200": {
@@ -501,7 +474,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/FeedbackDto"
+                    "$ref": "#/components/schemas/SchoolDto"
                   }
                 }
               }
@@ -517,42 +490,12 @@
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 50
-            }
-          }
-        ]
+        }
       },
       "post": {
-        "operationId": "saveFeedback",
+        "operationId": "saveSchool",
         "tags": [
-          "feedbacks"
+          "schools"
         ],
         "responses": {
           "201": {
@@ -560,7 +503,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FeedbackDto"
+                  "$ref": "#/components/schemas/SchoolDto"
                 }
               }
             }
@@ -581,18 +524,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FeedbackDto"
+                "$ref": "#/components/schemas/SchoolDto"
               }
             }
           }
         }
       }
     },
-    "/api/feedbacks/{id}": {
+    "/api/schools/{id}": {
       "get": {
-        "operationId": "getFeedbackById",
+        "operationId": "getSchoolById",
         "tags": [
-          "feedbacks"
+          "schools"
         ],
         "responses": {
           "200": {
@@ -600,7 +543,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FeedbackDto"
+                  "$ref": "#/components/schemas/SchoolDto"
                 }
               }
             }
@@ -629,9 +572,9 @@
         ]
       },
       "put": {
-        "operationId": "updateFeedbackById",
+        "operationId": "updateSchoolById",
         "tags": [
-          "feedbacks"
+          "schools"
         ],
         "responses": {
           "200": {
@@ -639,7 +582,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FeedbackDto"
+                  "$ref": "#/components/schemas/SchoolDto"
                 }
               }
             }
@@ -660,7 +603,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FeedbackDto"
+                "$ref": "#/components/schemas/SchoolDto"
               }
             }
           }
@@ -678,618 +621,9 @@
         ]
       },
       "delete": {
-        "operationId": "deleteFeedbackById",
+        "operationId": "deleteSchoolById",
         "tags": [
-          "feedbacks"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      }
-    },
-    "/api/institutions": {
-      "get": {
-        "operationId": "getAllInstitutions",
-        "tags": [
-          "institutions"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/InstitutionDto"
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "saveInstitution",
-        "tags": [
-          "institutions"
-        ],
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InstitutionDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InstitutionDto"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/institutions/{id}": {
-      "get": {
-        "operationId": "getInstitutionById",
-        "tags": [
-          "institutions"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InstitutionDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "put": {
-        "operationId": "updateInstitutionById",
-        "tags": [
-          "institutions"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InstitutionDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InstitutionDto"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deleteInstitutionById",
-        "tags": [
-          "institutions"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      }
-    },
-    "/api/letter-sign-pairs": {
-      "get": {
-        "operationId": "getAllLetterSignPairs",
-        "tags": [
-          "letter-sign-pairs"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/LetterSignPairDto"
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "saveLetterSignPair",
-        "tags": [
-          "letter-sign-pairs"
-        ],
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LetterSignPairDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LetterSignPairDto"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/letter-sign-pairs/{id}": {
-      "get": {
-        "operationId": "getLetterSignPairById",
-        "tags": [
-          "letter-sign-pairs"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LetterSignPairDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "put": {
-        "operationId": "updateLetterSignPairById",
-        "tags": [
-          "letter-sign-pairs"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LetterSignPairDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LetterSignPairDto"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deleteLetterSignPairById",
-        "tags": [
-          "letter-sign-pairs"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      }
-    },
-    "/api/notifications": {
-      "get": {
-        "operationId": "getAllNotifications",
-        "tags": [
-          "notifications"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/NotificationDto"
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "receiverId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 50
-            }
-          }
-        ]
-      },
-      "post": {
-        "operationId": "saveNotification",
-        "tags": [
-          "notifications"
-        ],
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotificationDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NotificationDto"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/notifications/{id}": {
-      "get": {
-        "operationId": "getNotificationById",
-        "tags": [
-          "notifications"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotificationDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "put": {
-        "operationId": "updateNotificationById",
-        "tags": [
-          "notifications"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/NotificationDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NotificationDto"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deleteNotificationById",
-        "tags": [
-          "notifications"
+          "schools"
         ],
         "responses": {
           "204": {
@@ -1543,166 +877,6 @@
             }
           }
         }
-      },
-      "post": {
-        "operationId": "saveSection",
-        "tags": [
-          "sections"
-        ],
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SectionDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SectionDto"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/sections/{id}": {
-      "get": {
-        "operationId": "getSectionById",
-        "tags": [
-          "sections"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SectionDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "put": {
-        "operationId": "updateSectionById",
-        "tags": [
-          "sections"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SectionDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SectionDto"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deleteSectionById",
-        "tags": [
-          "sections"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
       }
     },
     "/api/users": {
@@ -1898,197 +1072,159 @@
         ]
       }
     },
-    "/api/classrooms": {
+    "/api/counties": {
       "get": {
-        "operationId": "getAllClassrooms",
+        "operationId": "getCounties",
         "tags": [
-          "classrooms"
+          "school-directory"
         ],
+        "parameters": [],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Directory entries",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ClassroomDto"
+                    "$ref": "#/components/schemas/County"
                   }
                 }
               }
             }
           },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "saveClassroom",
-        "tags": [
-          "classrooms"
-        ],
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClassroomDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ClassroomDto"
-              }
-            }
+          "400": {
+            "description": "Invalid parameters"
           }
         }
       }
     },
-    "/api/classrooms/{id}": {
+    "/api/cities": {
       "get": {
-        "operationId": "getClassroomById",
+        "operationId": "getCities",
         "tags": [
-          "classrooms"
+          "school-directory"
+        ],
+        "parameters": [
+          {
+            "name": "countyId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Directory entries",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ClassroomDto"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/City"
+                  }
                 }
               }
             }
           },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
+          "400": {
+            "description": "Invalid parameters"
           }
-        },
+        }
+      }
+    },
+    "/api/schools/search": {
+      "get": {
+        "operationId": "searchSchools",
+        "tags": [
+          "school-directory"
+        ],
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
+            "name": "cityId",
+            "in": "query",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
           }
-        ]
-      },
-      "put": {
-        "operationId": "updateClassroomById",
-        "tags": [
-          "classrooms"
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Directory entries",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ClassroomDto"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SchoolDto"
+                  }
                 }
               }
             }
           },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
+          "400": {
+            "description": "Invalid parameters"
           }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ClassroomDto"
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
-      },
-      "delete": {
-        "operationId": "deleteClassroomById",
-        "tags": [
-          "classrooms"
-        ],
-        "responses": {
-          "204": {
-            "description": "Success"
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ]
+        }
       }
     }
   },
@@ -2112,18 +1248,6 @@
             ],
             "format": "uuid"
           },
-          "sectionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "code": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[A-Z][A-Z0-9_]*$",
-            "maxLength": 120
-          },
           "mediaKey": {
             "type": "string",
             "pattern": "^[a-z0-9_]+$",
@@ -2140,117 +1264,28 @@
           }
         },
         "required": [
+          "name"
+        ]
+      },
+      "SchoolDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cityId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
           "name",
-          "sectionId"
-        ]
-      },
-      "FeedbackDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "ISSUE",
-              "OPTIMIZATION",
-              "IMPROVEMENT"
-            ]
-          },
-          "description": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 10000
-          },
-          "sentAt": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time"
-          },
-          "userId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "type",
-          "description",
-          "userId"
-        ]
-      },
-      "InstitutionDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "school": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "required": [
-          "school"
-        ]
-      },
-      "LetterSignPairDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "letter": {
-            "type": "string",
-            "minLength": 1
-          },
-          "mediaKey": {
-            "type": "string",
-            "pattern": "^[a-z0-9_]+$",
-            "maxLength": 255
-          }
-        },
-        "required": [
-          "letter"
-        ]
-      },
-      "NotificationDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "message": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 10000
-          },
-          "senderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "receiverId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sentAt": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "message",
-          "senderId",
-          "receiverId"
+          "cityId"
         ]
       },
       "RoleDto": {
@@ -2275,21 +1310,16 @@
       "SectionDto": {
         "type": "object",
         "properties": {
-          "id": {
+          "type": {
             "type": "string",
-            "format": "uuid"
+            "enum": [
+              "VIDEO",
+              "VOICE_TO_SIGN"
+            ]
           },
           "name": {
             "type": "string",
             "minLength": 1
-          },
-          "code": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[A-Z][A-Z0-9_]*$",
-            "maxLength": 120
           },
           "mediaKey": {
             "type": "string",
@@ -2303,7 +1333,10 @@
           }
         },
         "required": [
-          "name"
+          "type",
+          "name",
+          "mediaKey",
+          "iconKey"
         ]
       },
       "UserDto": {
@@ -2329,23 +1362,7 @@
             "writeOnly": true,
             "description": "8 to 72 characters, with a maximum of 72 UTF-8 bytes."
           },
-          "mobile": {
-            "type": "string",
-            "minLength": 10,
-            "maxLength": 10
-          },
-          "address": {
-            "type": "string",
-            "minLength": 1
-          },
-          "birthday": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date"
-          },
-          "institutionId": {
+          "schoolId": {
             "type": "string",
             "format": "uuid"
           },
@@ -2353,21 +1370,18 @@
             "type": "string",
             "format": "uuid"
           },
-          "classroomId": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "uuid"
+          "phone": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 10
           }
         },
         "required": [
           "name",
           "email",
           "password",
-          "mobile",
-          "address",
-          "institutionId",
+          "phone",
+          "schoolId",
           "roleId"
         ]
       },
@@ -2393,29 +1407,7 @@
             "format": "email",
             "minLength": 1
           },
-          "mobile": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "minLength": 10,
-            "maxLength": 10
-          },
-          "address": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "minLength": 1
-          },
-          "birthday": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date"
-          },
-          "institutionId": {
+          "schoolId": {
             "type": [
               "string",
               "null"
@@ -2429,12 +1421,13 @@
             ],
             "format": "uuid"
           },
-          "classroomId": {
+          "phone": {
             "type": [
               "string",
               "null"
             ],
-            "format": "uuid"
+            "minLength": 10,
+            "maxLength": 10
           }
         }
       },
@@ -2466,7 +1459,7 @@
           }
         }
       },
-      "ClassroomDto": {
+      "County": {
         "type": "object",
         "properties": {
           "id": {
@@ -2474,17 +1467,33 @@
             "format": "uuid"
           },
           "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "City": {
+        "type": "object",
+        "properties": {
+          "id": {
             "type": "string",
-            "minLength": 1
+            "format": "uuid"
           },
-          "institutionId": {
+          "name": {
+            "type": "string"
+          },
+          "countyId": {
             "type": "string",
             "format": "uuid"
           }
         },
         "required": [
+          "id",
           "name",
-          "institutionId"
+          "countyId"
         ]
       }
     }

@@ -11,8 +11,8 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class DatabaseIntegrationTest {
-    private static final String[] TABLES = {"classrooms", "user_favorites", "institutions", "roles", "sections", "categories",
-            "letter_sign_pairs", "users", "feedbacks", "notifications"};
+    private static final String[] TABLES = {"favorites", "schools", "roles", "categories",
+            "users", "counties", "cities"};
     @Autowired private DataSource dataSource;
 
     @BeforeEach

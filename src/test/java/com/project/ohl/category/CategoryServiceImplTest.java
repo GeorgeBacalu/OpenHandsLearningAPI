@@ -2,7 +2,6 @@ package com.project.ohl.category;
 
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.model.CategoryDto;
-import com.project.ohl.application.port.in.SectionService;
 import com.project.ohl.application.port.out.CategoryRepositoryPort;
 import com.project.ohl.application.port.out.FavoriteRepositoryPort;
 import com.project.ohl.application.port.out.UserRepositoryPort;
@@ -10,7 +9,9 @@ import com.project.ohl.application.service.CategoryServiceImpl;
 import com.project.ohl.domain.exception.ResourceNotFoundException;
 import com.project.ohl.domain.model.Category;
 import com.project.ohl.domain.model.User;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,9 +59,6 @@ class CategoryServiceImplTest {
     @Mock
     private CategoryRepositoryPort categoryRepository;
 
-    @Mock
-    private SectionService sectionService;
-
     @Mock private FavoriteRepositoryPort favorites;
     @Mock private UserRepositoryPort users;
 
@@ -101,13 +99,18 @@ class CategoryServiceImplTest {
         filteredFavoriteCategories = getMockedFavoriteCategoriesFilteredByName();
         categoryDtoOne = mapper.convertToDto(categoryOne);
         categoryDtoTwo = mapper.convertToDto(categoryTwo);
-        categoryDtos = mapper.convertToDtoList(categories);
-        parentCategoryDtos = mapper.convertToDtoList(parentCategories);
+        categoryDtos = mapper.convertToDtoList(List.of(
+                categories.get(3), categories.get(0), categories.get(4),
+                categories.get(2), categories.get(6), categories.get(1),
+                categories.get(8), categories.get(7), categories.get(5)));
+        parentCategoryDtos = mapper.convertToDtoList(List.of(parentCategories.get(0), parentCategories.get(2), parentCategories.get(1)));
         filteredParentCategoryDtos = mapper.convertToDtoList(filteredParentCategories);
         childrenCategoryDtosAlphabet = mapper.convertToDtoList(childrenCategoriesAlphabet);
         filteredChildrenCategoryDtosAlphabet = mapper.convertToDtoList(filteredChildrenCategoriesAlphabet);
-        favoriteCategoryDtos = mapper.convertToDtoList(favoriteCategories);
-        filteredFavoriteCategoryDtos = mapper.convertToDtoList(filteredFavoriteCategories);
+        favoriteCategoryDtos = mapper.convertToDtoList(List.of(
+                favoriteCategories.get(2), favoriteCategories.get(0), favoriteCategories.get(1),
+                favoriteCategories.get(3), favoriteCategories.get(4)));
+        filteredFavoriteCategoryDtos = mapper.convertToDtoList(List.of(filteredFavoriteCategories.get(1), filteredFavoriteCategories.get(0)));
     }
 
     @Test
@@ -115,6 +118,34 @@ class CategoryServiceImplTest {
         given(categoryRepository.findAll()).willReturn(categories);
         List<CategoryDto> result = categoryService.getAllCategories();
         assertThat(result).isEqualTo(categoryDtos);
+    }
+
+    @Test
+    void categoriesUseRomanianAlphabeticalOrderIndependentlyOfTheDefaultLocale() {
+        List<String> names = List.of("Zebră", "Țară", "Tată", "Șarpe", "Sare",
+                "Înger", "Inel", "Ânger", "Ălbină", "Arici");
+        var values = new ArrayList<Category>();
+        for (int i = 0; i < names.size(); i++)
+            values.add(Category.builder().id(new UUID(0, i + 1)).name(names.get(i)).build());
+        given(categoryRepository.findAll()).willReturn(values);
+        Locale original = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+            assertThat(categoryService.getAllCategories()).extracting(CategoryDto::getName)
+                    .containsExactly("Arici", "Ălbină", "Ânger", "Inel", "Înger",
+                            "Sare", "Șarpe", "Tată", "Țară", "Zebră");
+        } finally {
+            Locale.setDefault(original);
+        }
+    }
+
+    @Test
+    void equivalentNamesUseTheUuidForStableOrdering() {
+        var first = Category.builder().id(new UUID(0, 1)).name("alfa").build();
+        var second = Category.builder().id(new UUID(0, 2)).name("ALFA").build();
+        given(categoryRepository.findAll()).willReturn(List.of(second, first));
+        assertThat(categoryService.getAllCategories()).extracting(CategoryDto::getId)
+                .containsExactly(first.getId(), second.getId());
     }
 
     @Test
@@ -176,30 +207,30 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNullAndNameBlank_shouldReturnListOfParentCategories() {
-        given(categoryRepository.findByParentIdNullAndSectionId(any(UUID.class))).willReturn(parentCategories);
-        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(null, VALID_ID, "");
+    void getCategoriesByParentIdAndName_whenParentIdNullAndNameBlank_shouldReturnListOfParentCategories() {
+        given(categoryRepository.findByParentIdNull()).willReturn(parentCategories);
+        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(null, "");
         assertThat(result).isEqualTo(parentCategoryDtos);
     }
 
     @Test
-    void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNullAndNameNotBlank_shouldReturnListOfParentCategoriesFilteredByName() {
-        given(categoryRepository.findByParentIdNullAndSectionIdAndNameContaining(any(UUID.class), anyString())).willReturn(filteredParentCategories);
-        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(null, VALID_ID, "a");
+    void getCategoriesByParentIdAndName_whenParentIdNullAndNameNotBlank_shouldReturnListOfParentCategoriesFilteredByName() {
+        given(categoryRepository.findByParentIdNullAndNameContaining(anyString())).willReturn(filteredParentCategories);
+        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(null, "a");
         assertThat(result).isEqualTo(filteredParentCategoryDtos);
     }
 
     @Test
-    void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNotNullAndNameBlank_shouldReturnListOfChildrenCategories() {
-        given(categoryRepository.findByParentIdAndSectionId(any(UUID.class), any(UUID.class))).willReturn(childrenCategoriesAlphabet);
-        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(VALID_ID, VALID_ID, "");
+    void getCategoriesByParentIdAndName_whenParentIdNotNullAndNameBlank_shouldReturnListOfChildrenCategories() {
+        given(categoryRepository.findByParentId(any(UUID.class))).willReturn(childrenCategoriesAlphabet);
+        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(VALID_ID, "");
         assertThat(result).isEqualTo(childrenCategoryDtosAlphabet);
     }
 
     @Test
-    void getCategoriesByParentIdAndSectionIdAndName_whenParentIdNotNullAndNameNotBlank_shouldReturnListOfChildrenCategoriesFilteredByName() {
-        given(categoryRepository.findByParentIdAndSectionIdAndNameContaining(any(UUID.class), any(UUID.class), anyString())).willReturn(filteredChildrenCategoriesAlphabet);
-        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndSectionIdAndName(VALID_ID, VALID_ID, "a");
+    void getCategoriesByParentIdAndName_whenParentIdNotNullAndNameNotBlank_shouldReturnListOfChildrenCategoriesFilteredByName() {
+        given(categoryRepository.findByParentIdAndNameContaining(any(UUID.class), anyString())).willReturn(filteredChildrenCategoriesAlphabet);
+        List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(VALID_ID, "a");
         assertThat(result).isEqualTo(filteredChildrenCategoryDtosAlphabet);
     }
 

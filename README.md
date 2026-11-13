@@ -37,45 +37,146 @@ validation, and timezone settings. Hibernate validates the existing development
 schema; startup does not create tables or seed data. No dev profile is required.
 
 All entity IDs and foreign keys use UUIDs. New records receive random UUIDs;
-HTTP IDs are UUID strings. Catalog images and icons use stable media keys; Android resource IDs remain local to the client.
+Persisted entity IDs are UUID strings. The read-only section menu uses fixed type identifiers. Catalog images and icons use stable media keys; Android resource IDs remain local to the client.
 
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V4 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V15 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
 - Per-user favorites; existing shared favorites are copied to each existing user.
-- Institutions representing schools, separate classrooms, and optional user classroom membership.
-- Unique normalized account emails and school/classroom names, required values, and supported role/feedback values.
+- Schools and normalized user membership.
+- Unique normalized account emails, required values, and supported role values.
 - Stable catalog `code`, `mediaKey`, and section `iconKey` fields, independent of translated display names.
-- Query indexes, matching-section parent relationships, and a serialized database trigger preventing hierarchy cycles.
+- Query indexes, parent relationships, and a serialized database trigger preventing hierarchy cycles.
 
 V2 transforms existing records and memberships; it seeds no users or catalog
 content. Space characters remain valid sign entries. New empty databases contain
-no application records after V1 through V4. Back up and rehearse upgrades on a copy
-before deploying these branches. Existing duplicate account emails or ambiguous
-classroom names must be resolved explicitly; migration failures roll back V2.
-Migrate the database through V4 before running this backend.
+no application records after V1 through V7. Back up and rehearse upgrades on a copy
+before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
+roll back V2.
+Migrate the database through V15 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
 The retained `dactilema_a` illustration matches the text/voice sign collection;
 the alphabet category uses that asset too. Letters are unique with case preserved,
-and normalized category names are unique within their section and parent, including
+and normalized category names are unique among siblings, including
 root categories. Shared media keys remain allowed.
-
-Feedback descriptions and notification messages use PostgreSQL `text`, with a
-10,000-character API limit. Their event times use `timestamptz` and Java `Instant`;
-V3 interprets existing local timestamps in `Europe/Bucharest`, the application
-timezone, and preserves those instants. New responses use UTC ISO timestamps.
-Notification lists accept `receiverId`, feedback lists accept `userId`, and both
-accept `page` (default 0) and `size` (default 50, maximum 100), ordered by newest
-event then UUID. Existing user/time indexes support the filtered reads.
 
 V4 removes the row revision counters from all nine entity tables. Applied
 migration files remain unchanged so Flyway can validate existing installations.
+
+V5 removes category display_order. V13 defines section ordering by UUID in application
+code. Category lists, including favorites and filtered searches, use Java Stream sorting with Romanian alphabetical collation, ignoring case and using UUID
+as a stable tie-breaker. /api/categories/filter returns only root categories
+when no parent is supplied, or only the selected parent's direct children. Both
+levels are alphabetically ordered. The obsolete category ordering index and
+constraint are removed with the column; the sibling-name index supports parent
+filtering after V14.
+
+V6 removes category codes. Category navigation and direct-child filters use UUIDs;
+the category filter accepts optional parentId and name; V14 removes sectionId.
+Renaming a parent leaves its UUID, children, and media keys unchanged. V13 also
+removes section codes; Android selects main section screens by UUID.
+
+V7 removes the letter-sign table and its CRUD API. The fixed alphabet mappings
+are an immutable Android dictionary shared by text and voice conversion.
+No backend request is needed for letter-to-sign lookup. The previous mappings
+are preserved in the local dictionary, including Romanian aliases and spaces.
+The pre-migration database backup retains the retired table.
+
+V8 replaces institutions with a Romania-only directory: `counties` →
+`cities` → `schools`. Schools use `city_id`; users use `school_id`.
+The cities table includes villages and Bucharest sectors, as represented by SIRUTA.
+Existing account UUIDs remain unchanged.
+
+Populate the directory explicitly after taking a database backup:
+
+```powershell
+.\mvnw.cmd spring-boot:run '-Dspring-boot.run.arguments=--spring.flyway.enabled=true --app.school-directory.import=true'
+```
+
+The importer reads the [INS SIRUTA S1 2026 catalog](https://data.gov.ro/dataset/siruta_s1-2026)
+and [Ministry school network 2025–2026](https://data.gov.ro/dataset/retea-scolara-2025-2026)
+through the data.gov.ro CKAN API. These are the verified source editions; imports
+do not automatically switch to a new edition. Apache POI 6.0.0 reads XLSX and
+Commons CSV 1.14.1 reads SIRUTA. No directory records are seeded by Flyway.
+Normal startup makes no external directory requests.
+
+Official SIRUTA and SIIIR codes determine repeatable UUIDs. Import validates both
+files and all school locations before writing, then upserts the complete directory
+in one transaction. Repeat imports preserve UUIDs and unchanged rows. Records absent
+from a later source are retained so memberships are not silently deleted.
+The three original numbered placeholder schools are replaced by the official
+Glina, Cățelu–Glina and Bobești–Glina schools; their users transfer to the corresponding schools. A database check rejects schools without a city; it is validated once
+legacy placeholders have been replaced. A failed import rolls back its changes.
+
+Browse `/api/counties`,
+`/api/cities?countyId=...`, and `/api/schools/search?cityId=...`.
+City and school searches accept `name`, `offset` (default 0), and `limit`
+(default 50, maximum 200). School CRUD is at `/api/schools`; requests use
+`name` and `cityId`. User requests use `schoolId`.
+
+V9 removes classroom management, its table, and user classroom assignments.
+Users retain their school memberships and all other account data. The API no
+longer exposes classroom endpoints or a classroom reference on users.
+
+V10 removes feedback and notification management, both tables, and their API
+contracts. Remaining account, school, category and favorite data are preserved.
+The event-only clock configuration and timezone property are no longer needed.
+
+V11 keeps user ID, name, email, phone, password, role and school only. It renames
+`mobile` to `phone` without changing values, and removes address and birthday.
+The profile API uses `phone`; responses continue to exclude password hashes.
+Existing user UUIDs, credentials, roles and school memberships are preserved.
+
+V12 renames `user_favorites` to `favorites` and drops `created_at`. Each row is
+only a user/category UUID pair. Existing pairs, composite uniqueness and cascading
+foreign keys are preserved; favorite lists continue to use alphabetical category order.
+
+V13 removes section `display_order` and `code`. V15 replaces UUID-based section
+ordering with the fixed declaration order of the API's Section enum.
+
+The retired Text to Sign section was deleted directly as a catalog record change,
+without a schema migration. It had no linked categories in development. Remaining
+retained section IDs and all other records are preserved. Voice to Sign retains both typed
+input and speech recognition unchanged.
+
+V14 removes `categories.section_id` and replaces the composite parent foreign key
+with a parent-only foreign key. Sibling-name uniqueness covers the entire catalog,
+including roots; the database trigger still prevents hierarchy cycles. Categories
+use UUID, name, parent UUID and media key only. `/api/categories/filter` returns
+alphabetical roots when parentId is absent and direct children when it is supplied.
+
+The six expression categories now sit under the `Expresii` parent inside Video.
+The parent reuses the former Expressions section UUID; existing expression IDs,
+media keys, descendant links and favorites are retained. The two remaining main
+sections are Video and Voice to Sign. Category creation and updates need no sectionId.
+
+Catalog record maintenance is separate from V14. On an existing V13 database,
+back up and regroup expressions before applying the schema migration:
+
+```sql
+BEGIN;
+INSERT INTO categories (id, name, parent_id, section_id, media_key)
+SELECT id, 'Expresii', NULL, '20a6880c-2e37-32e3-8e45-07a17e99a000', media_key
+FROM sections WHERE id = '1deb5200-b06d-3977-9426-e2ea373195f9';
+UPDATE categories
+SET parent_id = coalesce(parent_id, '1deb5200-b06d-3977-9426-e2ea373195f9'),
+    section_id = '20a6880c-2e37-32e3-8e45-07a17e99a000'
+WHERE section_id = '1deb5200-b06d-3977-9426-e2ea373195f9';
+DELETE FROM sections WHERE id = '1deb5200-b06d-3977-9426-e2ea373195f9';
+COMMIT;
+```
+
+V15 drops the unreferenced `sections` table. `GET /api/sections` remains a read-only,
+database-independent menu in fixed order: VIDEO, then VOICE_TO_SIGN. Each response
+entry has type, name, mediaKey and iconKey; section UUIDs and section mutation/detail
+endpoints are removed. Menu definitions and ordering can only change in API code.
+All remaining application records are preserved. Applied migration files remain immutable.
 
 For a separate empty PostgreSQL database:
 
@@ -88,7 +189,7 @@ For an audited copy already matching V1 with no Flyway history, explicitly
 baseline it at version 1 before applying subsequent migrations. Automatic baselining remains disabled
 in the application's default configuration. Never edit applied migrations.
 
-Regular tests use Hibernate-created H2 schemas and two records per table. The
+Regular tests use Hibernate-created H2 schemas, two records per table. The
 Flyway baseline test checks V1 creation and repeat runs on H2. V2 is PostgreSQL
 specific because its hierarchy trigger serializes concurrent tree changes. Its
 upgrade and record preservation were verified using a temporary database copy;
@@ -97,10 +198,8 @@ there is no PostgreSQL provisioning or rehearsal configuration in the project.
 Favorites endpoints require `userId`; a category read accepts optional `userId`
 to return that user's favorite status. Profile selection is not authentication:
 the existing API remains public and needs an authentication layer before serving
-private accounts in production. Catalog filters accept `parentCode` and
-`sectionCode` (default `VIDEO`), while UUID filters remain supported. Clients can
-rename labels without changing codes or media keys. Codes are immutable through
-the API. Classroom CRUD is available at `/api/classrooms`.
+private accounts in production. Catalog filters use the selected parent UUID. Clients can
+rename category labels without changing UUIDs, children or media keys.
 
 ## HTTP contract
 
@@ -124,7 +223,8 @@ updates store BCrypt.
 - `application`: input/output ports, use cases, validation models, and MapStruct mappings.
 - `adapter/web`: HTTP controllers, response projections, and error handling.
 - `adapter/persistence`: JPA entities, Spring Data repositories, and persistence adapters.
-- `adapter/config`: dependency wiring, service transaction boundaries, password hashing, and clock configuration.
+- `adapter/config`: dependency wiring, service transaction boundaries, password hashing.
+- `adapter/directory`: opt-in government catalog downloads and parsing.
 
 Application use cases depend on ports. Web and persistence adapters do not call
 each other. Service transactions wrap complete use cases, and MapStruct-generated

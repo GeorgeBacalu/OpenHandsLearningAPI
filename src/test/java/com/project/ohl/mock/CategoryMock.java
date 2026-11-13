@@ -6,7 +6,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import static com.project.ohl.TestIds.id;
-import static com.project.ohl.mock.SectionMock.getMockedSection1;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CategoryMock {
@@ -63,7 +62,6 @@ public class CategoryMock {
               .isExpanded(false)
               .isFavorite(true)
               .parent(null)
-              .section(getMockedSection1())
               .build();
     }
 
@@ -75,7 +73,6 @@ public class CategoryMock {
               .isExpanded(false)
               .isFavorite(false)
               .parent(null)
-              .section(getMockedSection1())
               .build();
     }
 
@@ -87,7 +84,6 @@ public class CategoryMock {
               .isExpanded(false)
               .isFavorite(true)
               .parent(null)
-              .section(getMockedSection1())
               .build();
     }
 
@@ -99,7 +95,6 @@ public class CategoryMock {
               .isExpanded(false)
               .isFavorite(true)
               .parent(getMockedCategoryAlphabet())
-              .section(getMockedSection1())
               .build();
     }
 
@@ -111,7 +106,6 @@ public class CategoryMock {
               .isExpanded(false)
               .isFavorite(false)
               .parent(getMockedCategoryAlphabet())
-              .section(getMockedSection1())
               .build();
     }
 
@@ -123,7 +117,6 @@ public class CategoryMock {
               .isExpanded(false)
               .isFavorite(false)
               .parent(getMockedCategoryNumbers())
-              .section(getMockedSection1())
               .build();
     }
 
@@ -135,7 +128,6 @@ public class CategoryMock {
               .isExpanded(false)
               .isFavorite(true)
               .parent(getMockedCategoryNumbers())
-              .section(getMockedSection1())
               .build();
     }
 
@@ -147,7 +139,6 @@ public class CategoryMock {
               .isExpanded(false)
               .isFavorite(false)
               .parent(getMockedCategoryColors())
-              .section(getMockedSection1())
               .build();
     }
 
@@ -159,7 +150,6 @@ public class CategoryMock {
               .isExpanded(false)
               .isFavorite(true)
               .parent(getMockedCategoryColors())
-              .section(getMockedSection1())
               .build();
     }
 }

@@ -17,8 +17,9 @@ class FlywayMigrationTest {
         flyway.migrate();
         assertThat(flyway.info().applied()).hasSize(1);
         var database = new JdbcTemplate(source);
-        for (String table : new String[]{"categories", "feedbacks", "institutions", "letter_sign_pairs",
-                "notifications", "roles", "sections", "users"})
+        var tables = database.queryForList("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' AND table_name <> 'flyway_schema_history'", String.class);
+        assertThat(tables).isNotEmpty();
+        for (String table : tables)
             assertThat(database.queryForObject("SELECT COUNT(*) FROM " + table, Long.class)).as(table).isZero();
         assertThat(flyway.migrate().migrationsExecuted).isZero();
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();

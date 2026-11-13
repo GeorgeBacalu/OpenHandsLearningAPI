@@ -1,9 +1,8 @@
 package com.project.ohl;
 
-import com.project.ohl.application.model.ClassroomDto;
 import com.project.ohl.application.model.UserDto;
+import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.in.CategoryService;
-import com.project.ohl.application.port.in.ClassroomService;
 import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.domain.exception.InvalidRequestException;
 import java.util.UUID;
@@ -15,7 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import static com.project.ohl.TestIds.CATEGORY_CHILD;
 import static com.project.ohl.TestIds.CATEGORY_PARENT;
-import static com.project.ohl.TestIds.INSTITUTION_A;
+import static com.project.ohl.TestIds.SCHOOL_A;
 import static com.project.ohl.TestIds.ROLE_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -24,10 +23,33 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SchemaNormalizationTest extends DatabaseIntegrationTest {
     @Autowired CategoryService categories;
     @Autowired UserService users;
-    @Autowired ClassroomService classrooms;
     @Autowired JdbcTemplate database;
 
     private UUID user(String name) { return database.queryForObject("SELECT id FROM users WHERE name = ?", UUID.class, name); }
+
+    @Test void expressionsCanBecomeChildrenWithoutChangingTheirIdentityOrFavorites() {
+        var parent = categories.saveCategory(CategoryDto.builder().name("Expresii").mediaKey("expressions_section").build());
+        var child = categories.getCategoryById(CATEGORY_CHILD);
+        String mediaKey = child.getMediaKey();
+        child.setParentId(parent.getId());
+        var moved = categories.updateCategoryById(child, child.getId());
+
+        assertThat(moved.getId()).isEqualTo(CATEGORY_CHILD);
+        assertThat(moved.getMediaKey()).isEqualTo(mediaKey);
+        assertThat(categories.getCategoriesByParentIdAndName(null, ""))
+                .extracting(CategoryDto::getName).containsExactly("Alphabet", "Expresii");
+        assertThat(categories.getCategoriesByParentIdAndName(parent.getId(), ""))
+                .extracting(CategoryDto::getId).containsExactly(CATEGORY_CHILD);
+        assertThat(categories.getFavoriteCategories(user("Ana")))
+                .extracting(CategoryDto::getId).containsExactly(CATEGORY_CHILD);
+    }
+
+    @Test void favoritesKeepOnlyTheirUserAndCategoryPair() {
+        var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'favorites'", String.class);
+        assertThat(columns).containsExactlyInAnyOrder("user_id", "category_id");
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'user_favorites'", Long.class)).isZero();
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM favorites", Long.class)).isEqualTo(2L);
+    }
 
     @Test void favoritesAreIndependentAndRepeatedSavesDoNotDuplicateThem() {
         UUID ana = user("Ana"), dan = user("Dan");
@@ -42,28 +64,22 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
         assertThat(categories.getCategoryById(CATEGORY_PARENT, dan).getIsFavorite()).isTrue();
     }
 
-    @Test void renamingCatalogLabelsPreservesCodesAndMediaKeys() {
+    @Test void renamingCategoriesPreservesTheirUuidChildrenAndMediaKeys() {
         var parent = categories.getCategoryById(CATEGORY_PARENT);
-        parent.setName("Translated alphabet"); parent.setCode(null); parent.setMediaKey(null);
+        parent.setName("Translated alphabet"); parent.setMediaKey(null);
         var changed = categories.updateCategoryById(parent, parent.getId());
-        assertThat(changed.getCode()).isEqualTo("ALPHABET");
+        assertThat(changed.getId()).isEqualTo(CATEGORY_PARENT);
         assertThat(changed.getMediaKey()).isEqualTo("alfabet");
-        assertThat(categories.getCategoriesByFilters(null, null, "ALPHABET", "VIDEO", ""))
+        assertThat(categories.getCategoriesByParentIdAndName(CATEGORY_PARENT, ""))
                 .extracting(value -> value.getId()).containsExactly(CATEGORY_CHILD);
-        changed.setCode("DIFFERENT");
-        assertThatThrownBy(() -> categories.updateCategoryById(changed, changed.getId())).isInstanceOf(InvalidRequestException.class);
     }
 
-    @Test void whitespaceSignSeparatorsRemainValidCatalogEntries() {
-        database.update("UPDATE letter_sign_pairs SET letter = ' ' WHERE id = (SELECT id FROM letter_sign_pairs LIMIT 1)");
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM letter_sign_pairs WHERE letter = ' '", Long.class)).isEqualTo(1);
-    }
-
-    @Test void parentAndChildMustBelongToTheSameSection() {
-        var child = categories.getCategoryById(CATEGORY_CHILD);
-        UUID otherSection = database.queryForObject("SELECT id FROM sections WHERE code = 'EXPRESSIONS'", UUID.class);
-        child.setSectionId(otherSection);
-        assertThatThrownBy(() -> categories.updateCategoryById(child, child.getId())).isInstanceOf(InvalidRequestException.class);
+    @Test void categoriesHaveNoSectionReferenceAndRejectCycles() {
+        var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'categories'", String.class);
+        assertThat(columns).containsExactlyInAnyOrder("id", "name", "parent_id", "media_key");
+        var parent = categories.getCategoryById(CATEGORY_PARENT);
+        parent.setParentId(CATEGORY_CHILD);
+        assertThatThrownBy(() -> categories.updateCategoryById(parent, parent.getId())).isInstanceOf(InvalidRequestException.class);
         assertThatThrownBy(() -> database.update("UPDATE categories SET parent_id = id WHERE id = ?", CATEGORY_PARENT))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
@@ -71,19 +87,11 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
     @Test void accountEmailsAreNormalizedAndCannotBeDuplicated() {
         UUID role = ROLE_USER;
         var request = UserDto.builder().name("Created user").email("  CREATED@Example.TEST ")
-                .password("test-password").mobile("0712345678").address("Bucharest")
-                .institutionId(INSTITUTION_A).roleId(role).build();
+                .password("test-password").phone("0712345678")
+                .schoolId(SCHOOL_A).roleId(role).build();
         assertThat(users.saveUser(request).getEmail()).isEqualTo("created@example.test");
         request.setEmail(" ANA@example.TEST ");
         assertThatThrownBy(() -> users.saveUser(request)).isInstanceOf(DataIntegrityViolationException.class);
     }
 
-    @Test void classroomsHaveSchoolMembershipAndUsersCannotJoinAnotherSchoolsClassroom() {
-        var created = classrooms.saveClassroom(ClassroomDto.builder().name("Class C").institutionId(INSTITUTION_A).build());
-        assertThat(classrooms.getClassroomById(created.getId()).getInstitutionId()).isEqualTo(INSTITUTION_A);
-        var ana = users.getUserById(user("Ana"));
-        ana.setPassword("test-password");
-        ana.setClassroomId(database.queryForObject("SELECT id FROM classrooms WHERE name = 'B'", UUID.class));
-        assertThatThrownBy(() -> users.updateUserById(ana, ana.getId())).isInstanceOf(InvalidRequestException.class);
-    }
 }

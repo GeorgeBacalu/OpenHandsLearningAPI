@@ -7,11 +7,11 @@ import org.mapstruct.Mapping;
 
 @Mapper(config = MappingConfiguration.class, uses = ReferenceMapper.class)
 public interface UserMapper {
-    @Mapping(target = "institutionId", source = "institution.id")
+    @Mapping(target = "schoolId", source = "school.id")
     @Mapping(target = "roleId", source = "role.id")
     UserDto convertToDto(User model);
 
-    @Mapping(target = "institution", source = "institutionId")
+    @Mapping(target = "school", source = "schoolId")
     @Mapping(target = "role", source = "roleId")
     User convertToEntity(UserDto dto);
 }

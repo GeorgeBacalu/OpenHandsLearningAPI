@@ -1,20 +1,15 @@
 package com.project.ohl.domain.model;
 
-import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class Section {
+@Getter
+@RequiredArgsConstructor
+public enum Section {
+    VIDEO("Video Section", "video_section", "ic_video_section"),
+    VOICE_TO_SIGN("Voice to Sign Section", "voice_to_sign_section", "ic_voice_to_sign_section");
 
-    private UUID id;
-    private String name;
-    private String code;
-    private String mediaKey;
-    private String iconKey;
+    private final String title;
+    private final String mediaKey;
+    private final String iconKey;
 }

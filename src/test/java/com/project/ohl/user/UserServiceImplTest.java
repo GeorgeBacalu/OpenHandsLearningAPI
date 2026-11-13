@@ -2,7 +2,7 @@ package com.project.ohl.user;
 
 import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.model.UserDto;
-import com.project.ohl.application.port.in.InstitutionService;
+import com.project.ohl.application.port.in.SchoolService;
 import com.project.ohl.application.port.in.RoleService;
 import com.project.ohl.application.port.out.PasswordHasher;
 import com.project.ohl.application.port.out.UserRepositoryPort;
@@ -49,7 +49,7 @@ class UserServiceImplTest {
     private UserRepositoryPort userRepository;
 
     @Mock
-    private InstitutionService institutionService;
+    private SchoolService schoolService;
 
     @Mock
     private RoleService roleService;

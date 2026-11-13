@@ -3,16 +3,19 @@ package com.project.ohl.application.service;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.port.in.CategoryService;
-import com.project.ohl.application.port.in.SectionService;
 import com.project.ohl.application.port.out.CategoryRepositoryPort;
 import com.project.ohl.application.port.out.FavoriteRepositoryPort;
 import com.project.ohl.application.port.out.UserRepositoryPort;
 import com.project.ohl.domain.exception.InvalidRequestException;
 import com.project.ohl.domain.exception.ResourceNotFoundException;
 import com.project.ohl.domain.model.Category;
+import java.text.Collator;
+import java.text.ParseException;
+import java.text.RuleBasedCollator;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Locale;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 
@@ -20,9 +23,9 @@ import static com.project.ohl.application.error.ExceptionMessageConstants.CATEGO
 
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
+    private static final Collator ROMANIAN_COLLATOR = romanianCollator();
 
     private final CategoryRepositoryPort categoryRepository;
-    private final SectionService sectionService;
 
     private final CategoryMapper mapper;
     private final FavoriteRepositoryPort favorites;
@@ -31,7 +34,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryDto> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
-        return mapper.convertToDtoList(categories);
+        return alphabeticalCategories(categories);
     }
 
     @Override
@@ -42,7 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto saveCategory(CategoryDto categoryDto) {
-        validateParent(null, categoryDto.getParentId(), categoryDto.getSectionId());
+        validateParent(null, categoryDto.getParentId());
         Category category = mapper.convertToEntity(categoryDto);
         Category savedCategory = categoryRepository.save(category);
         return mapper.convertToDto(savedCategory);
@@ -51,15 +54,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategoryById(CategoryDto categoryDto, UUID id) {
         Category categoryToUpdate = getCategoryEntityById(id);
-        validateParent(id, categoryDto.getParentId(), categoryDto.getSectionId());
-        categoryToUpdate.setCode(categoryDto.getCode());
+        validateParent(id, categoryDto.getParentId());
         categoryToUpdate.setMediaKey(categoryDto.getMediaKey());
         categoryToUpdate.setName(categoryDto.getName());
 
         categoryToUpdate.setIsExpanded(categoryDto.getIsExpanded());
         categoryToUpdate.setIsFavorite(categoryDto.getIsFavorite());
         categoryToUpdate.setParent(categoryDto.getParentId() == null ? null : getCategoryEntityById(categoryDto.getParentId()));
-        categoryToUpdate.setSection(sectionService.getSectionEntityById(categoryDto.getSectionId()));
         Category updatedCategory = categoryRepository.update(categoryToUpdate);
         return mapper.convertToDto(updatedCategory);
     }
@@ -71,18 +72,18 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getCategoriesByParentIdAndSectionIdAndName(UUID parentId, UUID sectionId, String name) {
+    public List<CategoryDto> getCategoriesByParentIdAndName(UUID parentId, String name) {
         List<Category> categories;
         if(parentId == null) {
             categories = name == null || name.isBlank()
-                  ? categoryRepository.findByParentIdNullAndSectionId(sectionId)
-                  : categoryRepository.findByParentIdNullAndSectionIdAndNameContaining(sectionId, name);
+                  ? categoryRepository.findByParentIdNull()
+                  : categoryRepository.findByParentIdNullAndNameContaining(name);
         } else {
             categories = name == null || name.isBlank()
-                  ? categoryRepository.findByParentIdAndSectionId(parentId, sectionId)
-                  : categoryRepository.findByParentIdAndSectionIdAndNameContaining(parentId, sectionId, name);
+                  ? categoryRepository.findByParentId(parentId)
+                  : categoryRepository.findByParentIdAndNameContaining(parentId, name);
         }
-        return mapper.convertToDtoList(categories);
+        return alphabeticalCategories(categories);
     }
 
     @Override
@@ -96,20 +97,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getCategoriesByFilters(UUID parentId, UUID sectionId, String parentCode, String sectionCode, String name) {
-        if (parentCode != null) parentId = categoryRepository.findByCode(parentCode)
-                .orElseThrow(() -> new ResourceNotFoundException("Category " + parentCode + " was not found")).getId();
-        if (sectionId == null) sectionId = sectionService.getSectionEntityByCode(sectionCode == null ? "VIDEO" : sectionCode).getId();
-        return getCategoriesByParentIdAndSectionIdAndName(parentId, sectionId, name);
-    }
-
-    @Override
     public List<CategoryDto> getFavoriteCategories(UUID userId) { return getFavoritesByName(userId, ""); }
 
     @Override
     public List<CategoryDto> getFavoritesByName(UUID userId, String name) {
         requireUser(userId);
-        var result = mapper.convertToDtoList(favorites.findByUserAndName(userId, name == null ? "" : name));
+        var result = alphabeticalCategories(favorites.findByUserAndName(userId, name == null ? "" : name));
         result.forEach(category -> category.setIsFavorite(true));
         return result;
     }
@@ -132,19 +125,37 @@ public class CategoryServiceImpl implements CategoryService {
         return result;
     }
 
+    private List<CategoryDto> alphabeticalCategories(List<Category> categories) {
+        var collator = (Collator) ROMANIAN_COLLATOR.clone();
+        Comparator<Category> byName = Comparator.comparing(category -> category.getName().strip().toLowerCase(Locale.ROOT), collator);
+        return categories.stream().sorted(byName.thenComparing(Category::getId))
+                .map(mapper::convertToDto).toList();
+    }
+
+    private static Collator romanianCollator() {
+        try {
+            var base = (RuleBasedCollator) Collator.getInstance(Locale.forLanguageTag("ro-RO"));
+            var collator = new RuleBasedCollator(base.getRules()
+                    + "& a < ă , Ă < â , Â & i < î , Î & s < ș , Ș = ş , Ş & t < ț , Ț = ţ , Ţ");
+            collator.setStrength(Collator.SECONDARY);
+            collator.setDecomposition(Collator.CANONICAL_DECOMPOSITION);
+            return collator;
+        } catch (ParseException exception) {
+            throw new ExceptionInInitializerError(exception);
+        }
+    }
+
     private void requireUser(UUID id) {
         if (id == null || users.findById(id).isEmpty()) throw new ResourceNotFoundException("User " + id + " was not found");
     }
 
-    private void validateParent(UUID categoryId, UUID parentId, UUID sectionId) {
+    private void validateParent(UUID categoryId, UUID parentId) {
         var visited = new HashSet<UUID>();
         while (parentId != null) {
             if (parentId.equals(categoryId) || !visited.add(parentId)) {
                 throw new InvalidRequestException("Category hierarchy must not contain cycles.");
             }
             var current = getCategoryEntityById(parentId);
-            if (current.getSection() != null && !Objects.equals(current.getSection().getId(), sectionId))
-                throw new InvalidRequestException("Parent and child must belong to the same section.");
             var parent = current.getParent();
             parentId = parent == null ? null : parent.getId();
         }
