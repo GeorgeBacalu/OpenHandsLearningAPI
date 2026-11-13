@@ -9,9 +9,11 @@ import org.mapstruct.Mapping;
 public interface UserMapper {
     @Mapping(target = "schoolId", source = "school.id")
     @Mapping(target = "roleId", source = "role.id")
+    @Mapping(target = "password", ignore = true)
     UserDto convertToDto(User model);
 
     @Mapping(target = "school", source = "schoolId")
     @Mapping(target = "role", source = "roleId")
+    @Mapping(target = "passwordHash", ignore = true)
     User convertToEntity(UserDto dto);
 }

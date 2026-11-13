@@ -16,7 +16,7 @@ INSERT INTO categories (id, name, parent_id, media_key) VALUES
     ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 'Alphabet', NULL, 'alfabet'),
     ('f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185', 'Letter A', '176ccfb5-fe9b-484c-a799-310eb72a02a5', 'dactilema_a');
 
-INSERT INTO users (id, name, email, password, phone, school_id, role_id) VALUES
+INSERT INTO users (id, name, email, password_hash, phone, school_id, role_id) VALUES
     ('4b16f89f-f513-4723-9d19-5750cf7199d6', 'Ana', 'ana@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0712345678', 'e882d373-7f2f-44b2-8c87-530cd04964d4', '99d0dd27-ea57-42b3-8fd8-64e3973a05d3'),
     ('0f7cc0da-f19f-48b7-ae3b-5139cdfbd690', 'Dan', 'dan@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0798765432', '5d958f7d-3407-49ff-b7c1-91098cc5e9e0', '4c517662-ab55-47ea-b758-84c1af759525');
 

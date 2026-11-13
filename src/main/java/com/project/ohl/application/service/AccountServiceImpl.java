@@ -34,7 +34,7 @@ public final class AccountServiceImpl implements AccountService {
     @Override
     public Account authenticate(String email, String password) {
         var user = users.findByEmail(normalize(email));
-        boolean matches = passwords.matches(password, user.map(User::getPassword).orElse(dummyHash));
+        boolean matches = passwords.matches(password, user.map(User::getPasswordHash).orElse(dummyHash));
         if (user.isEmpty() || !matches) throw new AuthenticationFailedException();
         return Account.from(user.get());
     }
@@ -48,7 +48,7 @@ public final class AccountServiceImpl implements AccountService {
         var school = schools.findById(registration.schoolId())
                 .orElseThrow(() -> new InvalidRequestException("Select an existing school."));
         var user = User.builder().name(registration.name().strip()).email(email)
-                .phone(registration.phone()).password(passwords.hash(registration.password()))
+                .phone(registration.phone()).passwordHash(passwords.hash(registration.password()))
                 .school(school).role(role).build();
         return Account.from(users.save(user));
     }

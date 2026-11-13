@@ -17,7 +17,7 @@ public class User {
     private String name;
     private String email;
     @ToString.Exclude
-    private String password;
+    private String passwordHash;
     private String phone;
     private School school;
     private Role role;

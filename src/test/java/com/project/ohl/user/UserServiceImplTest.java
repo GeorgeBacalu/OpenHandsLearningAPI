@@ -100,23 +100,25 @@ class UserServiceImplTest {
 
     @Test
     void saveUser_shouldAddUserToList() {
+        userDto1.setPassword("test-user-password1");
         given(passwordHasher.hash(userDto1.getPassword())).willReturn("encoded-password");
         given(userRepository.save(any(User.class))).willAnswer(invocation -> invocation.getArgument(0));
         UserDto result = userService.saveUser(userDto1);
         verify(userRepository).save(userCaptor.capture());
-        assertThat(userCaptor.getValue().getPassword()).isEqualTo("encoded-password");
+        assertThat(userCaptor.getValue().getPasswordHash()).isEqualTo("encoded-password");
         assertThat(result).isEqualTo(mapper.convertToDto(userCaptor.getValue()));
     }
 
     @Test
     void updateUserById_withValidId_shouldUpdateUserWithGivenId() {
+        userDto2.setPassword("test-user-password2");
         User user = user2; user.setId(VALID_ID);
         given(userRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(user1));
         given(passwordHasher.hash(userDto2.getPassword())).willReturn("encoded-password");
         given(userRepository.update(any(User.class))).willReturn(user1);
         UserDto result = userService.updateUserById(userDto2, VALID_ID);
         verify(userRepository).update(userCaptor.capture());
-        assertThat(userCaptor.getValue().getPassword()).isEqualTo("encoded-password");
+        assertThat(userCaptor.getValue().getPasswordHash()).isEqualTo("encoded-password");
         assertThat(result).isEqualTo(mapper.convertToDto(userCaptor.getValue()));
     }
 

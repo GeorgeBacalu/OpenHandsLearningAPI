@@ -65,13 +65,13 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
                 .email("hashed@example.test").password("long-test-password").phone("0712345678")
                 .schoolId(school.getId()).roleId(role.getId()).build();
         var created = userService.saveUser(request);
-        var stored = users.findById(created.getId()).orElseThrow().getPassword();
+        var stored = users.findById(created.getId()).orElseThrow().getPasswordHash();
         assertThat(stored).startsWith("$2b$12$").doesNotContain(request.getPassword());
         var encoder = new BCryptPasswordEncoder();
         assertThat(encoder.matches(request.getPassword(), stored)).isTrue();
         request.setPassword("another-test-password");
         userService.updateUserById(request, created.getId());
-        var updated = users.findById(created.getId()).orElseThrow().getPassword();
+        var updated = users.findById(created.getId()).orElseThrow().getPasswordHash();
         assertThat(updated).isNotEqualTo(stored);
         assertThat(encoder.matches(request.getPassword(), updated)).isTrue();
     }
@@ -81,7 +81,7 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         var school = schools.save(School.builder().name("School").cityId(UUID.fromString("00000000-0000-4000-8000-000000000104")).build());
         var role = roles.findById(ROLE_USER).orElseThrow();
         var user = users.save(User.builder().name("Ana").email("created@example.test")
-              .password("test-password").phone("0712345678")
+              .passwordHash("$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy").phone("0712345678")
               .school(school).role(role).build());
         var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
         var child = categories.save(Category.builder().name("C").parent(parent).build());

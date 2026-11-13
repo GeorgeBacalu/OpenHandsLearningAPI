@@ -5,6 +5,7 @@ import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.model.CategoryDto;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.domain.model.Category;
+import com.project.ohl.domain.model.User;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -46,5 +47,13 @@ class MapperTest {
         var user = users.convertToEntity(UserDto.builder().schoolId(id(19)).roleId(id(4)).build());
         assertThat(user.getSchool().getId()).isEqualTo(id(19));
         assertThat(user.getRole().getId()).isEqualTo(id(4));
+    }
+
+    @Test
+    void passwordHashesNeverMapToRawPasswordFields() {
+        var stored = User.builder().passwordHash("stored-hash").build();
+        assertThat(users.convertToDto(stored).getPassword()).isNull();
+        var request = UserDto.builder().password("raw-request-password").build();
+        assertThat(users.convertToEntity(request).getPasswordHash()).isNull();
     }
 }

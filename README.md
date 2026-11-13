@@ -9,6 +9,11 @@ build and run the API; JDK 17 is not required. The Maven Wrapper downloads Maven
 3.10.0 and verifies its checksum. No global Maven installation or wrapper JAR is
 needed.
 
+Source compilation treats warnings as errors. `.mvn/jvm.config` explicitly
+allows the Unsafe access required by Lombok 1.18.48 during Java 25 compilation,
+using the compatibility option described in [JEP 498](https://openjdk.org/jeps/498).
+This setting applies to Maven's JVM; it is not required to run the packaged API.
+
 ```powershell
 .\mvnw.cmd clean verify
 ```
@@ -42,7 +47,7 @@ Persisted entity IDs are UUID strings. The read-only section menu uses fixed typ
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V15 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V16 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
@@ -57,7 +62,7 @@ content. Space characters remain valid sign entries. New empty databases contain
 no application records after V1 through V7. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
 roll back V2.
-Migrate the database through V15 before running this backend.
+Migrate the database through V16 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
@@ -215,8 +220,15 @@ New and updated user passwords are hashed with BCrypt (`$2b$`, cost factor 12),
 using a fresh random salt for each hash. User HTTP responses exclude passwords.
 Public registration requires 15 to 72 characters and at most 72 UTF-8 bytes;
 oversized values return HTTP 400. Existing BCrypt credentials remain valid.
-Administrator account updates retain their existing validation rules. Existing credentials are not silently rewritten; password
-updates store BCrypt.
+Administrator account updates retain their existing validation rules. Stored credentials
+use `passwordHash` in Java and `users.password_hash` in PostgreSQL. Request-only
+`password` fields accept raw passwords; response mappings never copy stored hashes.
+
+V16 renames the column and migrates legacy plaintext credentials to BCrypt (`$2b$`,
+cost 12), preserving existing BCrypt hashes, user UUIDs, profiles, roles, schools,
+and favorites. Invalid BCrypt values and legacy passwords over 72 UTF-8 bytes
+abort the migration instead of being truncated. Apply V16 before starting this
+backend; migrations and directory imports remain disabled during normal startup.
 
 ## Authentication
 

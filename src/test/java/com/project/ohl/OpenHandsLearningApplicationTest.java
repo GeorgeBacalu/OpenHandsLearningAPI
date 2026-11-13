@@ -40,7 +40,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
 
     @BeforeEach
     void authenticateFixture() throws Exception {
-        database.update("UPDATE users SET password = ?", passwords.hash("correct-test-password"));
+        database.update("UPDATE users SET password_hash = ?", passwords.hash("correct-test-password"));
         client = HttpClient.newBuilder().cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL)).build();
         authenticate("dan@example.test");
     }
@@ -52,7 +52,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
 
     private String csrf() throws Exception {
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/auth/csrf")).GET().build();
-        return json.readTree(client.send(request, HttpResponse.BodyHandlers.ofString()).body()).path("token").asText();
+        return json.readTree(client.send(request, HttpResponse.BodyHandlers.ofString()).body()).path("token").asString();
     }
 
     @Test
@@ -62,10 +62,10 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(response.headers().firstValue("Content-Type").orElse("")).contains("application/json");
         var users = json.readTree(response.body());
         assertThat(users.size()).isEqualTo(2);
-        assertThat(List.of(users.get(0).path("name").asText(), users.get(1).path("name").asText()))
+        assertThat(List.of(users.get(0).path("name").asString(), users.get(1).path("name").asString()))
                 .containsExactlyInAnyOrder("Ana", "Dan");
-        var ana = users.get(0).path("name").asText().equals("Ana") ? users.get(0) : users.get(1);
-        assertThat(ana.path("phone").asText()).isEqualTo("0712345678");
+        var ana = users.get(0).path("name").asString().equals("Ana") ? users.get(0) : users.get(1);
+        assertThat(ana.path("phone").asString()).isEqualTo("0712345678");
         assertThat(users.get(0).has("password")).isFalse();
     }
 
@@ -76,12 +76,12 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(response.statusCode()).isEqualTo(200);
         var sections = json.readTree(response.body());
         assertThat(sections.size()).isEqualTo(2);
-        assertThat(List.of(sections.get(0).path("type").asText(), sections.get(1).path("type").asText()))
+        assertThat(List.of(sections.get(0).path("type").asString(), sections.get(1).path("type").asString()))
                 .containsExactly("VIDEO", "VOICE_TO_SIGN");
-        assertThat(sections.get(0).path("name").asText()).isEqualTo("Video Section");
-        assertThat(sections.get(0).path("mediaKey").asText()).isEqualTo("video_section");
-        assertThat(sections.get(1).path("name").asText()).isEqualTo("Voice to Sign Section");
-        assertThat(sections.get(1).path("iconKey").asText()).isEqualTo("ic_voice_to_sign_section");
+        assertThat(sections.get(0).path("name").asString()).isEqualTo("Video Section");
+        assertThat(sections.get(0).path("mediaKey").asString()).isEqualTo("video_section");
+        assertThat(sections.get(1).path("name").asString()).isEqualTo("Voice to Sign Section");
+        assertThat(sections.get(1).path("iconKey").asString()).isEqualTo("ic_voice_to_sign_section");
         for (var section : sections) {
             assertThat(section.size()).isEqualTo(4);
             assertThat(section.has("id") || section.has("displayOrder")).isFalse();
@@ -96,7 +96,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     @Test
     void userProfilesContainOnlyTheSupportedFields() throws Exception {
         var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'users'", String.class);
-        assertThat(columns).containsExactlyInAnyOrder("id", "name", "email", "phone", "password", "role_id", "school_id");
+        assertThat(columns).containsExactlyInAnyOrder("id", "name", "email", "phone", "password_hash", "role_id", "school_id");
         var request = json.createObjectNode().put("name", "Created profile").put("email", "created-profile@example.test")
                 .put("phone", "0712345678").put("password", "test-password")
                 .put("roleId", ROLE_USER.toString()).put("schoolId", SCHOOL_A.toString());
@@ -104,12 +104,12 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(created.statusCode()).isEqualTo(201);
         var profile = json.readTree(created.body());
         assertThat(profile.size()).isEqualTo(6);
-        assertThat(profile.path("phone").asText()).isEqualTo("0712345678");
+        assertThat(profile.path("phone").asString()).isEqualTo("0712345678");
         assertThat(profile.has("password") || profile.has("mobile") || profile.has("address") || profile.has("birthday")).isFalse();
-        String id = profile.path("id").asText();
+        String id = profile.path("id").asString();
         request.put("phone", "0798765432");
         assertThat(send("PUT", "/api/users/" + id, json.writeValueAsString(request)).statusCode()).isEqualTo(200);
-        assertThat(json.readTree(send("GET", "/api/users/" + id, null).body()).path("phone").asText()).isEqualTo("0798765432");
+        assertThat(json.readTree(send("GET", "/api/users/" + id, null).body()).path("phone").asString()).isEqualTo("0798765432");
         assertThat(send("DELETE", "/api/users/" + id, null).statusCode()).isEqualTo(204);
     }
 
@@ -133,7 +133,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         var response = send("GET", "/openapi.json", null);
         assertThat(response.statusCode()).isEqualTo(200);
         var contract = json.readTree(response.body());
-        assertThat(contract.path("openapi").asText()).isEqualTo("3.2.1");
+        assertThat(contract.path("openapi").asString()).isEqualTo("3.2.1");
         var documented = new HashSet<String>();
         contract.path("paths").properties().forEach(path -> path.getValue().properties().forEach(operation ->
                 documented.add(operation.getKey().toUpperCase() + " " + path.getKey())));
@@ -174,7 +174,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         request.put("roleId", ROLE_USER.toString());
         var response = send("POST", "/api/users", json.writeValueAsString(request));
         assertThat(response.statusCode()).isEqualTo(400);
-        assertThat(json.readTree(response.body()).path("detail").asText())
+        assertThat(json.readTree(response.body()).path("detail").asString())
                 .isEqualTo("Password must not exceed 72 UTF-8 bytes.");
     }
 
@@ -206,39 +206,39 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
                 .put("mediaKey", "arici");
         var created = send("POST", "/api/categories", json.writeValueAsString(request));
         assertThat(created.statusCode()).isEqualTo(201);
-        String id = json.readTree(created.body()).path("id").asText();
+        String id = json.readTree(created.body()).path("id").asString();
 
         var roots = json.readTree(send("GET", "/api/categories/filter", null).body());
         assertThat(roots.size()).isEqualTo(2);
         assertThat(roots.get(0).has("code")).isFalse();
         assertThat(roots.get(0).has("sectionId")).isFalse();
-        assertThat(List.of(roots.get(0).path("name").asText(), roots.get(1).path("name").asText()))
+        assertThat(List.of(roots.get(0).path("name").asString(), roots.get(1).path("name").asString()))
                 .containsExactly("Arici", "Zebră");
         assertThat(roots.get(0).path("parentId").isNull()).isTrue();
         assertThat(roots.get(1).path("parentId").isNull()).isTrue();
         var searchedRoots = json.readTree(send("GET", "/api/categories/filter?name=ici", null).body());
         assertThat(searchedRoots.size()).isEqualTo(1);
-        assertThat(searchedRoots.get(0).path("name").asText()).isEqualTo("Arici");
+        assertThat(searchedRoots.get(0).path("name").asString()).isEqualTo("Arici");
 
         request.put("name", "Țară").put("parentId", CATEGORY_PARENT.toString());
         assertThat(send("PUT", "/api/categories/" + id, json.writeValueAsString(request)).statusCode()).isEqualTo(200);
         var children = json.readTree(send("GET", "/api/categories/filter?parentId=" + CATEGORY_PARENT, null).body());
         assertThat(children.size()).isEqualTo(2);
-        assertThat(List.of(children.get(0).path("name").asText(), children.get(1).path("name").asText()))
+        assertThat(List.of(children.get(0).path("name").asString(), children.get(1).path("name").asString()))
                 .containsExactly("Șarpe", "Țară");
-        assertThat(children.get(0).path("parentId").asText()).isEqualTo(CATEGORY_PARENT.toString());
-        assertThat(children.get(1).path("parentId").asText()).isEqualTo(CATEGORY_PARENT.toString());
+        assertThat(children.get(0).path("parentId").asString()).isEqualTo(CATEGORY_PARENT.toString());
+        assertThat(children.get(1).path("parentId").asString()).isEqualTo(CATEGORY_PARENT.toString());
         var searchedChildren = json.readTree(send("GET",
                 "/api/categories/filter?parentId=" + CATEGORY_PARENT + "&name=pe", null).body());
         assertThat(searchedChildren.size()).isEqualTo(1);
-        assertThat(searchedChildren.get(0).path("name").asText()).isEqualTo("Șarpe");
+        assertThat(searchedChildren.get(0).path("name").asString()).isEqualTo("Șarpe");
         authenticate("ana@example.test");
         UUID ana = database.queryForObject("SELECT id FROM users WHERE name = 'Ana'", UUID.class);
         assertThat(send("PATCH", "/api/categories/favorites/save?userId=" + ana + "&categoryId=" + id, null)
                 .statusCode()).isEqualTo(200);
         var favorites = json.readTree(send("GET", "/api/categories/favorites?userId=" + ana, null).body());
         assertThat(favorites.size()).isEqualTo(2);
-        assertThat(List.of(favorites.get(0).path("name").asText(), favorites.get(1).path("name").asText()))
+        assertThat(List.of(favorites.get(0).path("name").asString(), favorites.get(1).path("name").asString()))
                 .containsExactly("Șarpe", "Țară");
     }
 

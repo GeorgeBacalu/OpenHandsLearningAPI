@@ -35,7 +35,7 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
     void credentials() {
         cookies = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
         client = HttpClient.newBuilder().cookieHandler(cookies).build();
-        database.update("UPDATE users SET password = ?", passwords.hash(PASSWORD));
+        database.update("UPDATE users SET password_hash = ?", passwords.hash(PASSWORD));
     }
 
     @Test
@@ -55,11 +55,11 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
         var created = send("POST", "/api/auth/register", json.writeValueAsString(request));
         assertThat(created.statusCode()).isEqualTo(201);
         var account = json.readTree(created.body());
-        assertThat(account.path("authority").asText()).isEqualTo("USER");
-        assertThat(account.path("roleId").asText()).isEqualTo(TestIds.ROLE_USER.toString());
-        assertThat(account.path("email").asText()).isEqualTo("new@example.test");
-        assertThat(account.has("password")).isFalse();
-        String hash = database.queryForObject("SELECT password FROM users WHERE email = 'new@example.test'", String.class);
+        assertThat(account.path("authority").asString()).isEqualTo("USER");
+        assertThat(account.path("roleId").asString()).isEqualTo(TestIds.ROLE_USER.toString());
+        assertThat(account.path("email").asString()).isEqualTo("new@example.test");
+        assertThat(account.has("password") || account.has("passwordHash") || account.has("password_hash")).isFalse();
+        String hash = database.queryForObject("SELECT password_hash FROM users WHERE email = 'new@example.test'", String.class);
         assertThat(hash).startsWith("$2b$12$");
         assertThat(passwords.matches(PASSWORD, hash)).isTrue();
         assertThat(send("GET", "/api/auth/me", null).statusCode()).isEqualTo(200);
@@ -85,8 +85,8 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
         var missing = login("unknown@example.test", "incorrect-password");
         assertThat(wrong.statusCode()).isEqualTo(401);
         assertThat(missing.statusCode()).isEqualTo(401);
-        assertThat(json.readTree(wrong.body()).path("detail").asText())
-                .isEqualTo(json.readTree(missing.body()).path("detail").asText());
+        assertThat(json.readTree(wrong.body()).path("detail").asString())
+                .isEqualTo(json.readTree(missing.body()).path("detail").asString());
         csrf();
         String before = sessionId();
         var authenticated = login("ANA@example.test", PASSWORD);
@@ -133,7 +133,7 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
     private HttpResponse<String> login(String email, String password) throws Exception {
         return send("POST", "/api/auth/login", json.writeValueAsString(json.createObjectNode().put("email", email).put("password", password)));
     }
-    private String csrf() throws Exception { return json.readTree(raw("GET", "/api/auth/csrf", null, null).body()).path("token").asText(); }
+    private String csrf() throws Exception { return json.readTree(raw("GET", "/api/auth/csrf", null, null).body()).path("token").asString(); }
     private URI uri(String path) { return URI.create("http://localhost:" + port + path); }
     private HttpResponse<String> send(String method, String path, String body) throws Exception {
         return raw(method, path, body, method.equals("GET") ? null : csrf());
