@@ -9,13 +9,21 @@ import com.project.ohl.domain.model.Role;
 import com.project.ohl.domain.model.User;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEntity> implements UserRepositoryPort {
 
     public UserPersistenceAdapter(UserJpaRepository repository) {
         super(repository);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<User> findByEmail(String email) {
+        return ((UserJpaRepository) repository).findByEmail(email).map(this::toDomain);
     }
 
     @Override
@@ -36,7 +44,7 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
               .password(entity.getPassword())
               .phone(entity.getPhone())
               .school(entity.getSchool() == null ? null : School.builder().id(entity.getSchool().getId()).build())
-              .role(entity.getRole() == null ? null : Role.builder().id(entity.getRole().getId()).build())
+              .role(entity.getRole() == null ? null : Role.builder().id(entity.getRole().getId()).authority(entity.getRole().getAuthority()).build())
               .build();
     }
 

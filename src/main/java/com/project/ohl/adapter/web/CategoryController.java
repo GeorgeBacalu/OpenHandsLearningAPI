@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,6 +35,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("#userId == null or @accountAccess.owns(authentication, #userId)")
     public ResponseEntity<CategoryDto> getCategoryById(@PathVariable UUID id, @RequestParam(required = false) UUID userId) {
         return ResponseEntity.ok(userId == null ? categoryService.getCategoryById(id) : categoryService.getCategoryById(id, userId));
     }
@@ -62,21 +64,25 @@ public class CategoryController {
     }
 
     @GetMapping("/favorites")
+    @PreAuthorize("@accountAccess.owns(authentication, #userId)")
     public ResponseEntity<List<CategoryDto>> getFavoriteCategories(@RequestParam UUID userId) {
         return ResponseEntity.ok(categoryService.getFavoriteCategories(userId));
     }
 
     @GetMapping("/favorites/filter")
+    @PreAuthorize("@accountAccess.owns(authentication, #userId)")
     public ResponseEntity<List<CategoryDto>> getFavoritesByName(@RequestParam UUID userId, @RequestParam String name) {
         return ResponseEntity.ok(categoryService.getFavoritesByName(userId, name));
     }
 
     @PatchMapping("/favorites/save")
+    @PreAuthorize("@accountAccess.owns(authentication, #userId)")
     public ResponseEntity<CategoryDto> saveFavorite(@RequestParam UUID userId, @RequestParam UUID categoryId) {
         return ResponseEntity.ok(categoryService.saveFavorite(userId, categoryId));
     }
 
     @PatchMapping("/favorites/delete")
+    @PreAuthorize("@accountAccess.owns(authentication, #userId)")
     public ResponseEntity<CategoryDto> deleteFavorite(@RequestParam UUID userId, @RequestParam UUID categoryId) {
         return ResponseEntity.ok(categoryService.deleteFavorite(userId, categoryId));
     }

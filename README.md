@@ -196,9 +196,9 @@ upgrade and record preservation were verified using a temporary database copy;
 there is no PostgreSQL provisioning or rehearsal configuration in the project.
 
 Favorites endpoints require `userId`; a category read accepts optional `userId`
-to return that user's favorite status. Profile selection is not authentication:
-the existing API remains public and needs an authentication layer before serving
-private accounts in production. Catalog filters use the selected parent UUID. Clients can
+to return that user's favorite status. Favorite requests require a session, and the supplied user UUID must match
+the authenticated account. Account listing and CRUD, role management, and catalog
+mutations require the ADMIN role. Catalog filters use the selected parent UUID. Clients can
 rename category labels without changing UUIDs, children or media keys.
 
 ## HTTP contract
@@ -213,9 +213,44 @@ Errors use RFC 9457 problem details (`application/problem+json`), including fiel
 validation errors. Database conflicts return 409 without exposing SQL details.
 New and updated user passwords are hashed with BCrypt (`$2b$`, cost factor 12),
 using a fresh random salt for each hash. User HTTP responses exclude passwords.
-Passwords must contain 8 to 72 characters and fit within 72 UTF-8 bytes; oversized
-values return HTTP 400. Existing credentials are not silently rewritten; password
+Public registration requires 15 to 72 characters and at most 72 UTF-8 bytes;
+oversized values return HTTP 400. Existing BCrypt credentials remain valid.
+Administrator account updates retain their existing validation rules. Existing credentials are not silently rewritten; password
 updates store BCrypt.
+
+## Authentication
+
+`POST /api/auth/register` accepts name, email, password, phone and schoolId. It
+always assigns the existing USER role; callers cannot choose a role or user ID.
+Emails are normalized and unique. Registration signs in the new account.
+`POST /api/auth/login` verifies BCrypt credentials and rotates the session ID.
+Failed login attempts are limited to five per IP/email pair in 15 minutes.
+Registration is limited to 30 attempts per IP in 15 minutes. Limits reserve an
+attempt before credential checks, so concurrent requests cannot bypass them.
+
+`GET /api/auth/me` returns the authenticated account without its password.
+`POST /api/auth/logout` invalidates the session. Sessions expire after 30 idle
+minutes and are held in memory, so an API restart signs clients out. No schema
+migration or account rewrite is required. Existing development records are unchanged.
+
+Cookie authentication uses HttpOnly, SameSite=Strict cookies. Cookies are Secure
+by default; production must use HTTPS. For local HTTP previews only, explicitly
+set `SESSION_COOKIE_SECURE=false`. Fetch `GET /api/auth/csrf` first, retain its
+JSESSIONID cookie, and send its
+`token` in `X-CSRF-TOKEN` for every POST, PUT, PATCH and DELETE. Fetch a new token
+after login or registration because authentication rotates it. Catalog and school
+directory reads remain public; private account data and favorites are protected.
+
+The Android app stores only an encrypted session cookie and validates it with
+`/api/auth/me`. Local profile selection never establishes authentication.
+Authentication integration tests use isolated H2 data and cover permissions,
+CSRF, role assignment, duplicate accounts, session fixation protection, logout,
+password verification, and login throttling. Deployment can scale to multiple
+instances by replacing in-memory sessions and throttling with shared storage.
+
+References: [Spring Security sessions](https://docs.spring.io/spring-security/reference/servlet/authentication/persistence.html),
+[CSRF](https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html),
+and [Android Keystore](https://developer.android.com/privacy-and-security/keystore).
 
 ## Structure
 
