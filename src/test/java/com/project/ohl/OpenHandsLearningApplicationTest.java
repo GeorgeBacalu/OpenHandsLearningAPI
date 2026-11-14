@@ -80,7 +80,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
                 .containsExactly("VIDEO", "VOICE_TO_SIGN");
         assertThat(sections.get(0).path("name").asString()).isEqualTo("Secțiune video");
         assertThat(sections.get(0).path("mediaKey").asString()).isEqualTo("video_section");
-        assertThat(sections.get(1).path("name").asString()).isEqualTo("Voce – semn");
+        assertThat(sections.get(1).path("name").asString()).isEqualTo("Secțiune voce-semn");
         assertThat(sections.get(1).path("iconKey").asString()).isEqualTo("ic_voice_to_sign_section");
         for (var section : sections) {
             assertThat(section.size()).isEqualTo(4);

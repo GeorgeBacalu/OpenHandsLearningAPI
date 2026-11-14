@@ -182,7 +182,7 @@ database-independent menu in fixed order: VIDEO, then VOICE_TO_SIGN. Each respon
 entry has type, name, mediaKey and iconKey; section UUIDs and section mutation/detail
 endpoints are removed. Menu definitions and ordering can only change in API code.
 All remaining application records are preserved. Applied migration files remain immutable.
-Section display names are Romanian: „Secțiune video” and „Voce – semn”. Enum
+Section display names are Romanian: „Secțiune video” and „Secțiune voce-semn”. Enum
 types and media keys stay unchanged. Catalog spelling corrections are record
 maintenance after a backup, rather than schema migrations.
 
