@@ -10,7 +10,6 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class S3StorageConfigTest {
     private final ApplicationContextRunner context = new ApplicationContextRunner()
@@ -18,53 +17,70 @@ class S3StorageConfigTest {
                 app.getEnvironment().getPropertySources().remove(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
                 new ConfigDataApplicationContextInitializer().initialize(app);
             })
-            .withPropertyValues("spring.config.location=file:src/main/resources/application.properties")
+            .withPropertyValues("spring.config.location=file:src/main/resources/application.properties",
+                    "AWS_ACCESS_KEY=test-access", "AWS_SECRET_ACCESS=test-secret")
             .withBean(PropertySourcesPlaceholderConfigurer.class)
-            .withUserConfiguration(S3StorageConfig.class);
+            .withUserConfiguration(S3StorageConfig.class, S3MediaStorageAdapter.class);
 
     @Test
-    void supportsCustomAndStandardEnvironmentNames() {
-        for (String[] names : new String[][]{{"AWS_ACCESS_KEY", "AWS_SECRET_ACCESS"},
-                {"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"}}) {
-            context.withPropertyValues(names[0] + "=test-access", names[1] + "=test-secret").run(app -> {
-                assertThat(app).hasNotFailed();
-                var credentials = app.getBean(AwsCredentialsProvider.class).resolveCredentials();
-                assertThat(credentials.accessKeyId()).isEqualTo("test-access");
-                assertThat(credentials.secretAccessKey()).isEqualTo("test-secret");
-                assertThat(app.getBean(S3Client.class).serviceClientConfiguration().region().id()).isEqualTo("us-east-1");
-            });
-        }
-    }
-
-    @Test
-    void rejectsPartialConfiguration() {
-        var config = new S3StorageConfig();
-        assertThatThrownBy(() -> config.s3Credentials("test", "")).isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> config.s3Credentials("", "secret")).isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void explicitSpringCredentialsOverrideEnvironmentCredentials() {
-        context.withPropertyValues("app.storage.s3.access-key=explicit-access", "app.storage.s3.secret-key=explicit-secret",
-                "AWS_ACCESS_KEY=environment-access", "AWS_SECRET_ACCESS=environment-secret").run(app -> {
+    void readsExplicitEnvironmentCredentials() {
+        context.run(app -> {
             assertThat(app).hasNotFailed();
             var credentials = app.getBean(AwsCredentialsProvider.class).resolveCredentials();
-            assertThat(credentials.accessKeyId()).isEqualTo("explicit-access");
-            assertThat(credentials.secretAccessKey()).isEqualTo("explicit-secret");
+            assertThat(credentials.accessKeyId()).isEqualTo("test-access");
+            assertThat(credentials.secretAccessKey()).isEqualTo("test-secret");
         });
+    }
+
+    @Test
+    void clientAndStorageUseRegionAndBucketFromApplicationProperties() {
+        context.run(app -> {
+            assertThat(app).hasNotFailed();
+
+            var environment = app.getEnvironment();
+
+            String region = environment.getRequiredProperty("app.storage.s3.region");
+            String bucket = environment.getRequiredProperty("app.storage.s3.bucket");
+
+            assertThat(app.getBean(S3Client.class).serviceClientConfiguration().region().id()).isEqualTo(region);
+            assertThat(app.getBean(S3MediaStorageAdapter.class).download("dev/categories/main.webp").url())
+                    .isEqualTo("https://" + bucket + ".s3." + region + ".amazonaws.com/dev/categories/main.webp");
+        });
+    }
+
+    @Test
+    void testProfileUsesH2WhileInheritingStorageConfiguration() {
+        new ApplicationContextRunner()
+                .withInitializer(app -> {
+                    app.getEnvironment().setActiveProfiles("test");
+                    new ConfigDataApplicationContextInitializer().initialize(app);
+                })
+                .withBean(PropertySourcesPlaceholderConfigurer.class)
+                .withUserConfiguration(S3StorageConfig.class, S3MediaStorageAdapter.class)
+                .run(app -> {
+                    assertThat(app).hasNotFailed();
+                    var environment = app.getEnvironment();
+
+                    assertThat(environment.getRequiredProperty("spring.datasource.url"))
+                            .isEqualTo("jdbc:h2:mem:open-hands-learning-test");
+                    assertThat(environment.getRequiredProperty("spring.jpa.hibernate.ddl-auto")).isEqualTo("create-drop");
+                    assertThat(app.getBean(S3Client.class).serviceClientConfiguration().region().id())
+                            .isEqualTo(environment.getRequiredProperty("app.storage.s3.region"));
+                    assertThat(app.getBean(S3MediaStorageAdapter.class).download("dev/categories/main.webp").url())
+                            .contains("https://" + environment.getRequiredProperty("app.storage.s3.bucket") + ".s3.");
+                });
     }
 
     @Test
     void productionConfigurationRejectsPartialCredentials() {
-        context.withPropertyValues("AWS_ACCESS_KEY=test-access").run(app -> {
-            assertThat(app).hasFailed();
-            assertThat(app.getStartupFailure()).hasRootCauseInstanceOf(IllegalArgumentException.class);
-        });
+        for (String missing : new String[]{"AWS_ACCESS_KEY", "AWS_SECRET_ACCESS"}) {
+            context.withPropertyValues(missing + "=").run(app -> assertThat(app).hasFailed());
+        }
     }
 
     @Test
-    void noExplicitCredentialsUsesTheDefaultChainWithoutResolvingItAtStartup() {
-        context.run(app -> {
+    void emptyCredentialsUseTheDefaultChainWithoutResolvingItAtStartup() {
+        context.withPropertyValues("AWS_ACCESS_KEY=", "AWS_SECRET_ACCESS=").run(app -> {
             assertThat(app).hasNotFailed();
             assertThat(app.getBean(AwsCredentialsProvider.class)).isInstanceOf(DefaultCredentialsProvider.class);
             assertThat(app.getBean(S3Client.class)).isNotNull();

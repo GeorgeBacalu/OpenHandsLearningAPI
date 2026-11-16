@@ -1,11 +1,10 @@
 package com.project.ohl.adapter.persistence.directory;
 
 import com.project.ohl.application.port.out.SchoolDirectoryPort;
-import com.project.ohl.domain.exception.InvalidRequestException;
 import com.project.ohl.domain.model.SchoolDirectory;
 import java.util.List;
-import java.util.Map;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -30,7 +29,6 @@ public class SchoolDirectoryPersistenceAdapter implements SchoolDirectoryPort {
 
     @Override
     public List<SchoolDirectory.City> cities(UUID countyId, String name, int offset, int limit) {
-        validatePage(offset, limit);
         return database.query("SELECT id, name, county_id FROM cities WHERE county_id = ? AND lower(name) LIKE ? ESCAPE '!' ORDER BY name, id LIMIT ? OFFSET ?",
                 (row, index) -> new SchoolDirectory.City(row.getObject(1, UUID.class), row.getString(2), row.getObject(3, UUID.class)),
                 countyId, pattern(name), limit, offset);
@@ -38,7 +36,6 @@ public class SchoolDirectoryPersistenceAdapter implements SchoolDirectoryPort {
 
     @Override
     public List<SchoolDirectory.School> schools(UUID cityId, String name, int offset, int limit) {
-        validatePage(offset, limit);
         return database.query("SELECT id, name, city_id FROM schools WHERE city_id = ? AND lower(name) LIKE ? ESCAPE '!' ORDER BY name, id LIMIT ? OFFSET ?",
                 (row, index) -> new SchoolDirectory.School(row.getObject(1, UUID.class), row.getString(2), row.getObject(3, UUID.class)),
                 cityId, pattern(name), limit, offset);
@@ -48,15 +45,9 @@ public class SchoolDirectoryPersistenceAdapter implements SchoolDirectoryPort {
         return "%" + value.strip().toLowerCase(Locale.ROOT).replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%";
     }
 
-    private static void validatePage(int offset, int limit) {
-        if (offset < 0 || limit < 1 || limit > 200) throw new InvalidRequestException("Use offset >= 0 and limit between 1 and 200.");
-    }
-
     @Override
     @Transactional
     public void importDirectory(SchoolDirectory data) {
-        if (data.counties().size() != 42 || data.cities().size() < 13000 || data.schools().size() < 15000)
-            throw new IllegalArgumentException("A complete Romania directory is required");
         database.execute("SELECT pg_advisory_xact_lock(782134920)");
         database.batchUpdate("INSERT INTO counties (id, name) VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name WHERE counties.name IS DISTINCT FROM EXCLUDED.name",
                 data.counties().stream().map(row -> new Object[]{row.id(), row.name()}).toList());
@@ -81,9 +72,9 @@ public class SchoolDirectoryPersistenceAdapter implements SchoolDirectoryPort {
         replacements.forEach((oldId, school) -> {
             var existing = database.queryForList("SELECT name FROM schools WHERE id = ? FOR UPDATE", String.class, oldId);
             if (existing.isEmpty()) return;
-            if (!existing.getFirst().equals(school[0])) throw new IllegalStateException("Placeholder school has been changed; review its replacement");
+            if (!school[0].equals(existing.getFirst())) throw new IllegalStateException("Placeholder school has been changed; review its replacement");
             UUID replacement = sourceId("school", school[1]);
-            if (database.queryForObject("SELECT COUNT(*) FROM schools WHERE id = ?", Integer.class, replacement) != 1)
+            if (!Integer.valueOf(1).equals(database.queryForObject("SELECT COUNT(*) FROM schools WHERE id = ?", Integer.class, replacement)))
                 throw new IllegalStateException("Replacement school is absent from the government dataset");
             database.update("UPDATE users SET school_id = ? WHERE school_id = ?", replacement, oldId);
             database.update("DELETE FROM schools WHERE id = ?", oldId);

@@ -5,12 +5,15 @@ import com.project.ohl.application.port.in.MediaService;
 import com.project.ohl.application.port.out.MediaStoragePort;
 import com.project.ohl.domain.exception.InvalidRequestException;
 import java.io.InputStream;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+@Service
 public class MediaServiceImpl implements MediaService {
     private final MediaStoragePort storage;
     private final String environment;
 
-    public MediaServiceImpl(MediaStoragePort storage, String environment) {
+    public MediaServiceImpl(MediaStoragePort storage, @Value("${app.storage.s3.environment}") String environment) {
         this.storage = storage;
         if (!"dev".equals(environment) && !"prod".equals(environment)) {
             throw new IllegalArgumentException("Media environment must be dev or prod.");
@@ -43,7 +46,7 @@ public class MediaServiceImpl implements MediaService {
             throw new InvalidRequestException("Media type must be images or videos.");
         }
         String suffix = "images".equals(type) ? "webp" : "mp4";
-        boolean category = mediaKey != null && mediaKey.matches("categories/(?:[a-z0-9_]+/)+[a-z0-9_]+\\." + suffix);
+        boolean category = mediaKey != null && mediaKey.matches("categories/(?:[a-z0-9_]+/)*[a-z0-9_]+\\." + suffix);
         boolean voice = "images".equals(type) && mediaKey != null && mediaKey.matches("voice/[a-z0-9_]+\\.webp");
         if (mediaKey == null || mediaKey.length() > 1000 || !(category || voice)) {
             throw new InvalidRequestException("Invalid media key.");

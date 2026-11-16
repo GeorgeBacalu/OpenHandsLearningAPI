@@ -33,9 +33,6 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
     public Category toDomain(CategoryEntity entity) {
         return Category.builder().id(entity.getId())
               .name(entity.getName()).imageUrl(entity.getImageUrl()).videoUrl(entity.getVideoUrl())
-
-              .isExpanded(false)
-              .isFavorite(false)
               .parent(entity.getParent() == null ? null : Category.builder().id(entity.getParent().getId()).build())
               .build();
     }

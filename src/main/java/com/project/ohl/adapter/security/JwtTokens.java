@@ -10,17 +10,18 @@ import java.util.Map;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.security.oauth2.jwt.JwtIssuerValidator;
 import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
-import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.stereotype.Component;
@@ -36,7 +37,6 @@ public final class JwtTokens {
     public JwtTokens() { this(randomKey()); }
 
     private static SecretKey randomKey() {
-        // Restarting this single-instance API replaces the private key and signs everyone out.
         byte[] bytes = new byte[32];
         new SecureRandom().nextBytes(bytes);
         return new SecretKeySpec(bytes, "HmacSHA256");
@@ -55,7 +55,7 @@ public final class JwtTokens {
     }
 
     public record AccessToken(String accessToken, String tokenType, long expiresIn, Account user) {
-        @Override public String toString() { return "AccessToken[user=" + user.id() + "]"; }
+        @Override public @NonNull String toString() { return "AccessToken[user=" + user.id() + "]"; }
     }
 
     public AccessToken issue(Account account) {

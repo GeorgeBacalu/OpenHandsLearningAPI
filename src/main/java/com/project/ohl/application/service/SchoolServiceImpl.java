@@ -9,10 +9,14 @@ import com.project.ohl.domain.model.School;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.SCHOOL_NOT_FOUND;
 
 @RequiredArgsConstructor
+@Service
+@Transactional(readOnly = true)
 public class SchoolServiceImpl implements SchoolService {
 
     private final SchoolRepositoryPort schoolRepository;
@@ -32,6 +36,7 @@ public class SchoolServiceImpl implements SchoolService {
     }
 
     @Override
+    @Transactional
     public SchoolDto saveSchool(SchoolDto schoolDto) {
         School school = mapper.convertToEntity(schoolDto);
         School savedSchool = schoolRepository.save(school);
@@ -39,6 +44,7 @@ public class SchoolServiceImpl implements SchoolService {
     }
 
     @Override
+    @Transactional
     public SchoolDto updateSchoolById(SchoolDto schoolDto, UUID id) {
         School schoolToUpdate = getSchoolEntityById(id);
         schoolToUpdate.setName(schoolDto.getName());
@@ -48,6 +54,7 @@ public class SchoolServiceImpl implements SchoolService {
     }
 
     @Override
+    @Transactional
     public void deleteSchoolById(UUID id) {
         School schoolToDelete = getSchoolEntityById(id);
         schoolRepository.delete(schoolToDelete);

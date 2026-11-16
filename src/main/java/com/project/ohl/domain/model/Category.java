@@ -16,7 +16,5 @@ public class Category {
     private String name;
     private String imageUrl;
     private String videoUrl;
-    private Boolean isExpanded;
-    private Boolean isFavorite;
     private Category parent;
 }

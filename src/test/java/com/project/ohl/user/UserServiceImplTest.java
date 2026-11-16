@@ -3,7 +3,6 @@ package com.project.ohl.user;
 import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.application.port.in.SchoolService;
-import com.project.ohl.application.port.in.RoleService;
 import com.project.ohl.application.port.out.PasswordHasher;
 import com.project.ohl.application.port.out.UserRepositoryPort;
 import com.project.ohl.application.service.UserServiceImpl;
@@ -23,9 +22,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.project.ohl.TestIds.INVALID_ID;
+import static com.project.ohl.TestIds.VALID_ID;
 import static com.project.ohl.application.error.ExceptionMessageConstants.USER_NOT_FOUND;
-import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
-import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
 import static com.project.ohl.mock.UserMock.getMockedUser1;
 import static com.project.ohl.mock.UserMock.getMockedUser2;
 import static com.project.ohl.mock.UserMock.getMockedUsers;
@@ -52,9 +51,6 @@ class UserServiceImplTest {
     private SchoolService schoolService;
 
     @Mock
-    private RoleService roleService;
-
-    @Mock
     private PasswordHasher passwordHasher;
 
     @Captor
@@ -74,20 +70,24 @@ class UserServiceImplTest {
         users = getMockedUsers();
         userDto1 = mapper.convertToDto(user1);
         userDto2 = mapper.convertToDto(user2);
-        userDtos = users.stream().map(user -> mapper.convertToDto(user)).toList();
+        userDtos = users.stream().map(mapper::convertToDto).toList();
     }
 
     @Test
     void getAllUsers_shouldReturnListOfUsers() {
         given(userRepository.findAll()).willReturn(users);
+
         List<UserDto> result = userService.getAllUsers();
+
         assertThat(result).isEqualTo(userDtos);
     }
 
     @Test
     void getUserById_withValidId_shouldReturnUserWithGivenId() {
         given(userRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(user1));
+
         UserDto result = userService.getUserById(VALID_ID);
+
         assertThat(result).isEqualTo(userDto1);
     }
 
@@ -101,10 +101,14 @@ class UserServiceImplTest {
     @Test
     void saveUser_shouldAddUserToList() {
         userDto1.setPassword("test-user-password1");
+
         given(passwordHasher.hash(userDto1.getPassword())).willReturn("encoded-password");
         given(userRepository.save(any(User.class))).willAnswer(invocation -> invocation.getArgument(0));
+
         UserDto result = userService.saveUser(userDto1);
+
         verify(userRepository).save(userCaptor.capture());
+
         assertThat(userCaptor.getValue().getPasswordHash()).isEqualTo("encoded-password");
         assertThat(result).isEqualTo(mapper.convertToDto(userCaptor.getValue()));
     }
@@ -113,12 +117,18 @@ class UserServiceImplTest {
     void updateUserById_withValidId_shouldUpdateUserWithGivenId() {
         userDto2.setPassword("test-user-password2");
         User user = user2; user.setId(VALID_ID);
+
         given(userRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(user1));
         given(passwordHasher.hash(userDto2.getPassword())).willReturn("encoded-password");
+        given(schoolService.getSchoolEntityById(userDto2.getSchoolId())).willReturn(user2.getSchool());
         given(userRepository.update(any(User.class))).willReturn(user1);
+
         UserDto result = userService.updateUserById(userDto2, VALID_ID);
+
         verify(userRepository).update(userCaptor.capture());
+
         assertThat(userCaptor.getValue().getPasswordHash()).isEqualTo("encoded-password");
+        assertThat(userCaptor.getValue().getSchool()).isEqualTo(user2.getSchool());
         assertThat(result).isEqualTo(mapper.convertToDto(userCaptor.getValue()));
     }
 
@@ -127,13 +137,16 @@ class UserServiceImplTest {
         assertThatThrownBy(() -> userService.updateUserById(userDto2, INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(USER_NOT_FOUND, INVALID_ID));
+
         verify(userRepository, never()).update(any(User.class));
     }
 
     @Test
     void deleteUserById_withValidId_shouldRemoveUserWithGivenIdFromList() {
         given(userRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(user1));
+
         userService.deleteUserById(VALID_ID);
+
         verify(userRepository).delete(user1);
     }
 

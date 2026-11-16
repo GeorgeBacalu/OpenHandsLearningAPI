@@ -23,7 +23,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/schools", produces = APPLICATION_JSON_VALUE)
 public class SchoolController {
-
     private final SchoolService schoolService;
 
     @GetMapping

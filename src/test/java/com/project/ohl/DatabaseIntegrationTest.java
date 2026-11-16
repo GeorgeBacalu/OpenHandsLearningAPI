@@ -7,12 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ActiveProfiles("test")
 public abstract class DatabaseIntegrationTest {
-    private static final String[] TABLES = {"favorites", "schools", "roles", "categories",
-            "users", "counties", "cities"};
+    private static final String[] TABLES = {"favorites", "schools", "categories", "users", "counties", "cities"};
     @Autowired private DataSource dataSource;
 
     @BeforeEach
