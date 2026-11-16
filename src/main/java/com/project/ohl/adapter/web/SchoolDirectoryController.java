@@ -1,6 +1,6 @@
 package com.project.ohl.adapter.web;
 
-import com.project.ohl.application.port.out.SchoolDirectoryPort;
+import com.project.ohl.application.port.in.SchoolDirectoryService;
 import com.project.ohl.domain.model.SchoolDirectory;
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class SchoolDirectoryController {
-    private final SchoolDirectoryPort directory;
+    private final SchoolDirectoryService directory;
 
     @GetMapping("/api/counties")
     public List<SchoolDirectory.County> counties() {

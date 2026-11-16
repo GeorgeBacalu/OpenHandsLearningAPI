@@ -1,6 +1,6 @@
 package com.project.ohl.adapter.directory;
 
-import com.project.ohl.application.port.out.SchoolDirectoryPort;
+import com.project.ohl.application.port.in.SchoolDirectoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "app.school-directory.import", havingValue = "true")
 public class SchoolDirectoryImportRunner implements ApplicationRunner {
     private static final Logger LOG = LoggerFactory.getLogger(SchoolDirectoryImportRunner.class);
-    private final SchoolDirectoryPort directory;
+    private final SchoolDirectoryService directory;
 
-    public SchoolDirectoryImportRunner(SchoolDirectoryPort directory) {
+    public SchoolDirectoryImportRunner(SchoolDirectoryService directory) {
         this.directory = directory;
     }
 

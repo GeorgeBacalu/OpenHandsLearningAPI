@@ -25,25 +25,29 @@ import com.project.ohl.application.service.SectionServiceImpl;
 import com.project.ohl.application.service.UserServiceImpl;
 import com.project.ohl.application.service.AccountServiceImpl;
 import com.project.ohl.application.port.in.AccountService;
-import java.util.Objects;
-import java.util.Properties;
+import com.project.ohl.adapter.transaction.TransactionalAccountService;
+import com.project.ohl.adapter.transaction.TransactionalCategoryService;
+import com.project.ohl.adapter.transaction.TransactionalRoleService;
+import com.project.ohl.adapter.transaction.TransactionalSchoolService;
+import com.project.ohl.adapter.transaction.TransactionalUserService;
+import com.project.ohl.adapter.transaction.TransactionalSchoolDirectoryService;
+import com.project.ohl.application.port.in.SchoolDirectoryService;
+import com.project.ohl.application.port.out.SchoolDirectoryPort;
+import com.project.ohl.application.service.SchoolDirectoryServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.interceptor.TransactionProxyFactoryBean;
 
 @Configuration(proxyBeanMethods = false)
 public class ApplicationConfig {
     @Bean
+    public SchoolDirectoryService schoolDirectoryService(SchoolDirectoryPort directory) {
+        return new TransactionalSchoolDirectoryService(new SchoolDirectoryServiceImpl(directory));
+    }
+
+    @Bean
     public MediaService mediaService(MediaStoragePort storage,
             @org.springframework.beans.factory.annotation.Value("${app.storage.s3.environment:dev}") String environment) {
         return new MediaServiceImpl(storage, environment);
-    }
-
-    private final PlatformTransactionManager transactions;
-
-    public ApplicationConfig(PlatformTransactionManager transactions) {
-        this.transactions = transactions;
     }
 
     @Bean
@@ -53,43 +57,27 @@ public class ApplicationConfig {
 
     @Bean
     public SchoolService schoolService(SchoolRepositoryPort schools, SchoolMapper mapper) {
-        return transactional(SchoolService.class, new SchoolServiceImpl(schools, mapper));
+        return new TransactionalSchoolService(new SchoolServiceImpl(schools, mapper));
     }
 
     @Bean
     public RoleService roleService(RoleRepositoryPort roles, RoleMapper mapper) {
-        return transactional(RoleService.class, new RoleServiceImpl(roles, mapper));
+        return new TransactionalRoleService(new RoleServiceImpl(roles, mapper));
     }
 
     @Bean
     public CategoryService categoryService(CategoryRepositoryPort categories, CategoryMapper mapper, FavoriteRepositoryPort favorites, UserRepositoryPort users) {
-        return transactional(CategoryService.class, new CategoryServiceImpl(categories, mapper, favorites, users));
+        return new TransactionalCategoryService(new CategoryServiceImpl(categories, mapper, favorites, users));
     }
 
     @Bean
     public UserService userService(UserRepositoryPort users, SchoolService schools, RoleService roles, PasswordHasher passwordHasher, UserMapper mapper) {
-        return transactional(UserService.class, new UserServiceImpl(users, schools, roles, passwordHasher, mapper));
-    }
-
-    private <T> T transactional(Class<T> port, T target) {
-        var attributes = new Properties();
-        attributes.setProperty("*", "PROPAGATION_REQUIRED,readOnly");
-        attributes.setProperty("save*", "PROPAGATION_REQUIRED");
-        attributes.setProperty("update*", "PROPAGATION_REQUIRED");
-        attributes.setProperty("delete*", "PROPAGATION_REQUIRED");
-        attributes.setProperty("register*", "PROPAGATION_REQUIRED");
-        var proxy = new TransactionProxyFactoryBean();
-        proxy.setTarget(target);
-        proxy.setProxyInterfaces(new Class<?>[]{port});
-        proxy.setTransactionManager(transactions);
-        proxy.setTransactionAttributes(attributes);
-        proxy.afterPropertiesSet();
-        return port.cast(Objects.requireNonNull(proxy.getObject()));
+        return new TransactionalUserService(new UserServiceImpl(users, schools, roles, passwordHasher, mapper));
     }
 
     @Bean
     public AccountService accountService(UserRepositoryPort users, RoleRepositoryPort roles,
             SchoolRepositoryPort schools, PasswordHasher passwords) {
-        return transactional(AccountService.class, new AccountServiceImpl(users, roles, schools, passwords));
+        return new TransactionalAccountService(new AccountServiceImpl(users, roles, schools, passwords));
     }
 }

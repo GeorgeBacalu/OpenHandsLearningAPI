@@ -1,7 +1,7 @@
 package com.project.ohl.directory;
 
 import com.project.ohl.DatabaseIntegrationTest;
-import com.project.ohl.application.port.out.SchoolDirectoryPort;
+import com.project.ohl.application.port.in.SchoolDirectoryService;
 import com.project.ohl.adapter.web.SchoolDirectoryController;
 import com.project.ohl.domain.exception.InvalidRequestException;
 import java.util.UUID;
@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 class SchoolDirectoryIntegrationTest extends DatabaseIntegrationTest {
-    @Autowired SchoolDirectoryPort directory;
+    @Autowired SchoolDirectoryService directory;
     @Autowired SchoolDirectoryController controller;
     @Autowired JdbcTemplate database;
 

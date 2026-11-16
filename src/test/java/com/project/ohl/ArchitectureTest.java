@@ -43,6 +43,14 @@ class ArchitectureTest {
     }
 
     @Test
+    void entryPointsOnlyAccessUseCases() {
+        noClasses().that().resideInAnyPackage("..adapter.web..", "..adapter.directory..")
+              .should().dependOnClassesThat()
+              .resideInAnyPackage("..application.port.out..", "..application.service..")
+              .check(PRODUCTION);
+    }
+
+    @Test
     void architectureLayersHaveNoDependencyCycles() {
         slices().matching("com.project.ohl.(*)..").should().beFreeOfCycles().check(PRODUCTION);
     }
