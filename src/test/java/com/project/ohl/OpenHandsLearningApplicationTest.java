@@ -226,9 +226,11 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
                 .containsExactly("Arici", "Zebră");
         assertThat(roots.get(0).path("parentId").isNull()).isTrue();
         assertThat(roots.get(1).path("parentId").isNull()).isTrue();
-        var searchedRoots = json.readTree(send("GET", "/api/categories/filter?name=ici", null).body());
+        var searchedRoots = json.readTree(send("GET", "/api/categories/filter?name=%20aR%20", null).body());
         assertThat(searchedRoots.size()).isEqualTo(1);
         assertThat(searchedRoots.get(0).path("name").asString()).isEqualTo("Arici");
+        assertThat(json.readTree(send("GET", "/api/categories/filter?name=ici", null).body()).size()).isZero();
+        assertThat(json.readTree(send("GET", "/api/categories/filter?name=%20%20", null).body()).size()).isEqualTo(2);
 
         request.put("name", "Țară").put("parentId", CATEGORY_PARENT.toString());
         assertThat(send("PUT", "/api/categories/" + id, json.writeValueAsString(request)).statusCode()).isEqualTo(200);
@@ -239,9 +241,11 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(children.get(0).path("parentId").asString()).isEqualTo(CATEGORY_PARENT.toString());
         assertThat(children.get(1).path("parentId").asString()).isEqualTo(CATEGORY_PARENT.toString());
         var searchedChildren = json.readTree(send("GET",
-                "/api/categories/filter?parentId=" + CATEGORY_PARENT + "&name=pe", null).body());
+                "/api/categories/filter?parentId=" + CATEGORY_PARENT + "&name=%C8%99A", null).body());
         assertThat(searchedChildren.size()).isEqualTo(1);
         assertThat(searchedChildren.get(0).path("name").asString()).isEqualTo("Șarpe");
+        assertThat(json.readTree(send("GET", "/api/categories/filter?parentId=" + CATEGORY_PARENT + "&name=pe", null).body()).size()).isZero();
+        assertThat(json.readTree(send("GET", "/api/categories/filter?parentId=" + CATEGORY_CHILD + "&name=%C8%99", null).body()).size()).isZero();
         authenticate("ana@example.test");
         UUID ana = database.queryForObject("SELECT id FROM users WHERE name = 'Ana'", UUID.class);
         assertThat(send("PATCH", "/api/categories/favorites/save?userId=" + ana + "&categoryId=" + id, null)
@@ -250,6 +254,11 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(favorites.size()).isEqualTo(2);
         assertThat(List.of(favorites.get(0).path("name").asString(), favorites.get(1).path("name").asString()))
                 .containsExactly("Șarpe", "Țară");
+        var filteredFavorites = json.readTree(send("GET", "/api/categories/favorites/filter?userId=" + ana + "&name=%20%C8%9Ba%20", null).body());
+        assertThat(filteredFavorites.size()).isEqualTo(1);
+        assertThat(filteredFavorites.get(0).path("name").asString()).isEqualTo("Țară");
+        assertThat(json.readTree(send("GET", "/api/categories/favorites/filter?userId=" + ana + "&name=ar", null).body()).size()).isZero();
+        assertThat(json.readTree(send("GET", "/api/categories/favorites/filter?userId=" + ana + "&name=", null).body()).size()).isEqualTo(2);
     }
 
     private HttpResponse<String> send(String method, String path, String body) throws Exception {

@@ -215,6 +215,7 @@
     "/api/categories/filter": {
       "get": {
         "operationId": "getCategoriesByParentIdAndName",
+        "description": "Returns alphabetically ordered categories at the requested hierarchy level whose names start with the supplied prefix, ignoring case and surrounding query whitespace. An empty prefix returns all categories at that level. SQL wildcard characters are treated literally.",
         "tags": [
           "categories"
         ],
@@ -330,6 +331,7 @@
     "/api/categories/favorites/filter": {
       "get": {
         "operationId": "getFavoritesByName",
+        "description": "Returns the user's favorite categories whose names start with the supplied prefix, ignoring case and surrounding query whitespace. An empty prefix returns all favorites. SQL wildcard characters are treated literally.",
         "tags": [
           "categories"
         ],

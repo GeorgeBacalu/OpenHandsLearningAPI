@@ -54,8 +54,8 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
     }
 
     @Override
-    public List<Category> findByParentIdNullAndNameContaining(String name) {
-        return categories.findByParent_IdIsNullAndNameContainingIgnoreCase(name).stream().map(this::toDomain).toList();
+    public List<Category> findByParentIdNullAndNameStartingWith(String name) {
+        return categories.findByParent_IdIsNullAndNameStartingWithIgnoreCase(name).stream().map(this::toDomain).toList();
     }
 
     @Override
@@ -64,8 +64,8 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
     }
 
     @Override
-    public List<Category> findByParentIdAndNameContaining(UUID parentId, String name) {
-        return categories.findByParent_IdAndNameContainingIgnoreCase(parentId, name).stream().map(this::toDomain).toList();
+    public List<Category> findByParentIdAndNameStartingWith(UUID parentId, String name) {
+        return categories.findByParent_IdAndNameStartingWithIgnoreCase(parentId, name).stream().map(this::toDomain).toList();
     }
 
 }

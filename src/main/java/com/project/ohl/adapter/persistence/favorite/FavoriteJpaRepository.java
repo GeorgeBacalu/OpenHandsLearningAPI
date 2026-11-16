@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FavoriteJpaRepository extends JpaRepository<FavoriteEntity, FavoriteId> {
     @EntityGraph(attributePaths = "category")
-    List<FavoriteEntity> findByUser_IdAndCategory_NameContainingIgnoreCase(UUID userId, String name);
+    List<FavoriteEntity> findByUser_IdAndCategory_NameStartingWithIgnoreCase(UUID userId, String name);
 }
