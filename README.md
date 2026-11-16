@@ -331,12 +331,14 @@ Both mutations require a bearer token, return 204 on success, reject an incorrec
 
 The backend uses AWS SDK for Java v2. The default bucket is `open-hands-learning`
 and the AWS region code for US East (N. Virginia) is `us-east-1`.
-Set `AWS_ACCESS_KEY` and `AWS_SECRET_ACCESS` in the process running the API.
-The checked-in configuration requires those two variables. The adapter also accepts
-the standard `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names when the explicit
-credential properties are supplied through external Spring configuration. Empty
-credential properties select the AWS default credential chain for workload IAM roles.
-Credentials are read from the environment and are never included in responses.
+For S3 writes, set `AWS_ACCESS_KEY` / `AWS_SECRET_ACCESS` or the standard
+`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` pair in the process running the API.
+External Spring properties `app.storage.s3.access-key` and `app.storage.s3.secret-key`
+take precedence. With neither key configured, the adapter uses the AWS default
+credential chain, including shared profiles and workload IAM roles. Credentials
+are resolved when S3 is accessed, so startup and catalog reads do not require
+explicit S3 credentials. Supplying only one key fails startup.
+Credentials are never included in responses.
 Restart the terminal or IDE after changing Windows user environment variables.
 
 The `app.storage.s3.bucket` and `app.storage.s3.region` Spring properties control
