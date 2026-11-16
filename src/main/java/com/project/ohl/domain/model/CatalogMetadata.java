@@ -13,8 +13,15 @@ public final class CatalogMetadata {
             return requested;
         }
         if (current != null) return current;
-        String key = Normalizer.normalize(name, Normalizer.Form.NFD).replaceAll("\\p{M}+", "")
-                .toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9_]+", "_");
-        return key.equals("a") ? "dactilema_a" : key;
+        String canonical = Normalizer.normalize(name, Normalizer.Form.NFC).toLowerCase(Locale.ROOT);
+        return switch (canonical) {
+            case "ă" -> "a_breve";
+            case "â" -> "a_circumflex";
+            case "î" -> "i_circumflex";
+            case "ș", "ş" -> "s_comma";
+            case "ț", "ţ" -> "t_comma";
+            default -> Normalizer.normalize(canonical, Normalizer.Form.NFD)
+                    .replaceAll("\\p{M}+", "").replaceAll("[^a-z0-9_]+", "_");
+        };
     }
 }

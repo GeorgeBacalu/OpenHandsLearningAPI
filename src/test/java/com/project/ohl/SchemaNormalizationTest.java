@@ -28,7 +28,10 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
     private UUID user(String name) { return database.queryForObject("SELECT id FROM users WHERE name = ?", UUID.class, name); }
 
     @Test void expressionsCanBecomeChildrenWithoutChangingTheirIdentityOrFavorites() {
-        var parent = categories.saveCategory(CategoryDto.builder().name("Expresii").mediaKey("expressions_section").build());
+        UUID parentId = UUID.randomUUID();
+        database.update("INSERT INTO categories (id, name, parent_id, media_key) VALUES (?, ?, NULL, ?)",
+                parentId, "Expresii", "expressions_section");
+        var parent = categories.getCategoryById(parentId);
         var child = categories.getCategoryById(CATEGORY_CHILD);
         String mediaKey = child.getMediaKey();
         child.setParentId(parent.getId());

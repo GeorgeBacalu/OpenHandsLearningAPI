@@ -163,16 +163,6 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void saveCategory_shouldAddCategoryToList() {
-        if (categoryDtoOne.getParentId() != null)
-            given(categoryRepository.findById(categoryDtoOne.getParentId())).willReturn(Optional.of(categoryOne.getParent()));
-        given(categoryRepository.save(any(Category.class))).willReturn(categoryOne);
-        CategoryDto result = categoryService.saveCategory(categoryDtoOne);
-        verify(categoryRepository).save(categoryCaptor.capture());
-        assertThat(result).isEqualTo(mapper.convertToDto(categoryCaptor.getValue()));
-    }
-
-    @Test
     void updateCategoryById_withValidId_shouldUpdateCategoryWithGivenId() {
         Category category = categoryTwo; category.setId(VALID_ID);
         given(categoryRepository.findById(VALID_ID)).willReturn(Optional.of(category));

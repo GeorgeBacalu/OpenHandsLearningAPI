@@ -199,14 +199,27 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     }
 
     @Test
+    void categoryCreationIsUnavailableEvenForAdministrators() throws Exception {
+        long before = database.queryForObject("SELECT COUNT(*) FROM categories", Long.class);
+        var request = json.createObjectNode().put("name", "Categorie nouă").put("mediaKey", "new_category");
+        assertThat(send("POST", "/api/categories", json.writeValueAsString(request)).statusCode()).isEqualTo(405);
+        request.put("parentId", CATEGORY_PARENT.toString());
+        assertThat(send("POST", "/api/categories", json.writeValueAsString(request)).statusCode()).isEqualTo(405);
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM categories", Long.class)).isEqualTo(before);
+        var contract = json.readTree(send("GET", "/openapi.json", null).body());
+        assertThat(contract.path("paths").path("/api/categories").has("post")).isFalse();
+        assertThat(send("GET", "/api/categories", null).statusCode()).isEqualTo(200);
+    }
+
+    @Test
     void categoryPagesKeepParentsAndChildrenSeparateAndAlphabetical() throws Exception {
         database.update("UPDATE categories SET name = ? WHERE id = ?", "Zebră", CATEGORY_PARENT);
         database.update("UPDATE categories SET name = ? WHERE id = ?", "Șarpe", CATEGORY_CHILD);
         var request = json.createObjectNode().put("name", "Arici")
                 .put("mediaKey", "arici");
-        var created = send("POST", "/api/categories", json.writeValueAsString(request));
-        assertThat(created.statusCode()).isEqualTo(201);
-        String id = json.readTree(created.body()).path("id").asString();
+        String id = UUID.randomUUID().toString();
+        database.update("INSERT INTO categories (id, name, parent_id, media_key) VALUES (?, ?, NULL, ?)",
+                UUID.fromString(id), "Arici", "arici");
 
         var roots = json.readTree(send("GET", "/api/categories/filter", null).body());
         assertThat(roots.size()).isEqualTo(2);

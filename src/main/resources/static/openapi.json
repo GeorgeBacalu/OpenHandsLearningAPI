@@ -42,56 +42,6 @@
           }
         },
         "security": []
-      },
-      "post": {
-        "operationId": "saveCategory",
-        "tags": [
-          "categories"
-        ],
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required"
-          },
-          "403": {
-            "description": "CSRF token required; operation must be authorized"
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CategoryDto"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "SessionCookie": [],
-            "CsrfToken": []
-          }
-        ]
       }
     },
     "/api/categories/{id}": {

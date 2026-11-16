@@ -66,8 +66,11 @@ Migrate the database through V16 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
-The retained `dactilema_a` illustration matches the text/voice sign collection;
-the alphabet category uses that asset too. Letters are unique with case preserved,
+The current alphabet uses letter media keys such as `b`, with distinct demonstrations for
+A and the Romanian diacritics. Android category photos and voice illustrations
+have separate resource catalogs. These catalog data updates are maintained
+directly in the database; historical applied migrations retain their checksums.
+Letters are unique with case preserved,
 and normalized category names are unique among siblings, including
 root categories. Shared media keys remain allowed.
 
@@ -159,7 +162,12 @@ alphabetical roots when parentId is absent and direct children when it is suppli
 The six expression categories now sit under the `Expresii` parent inside Video.
 The parent reuses the former Expressions section UUID; existing expression IDs,
 media keys, descendant links and favorites are retained. The two remaining main
-sections are Video and Voice to Sign. Category creation and updates need no sectionId.
+sections are Video and Voice to Sign. Category updates need no sectionId.
+
+Category/subcategory creation has been removed from Android and the API. The
+`/api/categories` collection supports GET only; POST returns 405 even for an
+authenticated administrator. Existing catalog reads, updates, deletion and favorites
+remain available. This change does not modify existing database records.
 
 Catalog record maintenance is separate from V14. On an existing V13 database,
 back up and regroup expressions before applying the schema migration:
@@ -268,6 +276,13 @@ References: [Spring Security sessions](https://docs.spring.io/spring-security/re
 and [Android Keystore](https://developer.android.com/privacy-and-security/keystore).
 
 ## Structure
+
+The alphabet catalog stores distinct media keys for Ă (`a_breve`),
+Â (`a_circumflex`), Î (`i_circumflex`), Ș (`s_comma`)
+and Ț (`t_comma`). A keeps `a`. These catalog data corrections
+are already persisted in the database and do not require schema migrations.
+Category IDs, names, hierarchy, favorites and customized media keys are preserved.
+The Android repository documents the verified clip sources in `media/alphabet/README.md`.
 
 - `domain`: framework-independent models and domain exceptions.
 - `application`: input/output ports, use cases, validation models, and MapStruct mappings.

@@ -44,14 +44,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto saveCategory(CategoryDto categoryDto) {
-        validateParent(null, categoryDto.getParentId());
-        Category category = mapper.convertToEntity(categoryDto);
-        Category savedCategory = categoryRepository.save(category);
-        return mapper.convertToDto(savedCategory);
-    }
-
-    @Override
     public CategoryDto updateCategoryById(CategoryDto categoryDto, UUID id) {
         Category categoryToUpdate = getCategoryEntityById(id);
         validateParent(id, categoryDto.getParentId());
