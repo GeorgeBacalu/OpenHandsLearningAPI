@@ -27,7 +27,6 @@ public class UserDto {
     private String email;
 
     @NotBlank(message = "Password must not be blank")
-    @Size(min = 8, max = 72, message = "Password is invalid")
     @ToString.Exclude
     private String password;
 

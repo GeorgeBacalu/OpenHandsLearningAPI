@@ -15,31 +15,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.security.web.csrf.CsrfAuthenticationStrategy;
-import org.springframework.security.web.csrf.CsrfTokenRepository;
-import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
-import org.springframework.security.web.authentication.session.ChangeSessionIdAuthenticationStrategy;
-import org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy;
-import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
-import java.util.List;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import java.util.UUID;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 @Configuration(proxyBeanMethods = false)
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Bean
-    SecurityContextRepository securityContexts() { return new HttpSessionSecurityContextRepository(); }
-
-    @Bean
-    CsrfTokenRepository csrfTokens() { return new HttpSessionCsrfTokenRepository(); }
-
-    @Bean
-    SessionAuthenticationStrategy sessionAuthentication(CsrfTokenRepository csrf) {
-        return new CompositeSessionAuthenticationStrategy(List.of(new ChangeSessionIdAuthenticationStrategy(),
-                new CsrfAuthenticationStrategy(csrf)));
-    }
-
     @Bean
     AuthenticationManager authenticationManager(AccountService accounts) {
         return authentication -> {
@@ -54,20 +36,30 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain security(HttpSecurity http, SecurityContextRepository contexts,
-            CsrfTokenRepository csrf) throws Exception {
-        return http.securityContext(value -> value.securityContextRepository(contexts))
-                .csrf(value -> value.csrfTokenRepository(csrf))
+    SecurityFilterChain security(HttpSecurity http, JwtTokens tokens, AccountService accounts) throws Exception {
+        return http.csrf(AbstractHttpConfigurer::disable)
                 .requestCache(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable).httpBasic(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
-                .sessionManagement(Customizer.withDefaults())
+                .sessionManagement(value -> value.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(value -> value.jwt(jwt -> jwt.decoder(tokens::decode)
+                        .jwtAuthenticationConverter(token -> {
+                            try {
+                                var account = accounts.current(UUID.fromString(token.getSubject()));
+                                return new JwtAuthenticationToken(token,
+                                        AuthorityUtils.createAuthorityList("ROLE_" + account.authority().name()), account.id().toString());
+                            } catch (AuthenticationFailedException | IllegalArgumentException exception) {
+                                throw new org.springframework.security.oauth2.server.resource.InvalidBearerTokenException(
+                                        "Invalid account", exception);
+                            }
+                        })))
                 .authorizeHttpRequests(value -> value
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                        .requestMatchers("/api/auth/csrf", "/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/**", "/api/categories/favorites/**").authenticated()
                         .requestMatchers("/api/users/**", "/api/roles/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/**", "/openapi.json").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/counties", "/api/cities", "/api/schools/search", "/openapi.json").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/**").authenticated()
                         .anyRequest().hasRole("ADMIN"))
                 .exceptionHandling(value -> value
                         .authenticationEntryPoint((request, response, exception) -> response.sendError(401))

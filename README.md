@@ -212,7 +212,7 @@ upgrade and record preservation were verified using a temporary database copy;
 there is no PostgreSQL provisioning or rehearsal configuration in the project.
 
 Favorites endpoints require `userId`; a category read accepts optional `userId`
-to return that user's favorite status. Favorite requests require a session, and the supplied user UUID must match
+to return that user's favorite status. Favorite requests require a valid JWT, and the supplied user UUID must match
 the authenticated account. Account listing and CRUD, role management, and catalog
 mutations require the ADMIN role. Catalog filters use the selected parent UUID. Clients can
 rename category labels without changing UUIDs, children or media keys.
@@ -227,11 +227,11 @@ controllers. There is no runtime Swagger UI or springdoc dependency.
 
 Errors use RFC 9457 problem details (`application/problem+json`), including field
 validation errors. Database conflicts return 409 without exposing SQL details.
-New and updated user passwords are hashed with BCrypt (`$2b$`, cost factor 12),
-using a fresh random salt for each hash. User HTTP responses exclude passwords.
-Public registration requires 15 to 72 characters and at most 72 UTF-8 bytes;
-oversized values return HTTP 400. Existing BCrypt credentials remain valid.
-Administrator account updates retain their existing validation rules. Stored credentials
+New and updated user passwords use Spring Security PBKDF2-HMAC-SHA256 with
+600,000 iterations and a fresh 16-byte random salt. Existing BCrypt credentials
+remain valid without rewriting accounts. Passwords are required, with no minimum
+length, maximum length or composition policy. User responses exclude passwords.
+Stored credentials
 use `passwordHash` in Java and `users.password_hash` in PostgreSQL. Request-only
 `password` fields accept raw passwords; response mappings never copy stored hashes.
 
@@ -243,37 +243,39 @@ backend; migrations and directory imports remain disabled during normal startup.
 
 ## Authentication
 
-`POST /api/auth/register` accepts name, email, password, phone and schoolId. It
-always assigns the existing USER role; callers cannot choose a role or user ID.
-Emails are normalized and unique. Registration signs in the new account.
-`POST /api/auth/login` verifies BCrypt credentials and rotates the session ID.
-Failed login attempts are limited to five per IP/email pair in 15 minutes.
-Registration is limited to 30 attempts per IP in 15 minutes. Limits reserve an
-attempt before credential checks, so concurrent requests cannot bypass them.
+`POST /api/auth/register` creates an account with the USER role and a securely hashed password.
+`POST /api/auth/login` verifies email and password. Both return
+`{accessToken, tokenType: "Bearer", expiresIn: 1800, user}`. `user` contains the account
+name and UUID, never its password. Send `Authorization: Bearer <accessToken>` on
+subsequent protected requests. The API uses Spring Security's JWT resource-server
+support and Nimbus signing/validation; no external OAuth2 provider is involved.
 
-`GET /api/auth/me` returns the authenticated account without its password.
-`POST /api/auth/logout` invalidates the session. Sessions expire after 30 idle
-minutes and are held in memory, so an API restart signs clients out. No schema
-migration or account rewrite is required. Existing development records are unchanged.
+Tokens use HS256, a cryptographically random 256-bit private key, issuer, audience,
+account UUID, unique token ID, issue time and a fixed 30-minute expiry. The API
+checks signature, algorithm, issuer, audience, timestamps and revocation. It reads
+the current account and role on every authenticated request. Expired tokens require
+login again. `GET /api/auth/me` returns the current account; `POST /api/auth/logout`
+revokes that token until expiry. Revocations and the signing key remain in memory:
+restarting this single-instance API signs everyone out. Multiple API instances
+would require shared signing keys and persistent revocation/throttling storage.
 
-Cookie authentication uses HttpOnly, SameSite=Strict cookies. Cookies are Secure
-by default; production must use HTTPS. For local HTTP previews only, explicitly
-set `SESSION_COOKIE_SECURE=false`. Fetch `GET /api/auth/csrf` first, retain its
-JSESSIONID cookie, and send its
-`token` in `X-CSRF-TOKEN` for every POST, PUT, PATCH and DELETE. Fetch a new token
-after login or registration because authentication rotates it. Catalog and school
-directory reads remain public; private account data and favorites are protected.
+Sections, categories and favorites require authentication. User and role management
+and catalog mutations require ADMIN; favorites must belong to the authenticated
+account. Login, registration and the county/city/school-search reads needed by
+registration remain public. Requests use no session cookies, and the API is
+stateless with CSRF disabled because credentials are sent only in an explicit
+Authorization header. Use HTTPS outside local development.
 
-The Android app stores only an encrypted session cookie and validates it with
-`/api/auth/me`. Local profile selection never establishes authentication.
-Authentication integration tests use isolated H2 data and cover permissions,
-CSRF, role assignment, duplicate accounts, session fixation protection, logout,
-password verification, and login throttling. Deployment can scale to multiple
-instances by replacing in-memory sessions and throttling with shared storage.
+Existing BCrypt accounts keep their credentials and records; no database migration
+is needed. Login is limited to five failures per email/IP in 15 minutes and
+registration to 30 attempts per IP in 15 minutes. The Android app encrypts JWTs
+with Android Keystore outside backups, validates them with `/api/auth/me`, and
+redirects guests to login before showing the main page.
 
-References: [Spring Security sessions](https://docs.spring.io/spring-security/reference/servlet/authentication/persistence.html),
-[CSRF](https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html),
-and [Android Keystore](https://developer.android.com/privacy-and-security/keystore).
+Tests cover guest restrictions, JWT issuance, invalid/tampered/expired tokens,
+logout revocation, roles, favorite ownership, registration and throttling.
+
+Reference: [Spring Security JWT support](https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html).
 
 ## Structure
 

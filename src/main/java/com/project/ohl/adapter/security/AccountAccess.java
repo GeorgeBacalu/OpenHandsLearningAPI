@@ -1,6 +1,6 @@
 package com.project.ohl.adapter.security;
 
-import com.project.ohl.application.model.Account;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import java.util.UUID;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 public class AccountAccess {
     public boolean owns(Authentication authentication, UUID userId) {
         return authentication != null && authentication.isAuthenticated()
-                && authentication.getPrincipal() instanceof Account account && account.id().equals(userId);
+                && authentication instanceof JwtAuthenticationToken && userId != null
+                && userId.toString().equals(authentication.getName());
     }
 }

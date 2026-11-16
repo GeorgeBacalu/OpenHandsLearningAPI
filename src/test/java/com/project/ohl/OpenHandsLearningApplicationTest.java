@@ -1,8 +1,6 @@
 package com.project.ohl;
 
 import java.net.URI;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import org.junit.jupiter.api.BeforeEach;
 import com.project.ohl.application.port.out.PasswordHasher;
 import java.net.http.HttpClient;
@@ -27,7 +25,7 @@ import static com.project.ohl.TestIds.SCHOOL_A;
 import static com.project.ohl.TestIds.ROLE_USER;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = "server.servlet.session.cookie.secure=false")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     @LocalServerPort private int port;
     @Autowired private JdbcTemplate database;
@@ -35,24 +33,23 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     @Qualifier("requestMappingHandlerMapping")
     private RequestMappingHandlerMapping mappings;
     private HttpClient client;
+    private String token;
     @Autowired private PasswordHasher passwords;
     private final JsonMapper json = JsonMapper.builder().build();
 
     @BeforeEach
     void authenticateFixture() throws Exception {
         database.update("UPDATE users SET password_hash = ?", passwords.hash("correct-test-password"));
-        client = HttpClient.newBuilder().cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ALL)).build();
+        client = HttpClient.newHttpClient();
+        token = null;
         authenticate("dan@example.test");
     }
 
     private void authenticate(String email) throws Exception {
         String credentials = json.writeValueAsString(json.createObjectNode().put("email", email).put("password", "correct-test-password"));
-        assertThat(send("POST", "/api/auth/login", credentials).statusCode()).isEqualTo(200);
-    }
-
-    private String csrf() throws Exception {
-        var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/auth/csrf")).GET().build();
-        return json.readTree(client.send(request, HttpResponse.BodyHandlers.ofString()).body()).path("token").asString();
+        var response = send("POST", "/api/auth/login", credentials);
+        assertThat(response.statusCode()).isEqualTo(200);
+        token = json.readTree(response.body()).path("accessToken").asString();
     }
 
     @Test
@@ -159,12 +156,12 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(json.readTree(invalid.body()).path("errors").has("password")).isTrue();
         assertThat(send("PATCH", "/api/users", "{}").statusCode()).isEqualTo(405);
         var request = HttpRequest.newBuilder(URI.create("http://localhost:" + port + "/api/users"))
-                .header("Content-Type", "text/plain").header("X-CSRF-TOKEN", csrf()).POST(HttpRequest.BodyPublishers.ofString("invalid")).build();
+                .header("Content-Type", "text/plain").header("Authorization", "Bearer " + token).POST(HttpRequest.BodyPublishers.ofString("invalid")).build();
         assertThat(client.send(request, HttpResponse.BodyHandlers.ofString()).statusCode()).isEqualTo(415);
     }
 
     @Test
-    void returnsBadRequestForPasswordsExceedingBcryptUtf8Limit() throws Exception {
+    void acceptsPasswordsBeyondTheFormerBcryptUtf8Limit() throws Exception {
         var request = json.createObjectNode();
         request.put("name", "Test User");
         request.put("email", "test@example.test");
@@ -173,9 +170,9 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         request.put("schoolId", SCHOOL_A.toString());
         request.put("roleId", ROLE_USER.toString());
         var response = send("POST", "/api/users", json.writeValueAsString(request));
-        assertThat(response.statusCode()).isEqualTo(400);
-        assertThat(json.readTree(response.body()).path("detail").asString())
-                .isEqualTo("Password must not exceed 72 UTF-8 bytes.");
+        assertThat(response.statusCode()).isEqualTo(201);
+        String hash = database.queryForObject("SELECT password_hash FROM users WHERE email = 'test@example.test'", String.class);
+        assertThat(passwords.matches("é".repeat(37), hash)).isTrue();
     }
 
     @Test
@@ -258,7 +255,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     private HttpResponse<String> send(String method, String path, String body) throws Exception {
         var builder = HttpRequest.newBuilder(URI.create("http://localhost:" + port + path))
                 .timeout(Duration.ofSeconds(30)).header("Content-Type", "application/json");
-        if (!method.equals("GET")) builder.header("X-CSRF-TOKEN", csrf());
+        if (token != null && !path.equals("/api/auth/login")) builder.header("Authorization", "Bearer " + token);
         var request = builder.method(method, body == null ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofString(body))
                 .build();
         return client.send(request, HttpResponse.BodyHandlers.ofString());
