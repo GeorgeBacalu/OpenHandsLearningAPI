@@ -427,9 +427,10 @@ Keep generated output, credentials and database backups outside Git.
    UUIDs, names, hierarchy and favorites remain unchanged. Production DBs are
    not touched. `media_assets` exposes `object_key`, `public_url`, `content_type`,
    `byte_size`, and `sha256` for inspection in the development database.
-6. Run `install` to replace the bundled fallback images and videos with their
-   optimized equivalents. Logos are excluded. Android renders S3 media with the
-   same layouts and uses bundled media if a remote request fails.
+6. Use the current S3-only Android build. It retains local logos and native UI
+   vectors, and loads artwork and videos from S3 with the same layouts. Do not
+   run `install` for this build: that legacy action restores bundled fallbacks
+   for older Android revisions. Glide retains its normal downloaded-image cache.
 
 Re-run `verify` after deployment. Legacy extensionless objects can be removed only
 after all consumers have migrated and replacement URLs have passed verification.
