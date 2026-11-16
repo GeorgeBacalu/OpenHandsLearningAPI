@@ -65,15 +65,16 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> getCategoriesByParentIdAndName(UUID parentId, String name) {
+        String prefix = name == null ? "" : name.strip();
         List<Category> categories;
         if(parentId == null) {
-            categories = name == null || name.isBlank()
+            categories = prefix.isEmpty()
                   ? categoryRepository.findByParentIdNull()
-                  : categoryRepository.findByParentIdNullAndNameContaining(name);
+                  : categoryRepository.findByParentIdNullAndNameStartingWith(prefix);
         } else {
-            categories = name == null || name.isBlank()
+            categories = prefix.isEmpty()
                   ? categoryRepository.findByParentId(parentId)
-                  : categoryRepository.findByParentIdAndNameContaining(parentId, name);
+                  : categoryRepository.findByParentIdAndNameStartingWith(parentId, prefix);
         }
         return alphabeticalCategories(categories);
     }
@@ -94,7 +95,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryDto> getFavoritesByName(UUID userId, String name) {
         requireUser(userId);
-        var result = alphabeticalCategories(favorites.findByUserAndName(userId, name == null ? "" : name));
+        var result = alphabeticalCategories(favorites.findByUserAndName(userId, name == null ? "" : name.strip()));
         result.forEach(category -> category.setIsFavorite(true));
         return result;
     }

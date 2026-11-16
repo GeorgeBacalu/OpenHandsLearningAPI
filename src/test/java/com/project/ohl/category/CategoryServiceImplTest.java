@@ -205,7 +205,7 @@ class CategoryServiceImplTest {
 
     @Test
     void getCategoriesByParentIdAndName_whenParentIdNullAndNameNotBlank_shouldReturnListOfParentCategoriesFilteredByName() {
-        given(categoryRepository.findByParentIdNullAndNameContaining(anyString())).willReturn(filteredParentCategories);
+        given(categoryRepository.findByParentIdNullAndNameStartingWith(anyString())).willReturn(filteredParentCategories);
         List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(null, "a");
         assertThat(result).isEqualTo(filteredParentCategoryDtos);
     }
@@ -219,7 +219,7 @@ class CategoryServiceImplTest {
 
     @Test
     void getCategoriesByParentIdAndName_whenParentIdNotNullAndNameNotBlank_shouldReturnListOfChildrenCategoriesFilteredByName() {
-        given(categoryRepository.findByParentIdAndNameContaining(any(UUID.class), anyString())).willReturn(filteredChildrenCategoriesAlphabet);
+        given(categoryRepository.findByParentIdAndNameStartingWith(any(UUID.class), anyString())).willReturn(filteredChildrenCategoriesAlphabet);
         List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(VALID_ID, "a");
         assertThat(result).isEqualTo(filteredChildrenCategoryDtosAlphabet);
     }

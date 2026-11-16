@@ -128,8 +128,28 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
         } finally {
             statistics.setStatisticsEnabled(false);
         }
-        assertThat(categories.findByParentIdAndNameContaining(parent.getId(), "letter"))
+        assertThat(categories.findByParentIdAndNameStartingWith(parent.getId(), "letter"))
               .extracting(Category::getId).containsExactly(child.getId());
+    }
+
+    @Test
+    void prefixSearchTreatsSqlWildcardsLiterallyAtEveryLevelAndInFavorites() {
+        var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
+        for (String prefix : List.of("%", "_", "\\")) {
+            var root = categories.save(Category.builder().name(prefix + "Root").build());
+            var child = categories.save(Category.builder().name(prefix + "Child").parent(parent).build());
+            var substring = categories.save(Category.builder().name("X" + prefix + "Child").parent(parent).build());
+            categoryService.saveFavorite(com.project.ohl.TestIds.USER_ANA, root.getId());
+            categoryService.saveFavorite(com.project.ohl.TestIds.USER_ANA, child.getId());
+            categoryService.saveFavorite(com.project.ohl.TestIds.USER_ANA, substring.getId());
+            assertThat(categoryService.getCategoriesByParentIdAndName(null, prefix))
+                    .extracting(value -> value.getId()).containsExactly(root.getId());
+            assertThat(categoryService.getCategoriesByParentIdAndName(parent.getId(), prefix))
+                    .extracting(value -> value.getId()).containsExactly(child.getId());
+            assertThat(categoryService.getFavoritesByName(com.project.ohl.TestIds.USER_ANA, prefix))
+                    .extracting(value -> value.getId()).containsExactly(child.getId(), root.getId());
+            assertThat(categoryService.getFavoritesByName(com.project.ohl.TestIds.USER_DAN, prefix)).isEmpty();
+        }
     }
 
     @Test

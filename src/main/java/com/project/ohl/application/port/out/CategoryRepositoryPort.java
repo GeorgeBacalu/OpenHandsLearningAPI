@@ -19,10 +19,10 @@ public interface CategoryRepositoryPort {
 
     List<Category> findByParentIdNull();
 
-    List<Category> findByParentIdNullAndNameContaining(String name);
+    List<Category> findByParentIdNullAndNameStartingWith(String name);
 
     List<Category> findByParentId(UUID parentId);
 
-    List<Category> findByParentIdAndNameContaining(UUID parentId, String name);
+    List<Category> findByParentIdAndNameStartingWith(UUID parentId, String name);
 
 }
