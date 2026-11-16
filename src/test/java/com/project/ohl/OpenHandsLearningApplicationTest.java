@@ -161,7 +161,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     }
 
     @Test
-    void returnsBadRequestForPasswordsExceedingBcryptUtf8Limit() throws Exception {
+    void acceptsPasswordsBeyondTheFormerBcryptUtf8Limit() throws Exception {
         var request = json.createObjectNode();
         request.put("name", "Test User");
         request.put("email", "test@example.test");
@@ -170,9 +170,9 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         request.put("schoolId", SCHOOL_A.toString());
         request.put("roleId", ROLE_USER.toString());
         var response = send("POST", "/api/users", json.writeValueAsString(request));
-        assertThat(response.statusCode()).isEqualTo(400);
-        assertThat(json.readTree(response.body()).path("detail").asString())
-                .isEqualTo("Password must not exceed 72 UTF-8 bytes.");
+        assertThat(response.statusCode()).isEqualTo(201);
+        String hash = database.queryForObject("SELECT password_hash FROM users WHERE email = 'test@example.test'", String.class);
+        assertThat(passwords.matches("é".repeat(37), hash)).isTrue();
     }
 
     @Test

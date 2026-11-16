@@ -6,6 +6,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +63,7 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
         assertThat(account.path("email").asString()).isEqualTo("new@example.test");
         assertThat(account.has("password") || account.has("passwordHash") || account.has("password_hash")).isFalse();
         String hash = database.queryForObject("SELECT password_hash FROM users WHERE email = 'new@example.test'", String.class);
-        assertThat(hash).startsWith("$2b$12$");
+        assertThat(hash).startsWith("{pbkdf2-sha256-600000}");
         assertThat(passwords.matches(PASSWORD, hash)).isTrue();
         assertThat(send("GET", "/api/auth/me", null).statusCode()).isEqualTo(200);
         assertThat(send("GET", "/api/users", null).statusCode()).isEqualTo(403);
@@ -70,15 +71,35 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
     }
 
     @Test
-    void invalidSchoolAndPasswordsCreateNoRecords() throws Exception {
+    void missingPasswordAndInvalidSchoolCreateNoRecords() throws Exception {
         var request = json.createObjectNode().put("name", "Invalid Account").put("email", "invalid@example.test")
-                .put("password", "short").put("phone", "0712345678").put("schoolId", SCHOOL_A.toString());
-        assertThat(send("POST", "/api/auth/register", json.writeValueAsString(request)).statusCode()).isEqualTo(400);
-        request.put("password", "é".repeat(37));
+                .put("password", "").put("phone", "0712345678").put("schoolId", SCHOOL_A.toString());
         assertThat(send("POST", "/api/auth/register", json.writeValueAsString(request)).statusCode()).isEqualTo(400);
         request.put("password", PASSWORD).put("schoolId", "00000000-0000-4000-8000-000000000999");
         assertThat(send("POST", "/api/auth/register", json.writeValueAsString(request)).statusCode()).isEqualTo(400);
         assertThat(database.queryForObject("SELECT COUNT(*) FROM users", Long.class)).isEqualTo(2);
+    }
+
+    @Test
+    void registrationAndLoginAcceptShortUnicodeAndLongPasswords() throws Exception {
+        String[] values = {"a", "ș", "é".repeat(100), "x".repeat(2000)};
+        for (int i = 0; i < values.length; i++) {
+            String email = "password-policy-" + i + "@example.test";
+            var request = json.createObjectNode().put("name", "New user").put("email", email)
+                    .put("password", values[i]).put("phone", "0712345678").put("schoolId", SCHOOL_A.toString());
+            assertThat(send("POST", "/api/auth/register", json.writeValueAsString(request)).statusCode()).isEqualTo(201);
+            assertThat(login(email, values[i]).statusCode()).isEqualTo(200);
+            assertThat(send("GET", "/api/auth/me", null).statusCode()).isEqualTo(200);
+            assertThat(login(email, values[i] + "x").statusCode()).isEqualTo(401);
+        }
+    }
+
+    @Test
+    void existingBcryptAccountsCanStillLogin() throws Exception {
+        database.update("UPDATE users SET password_hash = ? WHERE id = ?",
+                new BCryptPasswordEncoder(4).encode(PASSWORD), TestIds.USER_ANA);
+        assertThat(login("ana@example.test", PASSWORD).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/auth/me", null).body()).contains("Ana");
     }
 
     @Test

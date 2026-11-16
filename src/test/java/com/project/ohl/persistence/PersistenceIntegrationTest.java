@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.project.ohl.application.port.out.PasswordHasher;
 
 import static com.project.ohl.TestIds.CATEGORY_CHILD;
 import static com.project.ohl.TestIds.CATEGORY_PARENT;
@@ -43,6 +43,7 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
     @Autowired private EntityManagerFactory entityManagerFactory;
 
     @Autowired private UserService userService;
+    @Autowired private PasswordHasher passwords;
 
     @Test
     void rejectsSelfParentsAndDescendantParents() {
@@ -66,14 +67,13 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
                 .schoolId(school.getId()).roleId(role.getId()).build();
         var created = userService.saveUser(request);
         var stored = users.findById(created.getId()).orElseThrow().getPasswordHash();
-        assertThat(stored).startsWith("$2b$12$").doesNotContain(request.getPassword());
-        var encoder = new BCryptPasswordEncoder();
-        assertThat(encoder.matches(request.getPassword(), stored)).isTrue();
+        assertThat(stored).startsWith("{pbkdf2-sha256-600000}").doesNotContain(request.getPassword());
+        assertThat(passwords.matches(request.getPassword(), stored)).isTrue();
         request.setPassword("another-test-password");
         userService.updateUserById(request, created.getId());
         var updated = users.findById(created.getId()).orElseThrow().getPasswordHash();
         assertThat(updated).isNotEqualTo(stored);
-        assertThat(encoder.matches(request.getPassword(), updated)).isTrue();
+        assertThat(passwords.matches(request.getPassword(), updated)).isTrue();
     }
 
     @Test

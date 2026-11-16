@@ -35,7 +35,7 @@ public class AuthController {
     private final LoginThrottle throttle;
 
     public record Credentials(@NotBlank @Email @Size(max = 254) String email,
-            @NotBlank @Size(max = 72) String password) {
+            @NotBlank String password) {
         @Override public String toString() { return "Credentials[email=" + email + "]"; }
     }
     @PostMapping("/login")

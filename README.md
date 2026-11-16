@@ -227,11 +227,11 @@ controllers. There is no runtime Swagger UI or springdoc dependency.
 
 Errors use RFC 9457 problem details (`application/problem+json`), including field
 validation errors. Database conflicts return 409 without exposing SQL details.
-New and updated user passwords are hashed with BCrypt (`$2b$`, cost factor 12),
-using a fresh random salt for each hash. User HTTP responses exclude passwords.
-Public registration requires 15 to 72 characters and at most 72 UTF-8 bytes;
-oversized values return HTTP 400. Existing BCrypt credentials remain valid.
-Administrator account updates retain their existing validation rules. Stored credentials
+New and updated user passwords use Spring Security PBKDF2-HMAC-SHA256 with
+600,000 iterations and a fresh 16-byte random salt. Existing BCrypt credentials
+remain valid without rewriting accounts. Passwords are required, with no minimum
+length, maximum length or composition policy. User responses exclude passwords.
+Stored credentials
 use `passwordHash` in Java and `users.password_hash` in PostgreSQL. Request-only
 `password` fields accept raw passwords; response mappings never copy stored hashes.
 
@@ -243,7 +243,7 @@ backend; migrations and directory imports remain disabled during normal startup.
 
 ## Authentication
 
-`POST /api/auth/register` creates an account with the USER role and a BCrypt password.
+`POST /api/auth/register` creates an account with the USER role and a securely hashed password.
 `POST /api/auth/login` verifies email and password. Both return
 `{accessToken, tokenType: "Bearer", expiresIn: 1800, user}`. `user` contains the account
 name and UUID, never its password. Send `Authorization: Bearer <accessToken>` on
