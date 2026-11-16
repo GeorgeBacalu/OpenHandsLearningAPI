@@ -39,9 +39,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
           }
         },
-        "security": []
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/categories/{id}": {
@@ -70,6 +77,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
           }
         },
         "parameters": [
@@ -92,7 +102,11 @@
             }
           }
         ],
-        "security": []
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "put": {
         "operationId": "updateCategoryById",
@@ -124,7 +138,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "requestBody": {
@@ -150,8 +164,7 @@
         ],
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       },
@@ -178,7 +191,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "parameters": [
@@ -194,8 +207,7 @@
         ],
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       }
@@ -229,6 +241,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
           }
         },
         "parameters": [
@@ -250,7 +265,11 @@
             }
           }
         ],
-        "security": []
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/categories/favorites": {
@@ -287,7 +306,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Insufficient permissions or another account requested"
+            "description": "Operation not authorized for this account"
           }
         },
         "parameters": [
@@ -303,7 +322,7 @@
         ],
         "security": [
           {
-            "SessionCookie": []
+            "bearerAuth": []
           }
         ]
       }
@@ -342,7 +361,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Insufficient permissions or another account requested"
+            "description": "Operation not authorized for this account"
           }
         },
         "parameters": [
@@ -366,7 +385,7 @@
         ],
         "security": [
           {
-            "SessionCookie": []
+            "bearerAuth": []
           }
         ]
       }
@@ -402,7 +421,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "parameters": [
@@ -427,8 +446,7 @@
         ],
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       }
@@ -464,7 +482,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "parameters": [
@@ -489,8 +507,7 @@
         ],
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       }
@@ -524,9 +541,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
           }
         },
-        "security": []
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "post": {
         "operationId": "saveSchool",
@@ -558,7 +582,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "requestBody": {
@@ -573,8 +597,7 @@
         },
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       }
@@ -605,6 +628,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
           }
         },
         "parameters": [
@@ -618,7 +644,11 @@
             }
           }
         ],
-        "security": []
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       },
       "put": {
         "operationId": "updateSchoolById",
@@ -650,7 +680,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "requestBody": {
@@ -676,8 +706,7 @@
         ],
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       },
@@ -704,7 +733,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "parameters": [
@@ -720,8 +749,7 @@
         ],
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       }
@@ -760,12 +788,12 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Insufficient permissions or another account requested"
+            "description": "Operation not authorized for this account"
           }
         },
         "security": [
           {
-            "SessionCookie": []
+            "bearerAuth": []
           }
         ]
       },
@@ -799,7 +827,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "requestBody": {
@@ -814,8 +842,7 @@
         },
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       }
@@ -851,7 +878,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Insufficient permissions or another account requested"
+            "description": "Operation not authorized for this account"
           }
         },
         "parameters": [
@@ -867,7 +894,7 @@
         ],
         "security": [
           {
-            "SessionCookie": []
+            "bearerAuth": []
           }
         ]
       },
@@ -901,7 +928,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "requestBody": {
@@ -927,8 +954,7 @@
         ],
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       },
@@ -955,7 +981,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "parameters": [
@@ -971,8 +997,7 @@
         ],
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       }
@@ -1006,9 +1031,16 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
           }
         },
-        "security": []
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/users": {
@@ -1045,12 +1077,12 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Insufficient permissions or another account requested"
+            "description": "Operation not authorized for this account"
           }
         },
         "security": [
           {
-            "SessionCookie": []
+            "bearerAuth": []
           }
         ]
       },
@@ -1084,7 +1116,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "requestBody": {
@@ -1099,8 +1131,7 @@
         },
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       }
@@ -1136,7 +1167,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Insufficient permissions or another account requested"
+            "description": "Operation not authorized for this account"
           }
         },
         "parameters": [
@@ -1152,7 +1183,7 @@
         ],
         "security": [
           {
-            "SessionCookie": []
+            "bearerAuth": []
           }
         ]
       },
@@ -1186,7 +1217,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "requestBody": {
@@ -1212,8 +1243,7 @@
         ],
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       },
@@ -1240,7 +1270,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "parameters": [
@@ -1256,8 +1286,7 @@
         ],
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       }
@@ -1268,7 +1297,6 @@
         "tags": [
           "school-directory"
         ],
-        "parameters": [],
         "responses": {
           "200": {
             "description": "Directory entries",
@@ -1420,24 +1448,6 @@
         "security": []
       }
     },
-    "/api/auth/csrf": {
-      "get": {
-        "summary": "Get a CSRF token for the current session",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CsrfResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": []
-      }
-    },
     "/api/auth/login": {
       "post": {
         "summary": "Authenticate with email and password",
@@ -1447,13 +1457,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Account"
+                  "$ref": "#/components/schemas/AuthenticationResponse"
                 }
               }
             }
-          },
-          "403": {
-            "description": "CSRF token required; operation must be authorized"
           },
           "400": {
             "description": "Invalid fields"
@@ -1475,11 +1482,7 @@
             }
           }
         },
-        "security": [
-          {
-            "CsrfToken": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/register": {
@@ -1491,13 +1494,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Account"
+                  "$ref": "#/components/schemas/AuthenticationResponse"
                 }
               }
             }
-          },
-          "403": {
-            "description": "CSRF token required; operation must be authorized"
           },
           "400": {
             "description": "Invalid fields"
@@ -1522,11 +1522,7 @@
             }
           }
         },
-        "security": [
-          {
-            "CsrfToken": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/auth/me": {
@@ -1547,19 +1543,19 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "Insufficient permissions or another account requested"
+            "description": "Operation not authorized for this account"
           }
         },
         "security": [
           {
-            "SessionCookie": []
+            "bearerAuth": []
           }
         ]
       }
     },
     "/api/auth/logout": {
       "post": {
-        "summary": "Invalidate the authenticated session",
+        "summary": "Revoke the authenticated JWT",
         "responses": {
           "204": {
             "description": "Success"
@@ -1568,13 +1564,12 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "CSRF token required; operation must be authorized"
+            "description": "Operation not authorized for this account"
           }
         },
         "security": [
           {
-            "SessionCookie": [],
-            "CsrfToken": []
+            "bearerAuth": []
           }
         ]
       }
@@ -1956,25 +1951,37 @@
           }
         }
       },
-      "CsrfResponse": {
+      "AuthenticationResponse": {
         "type": "object",
+        "required": [
+          "accessToken",
+          "tokenType",
+          "expiresIn",
+          "user"
+        ],
         "properties": {
-          "token": {
+          "accessToken": {
             "type": "string"
+          },
+          "tokenType": {
+            "type": "string",
+            "const": "Bearer"
+          },
+          "expiresIn": {
+            "type": "integer",
+            "example": 1800
+          },
+          "user": {
+            "$ref": "#/components/schemas/Account"
           }
         }
       }
     },
     "securitySchemes": {
-      "SessionCookie": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "JSESSIONID"
-      },
-      "CsrfToken": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "X-CSRF-TOKEN"
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
