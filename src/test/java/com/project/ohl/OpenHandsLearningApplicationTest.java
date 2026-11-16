@@ -76,7 +76,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         assertThat(List.of(sections.get(0).path("type").asString(), sections.get(1).path("type").asString()))
                 .containsExactly("VIDEO", "VOICE_TO_SIGN");
         assertThat(sections.get(0).path("name").asString()).isEqualTo("Secțiune video");
-        assertThat(sections.get(0).path("mediaKey").asString()).isEqualTo("video_section");
+        assertThat(sections.get(0).path("imageUrl").asString()).isEqualTo("https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/application/video_section.webp");
         assertThat(sections.get(1).path("name").asString()).isEqualTo("Secțiune voce-semn");
         assertThat(sections.get(1).path("iconKey").asString()).isEqualTo("ic_voice_to_sign_section");
         for (var section : sections) {
@@ -198,7 +198,7 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
     @Test
     void categoryCreationIsUnavailableEvenForAdministrators() throws Exception {
         long before = database.queryForObject("SELECT COUNT(*) FROM categories", Long.class);
-        var request = json.createObjectNode().put("name", "Categorie nouă").put("mediaKey", "new_category");
+        var request = json.createObjectNode().put("name", "Categorie nouă").put("imageUrl", "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/new_category.webp");
         assertThat(send("POST", "/api/categories", json.writeValueAsString(request)).statusCode()).isEqualTo(405);
         request.put("parentId", CATEGORY_PARENT.toString());
         assertThat(send("POST", "/api/categories", json.writeValueAsString(request)).statusCode()).isEqualTo(405);
@@ -213,10 +213,10 @@ class OpenHandsLearningApplicationTest extends DatabaseIntegrationTest {
         database.update("UPDATE categories SET name = ? WHERE id = ?", "Zebră", CATEGORY_PARENT);
         database.update("UPDATE categories SET name = ? WHERE id = ?", "Șarpe", CATEGORY_CHILD);
         var request = json.createObjectNode().put("name", "Arici")
-                .put("mediaKey", "arici");
+                .put("imageUrl", "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/arici.webp");
         String id = UUID.randomUUID().toString();
-        database.update("INSERT INTO categories (id, name, parent_id, media_key) VALUES (?, ?, NULL, ?)",
-                UUID.fromString(id), "Arici", "arici");
+        database.update("INSERT INTO categories (id, name, parent_id, image_url) VALUES (?, ?, NULL, ?)",
+                UUID.fromString(id), "Arici", "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/arici.webp");
 
         var roots = json.readTree(send("GET", "/api/categories/filter", null).body());
         assertThat(roots.size()).isEqualTo(2);

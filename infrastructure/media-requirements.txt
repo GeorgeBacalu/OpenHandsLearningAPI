@@ -1,0 +1,5 @@
+Pillow==12.3.0
+numpy==2.5.1
+boto3==1.44.3
+psycopg[binary]==3.3.9
+imageio-ffmpeg==0.8.1

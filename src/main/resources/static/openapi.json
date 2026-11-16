@@ -1649,6 +1649,206 @@
           }
         }
       }
+    },
+    "/api/media/{type}": {
+      "get": {
+        "operationId": "downloadMedia",
+        "tags": [
+          "media"
+        ],
+        "summary": "Resolve a permanent public media URL",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "images",
+                "videos"
+              ]
+            }
+          },
+          {
+            "name": "mediaKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 1000
+            },
+            "description": "Relative object path including .webp or .mp4, for example categories/alfabet/a.webp. The configured dev/prod environment is prepended."
+          }
+        ],
+        "security": [],
+        "responses": {
+          "default": {
+            "description": "Request or storage error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Public URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaDownload"
+                }
+              }
+            }
+          }
+        },
+        "description": "No authentication, signing or expiration. Resolves the URL without checking object existence. Fetch the returned URL directly from S3 (including Range requests for video)."
+      },
+      "put": {
+        "operationId": "uploadMedia",
+        "tags": [
+          "media"
+        ],
+        "summary": "Upload or replace application media (administrator)",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "images",
+                "videos"
+              ]
+            }
+          },
+          {
+            "name": "mediaKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 1000
+            },
+            "description": "Relative object path including .webp or .mp4, for example categories/alfabet/a.webp. The configured dev/prod environment is prepended."
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Request or storage error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Completed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Administrator required"
+          },
+          "503": {
+            "description": "Media storage unavailable"
+          },
+          "413": {
+            "description": "File exceeds configured limit"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "Part file must declare image/webp for .webp images or video/mp4 for .mp4 videos. Files must be compressed before upload. Maximum file size 100 MB. Original filenames are ignored. The configured dev/prod environment is prepended; no ACL is sent."
+      },
+      "delete": {
+        "operationId": "deleteMedia",
+        "tags": [
+          "media"
+        ],
+        "summary": "Delete application media (administrator)",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "images",
+                "videos"
+              ]
+            }
+          },
+          {
+            "name": "mediaKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 1000
+            },
+            "description": "Relative object path including .webp or .mp4, for example categories/alfabet/a.webp. The configured dev/prod environment is prepended."
+          }
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Request or storage error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Completed"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Administrator required"
+          },
+          "503": {
+            "description": "Media storage unavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1671,11 +1871,6 @@
             ],
             "format": "uuid"
           },
-          "mediaKey": {
-            "type": "string",
-            "pattern": "^[a-z0-9_]+$",
-            "maxLength": 255
-          },
           "isFavorite": {
             "type": "boolean",
             "readOnly": true
@@ -1684,6 +1879,28 @@
             "type": "boolean",
             "readOnly": true,
             "deprecated": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "pattern": "https://[a-z0-9][a-z0-9.-]+\\.s3\\.[a-z0-9-]+\\.amazonaws\\.com/(dev|prod)/categories/([a-z0-9_]+/)+[a-z0-9_]+\\.webp",
+            "maxLength": 2048,
+            "format": "uri",
+            "description": "Permanent public HTTPS S3 image URL. Omit on update to keep the current URL.",
+            "example": "https://open-hands-learning.s3.us-east-1.amazonaws.com/images/alfabet",
+            "examples": [
+              "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/a.webp"
+            ]
+          },
+          "videoUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2048,
+            "pattern": "https://[a-z0-9][a-z0-9.-]+\\.s3\\.[a-z0-9-]+\\.amazonaws\\.com/(dev|prod)/categories/([a-z0-9_]+/)+[a-z0-9_]+\\.mp4",
+            "examples": [
+              "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/a.mp4"
+            ]
           }
         },
         "required": [
@@ -1744,21 +1961,25 @@
             "type": "string",
             "minLength": 1
           },
-          "mediaKey": {
-            "type": "string",
-            "pattern": "^[a-z0-9_]+$",
-            "maxLength": 255
-          },
           "iconKey": {
             "type": "string",
             "pattern": "^[a-z0-9_]+$",
             "maxLength": 255
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://open-hands-learning.s3.us-east-1.amazonaws.com/images/video_section",
+            "pattern": "https://[a-z0-9][a-z0-9.-]+\\.s3\\.[a-z0-9-]+\\.amazonaws\\.com/(dev|prod)/(categories/([a-z0-9_]+/)+|voice/)[a-z0-9_]+\\.webp",
+            "examples": [
+              "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/a.webp"
+            ]
           }
         },
         "required": [
           "type",
           "name",
-          "mediaKey",
+          "imageUrl",
           "iconKey"
         ]
       },
@@ -2098,6 +2319,22 @@
             "format": "password",
             "writeOnly": true,
             "minLength": 1
+          }
+        }
+      },
+      "MediaDownload": {
+        "type": "object",
+        "required": [
+          "key",
+          "url"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
           }
         }
       }
