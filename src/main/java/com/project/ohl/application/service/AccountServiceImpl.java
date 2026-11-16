@@ -58,6 +58,25 @@ public final class AccountServiceImpl implements AccountService {
         return Account.from(users.findById(id).orElseThrow(AuthenticationFailedException::new));
     }
 
+    @Override
+    public void updatePassword(UUID id, String currentPassword, String newPassword) {
+        var user = verifiedUser(id, currentPassword);
+        user.setPasswordHash(passwords.hash(newPassword));
+        users.update(user);
+    }
+
+    @Override
+    public void deleteAccount(UUID id, String currentPassword) {
+        users.delete(verifiedUser(id, currentPassword));
+    }
+
+    private User verifiedUser(UUID id, String currentPassword) {
+        var user = users.findById(id).orElseThrow(AuthenticationFailedException::new);
+        if (!passwords.matches(currentPassword, user.getPasswordHash()))
+            throw new InvalidRequestException("The current password is incorrect.");
+        return user;
+    }
+
     private static String normalize(String email) {
         return email == null ? "" : email.strip().toLowerCase(Locale.ROOT);
     }

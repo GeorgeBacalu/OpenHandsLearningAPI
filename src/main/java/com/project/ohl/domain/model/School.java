@@ -15,4 +15,6 @@ public class School {
     private UUID id;
     private String name;
     private UUID cityId;
+    private String cityName;
+    private String countyName;
 }

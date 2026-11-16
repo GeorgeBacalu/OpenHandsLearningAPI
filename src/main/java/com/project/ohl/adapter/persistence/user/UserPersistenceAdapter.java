@@ -43,7 +43,10 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
               .email(entity.getEmail())
               .passwordHash(entity.getPasswordHash())
               .phone(entity.getPhone())
-              .school(entity.getSchool() == null ? null : School.builder().id(entity.getSchool().getId()).build())
+              .school(entity.getSchool() == null ? null : School.builder().id(entity.getSchool().getId())
+                      .name(entity.getSchool().getName())
+                      .cityName(entity.getSchool().getCity() == null ? null : entity.getSchool().getCity().getName())
+                      .countyName(entity.getSchool().getCity() == null ? null : entity.getSchool().getCity().getCounty().getName()).build())
               .role(entity.getRole() == null ? null : Role.builder().id(entity.getRole().getId()).authority(entity.getRole().getAuthority()).build())
               .build();
     }

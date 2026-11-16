@@ -19,6 +19,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -64,6 +66,36 @@ public class AuthController {
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(Authentication authentication) {
+        tokens.revoke(((JwtAuthenticationToken) authentication).getToken());
+    }
+
+    public record PasswordChange(@NotBlank String currentPassword, @NotBlank String newPassword) {
+        @Override public String toString() { return "PasswordChange"; }
+    }
+
+    public record AccountDeletion(@NotBlank String currentPassword) {
+        @Override public String toString() { return "AccountDeletion"; }
+    }
+
+    @PutMapping("/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(Authentication authentication, @Valid @RequestBody PasswordChange change,
+            HttpServletRequest request) {
+        String key = request.getRemoteAddr() + ":account:" + authentication.getName();
+        throttle.check(key);
+        accounts.updatePassword(UUID.fromString(authentication.getName()), change.currentPassword(), change.newPassword());
+        throttle.succeeded(key);
+        tokens.revoke(((JwtAuthenticationToken) authentication).getToken());
+    }
+
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAccount(Authentication authentication, @Valid @RequestBody AccountDeletion deletion,
+            HttpServletRequest request) {
+        String key = request.getRemoteAddr() + ":account:" + authentication.getName();
+        throttle.check(key);
+        accounts.deleteAccount(UUID.fromString(authentication.getName()), deletion.currentPassword());
+        throttle.succeeded(key);
         tokens.revoke(((JwtAuthenticationToken) authentication).getToken());
     }
 }

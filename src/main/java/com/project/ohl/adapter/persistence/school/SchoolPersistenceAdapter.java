@@ -28,6 +28,8 @@ public class SchoolPersistenceAdapter extends JpaPersistenceAdapter<School, Scho
     protected School toDomain(SchoolEntity entity) {
         return School.builder().id(entity.getId())
               .name(entity.getName()).cityId(entity.getCity() == null ? null : entity.getCity().getId())
+              .cityName(entity.getCity() == null ? null : entity.getCity().getName())
+              .countyName(entity.getCity() == null ? null : entity.getCity().getCounty().getName())
               .build();
     }
 
