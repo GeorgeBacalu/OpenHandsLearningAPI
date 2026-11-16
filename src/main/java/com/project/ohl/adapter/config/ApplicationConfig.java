@@ -20,6 +20,8 @@ import com.project.ohl.application.service.SchoolServiceImpl;
 import com.project.ohl.application.service.RoleServiceImpl;
 import com.project.ohl.application.service.SectionServiceImpl;
 import com.project.ohl.application.service.UserServiceImpl;
+import com.project.ohl.application.service.AccountServiceImpl;
+import com.project.ohl.application.port.in.AccountService;
 import java.util.Objects;
 import java.util.Properties;
 import org.springframework.context.annotation.Bean;
@@ -66,6 +68,7 @@ public class ApplicationConfig {
         attributes.setProperty("save*", "PROPAGATION_REQUIRED");
         attributes.setProperty("update*", "PROPAGATION_REQUIRED");
         attributes.setProperty("delete*", "PROPAGATION_REQUIRED");
+        attributes.setProperty("register*", "PROPAGATION_REQUIRED");
         var proxy = new TransactionProxyFactoryBean();
         proxy.setTarget(target);
         proxy.setProxyInterfaces(new Class<?>[]{port});
@@ -73,5 +76,11 @@ public class ApplicationConfig {
         proxy.setTransactionAttributes(attributes);
         proxy.afterPropertiesSet();
         return port.cast(Objects.requireNonNull(proxy.getObject()));
+    }
+
+    @Bean
+    public AccountService accountService(UserRepositoryPort users, RoleRepositoryPort roles,
+            SchoolRepositoryPort schools, PasswordHasher passwords) {
+        return transactional(AccountService.class, new AccountServiceImpl(users, roles, schools, passwords));
     }
 }

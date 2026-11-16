@@ -1,6 +1,6 @@
-# OpenHandsLearning
+# Open Hands Learning
 
-REST API for the OpenHandsLearning Android application.
+REST API for the Open Hands Learning Android application.
 
 ## Build and test
 
@@ -8,6 +8,11 @@ Install JDK 25 and set `JAVA_HOME` to that installation. Java 25 is required to
 build and run the API; JDK 17 is not required. The Maven Wrapper downloads Maven
 3.10.0 and verifies its checksum. No global Maven installation or wrapper JAR is
 needed.
+
+Source compilation treats warnings as errors. `.mvn/jvm.config` explicitly
+allows the Unsafe access required by Lombok 1.18.48 during Java 25 compilation,
+using the compatibility option described in [JEP 498](https://openjdk.org/jeps/498).
+This setting applies to Maven's JVM; it is not required to run the packaged API.
 
 ```powershell
 .\mvnw.cmd clean verify
@@ -42,7 +47,7 @@ Persisted entity IDs are UUID strings. The read-only section menu uses fixed typ
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V15 applied; its existing
+schema on startup. Development is baselined at V1 and has V2 through V16 applied; its existing
 records and memberships were verified after migration. The immutable V1 captures
 the previous UUID schema. V2 adds:
 
@@ -57,12 +62,15 @@ content. Space characters remain valid sign entries. New empty databases contain
 no application records after V1 through V7. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
 roll back V2.
-Migrate the database through V15 before running this backend.
+Migrate the database through V16 before running this backend.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
-The retained `dactilema_a` illustration matches the text/voice sign collection;
-the alphabet category uses that asset too. Letters are unique with case preserved,
+The current alphabet uses letter media keys such as `b`, with distinct demonstrations for
+A and the Romanian diacritics. Android category photos and voice illustrations
+have separate resource catalogs. These catalog data updates are maintained
+directly in the database; historical applied migrations retain their checksums.
+Letters are unique with case preserved,
 and normalized category names are unique among siblings, including
 root categories. Shared media keys remain allowed.
 
@@ -154,7 +162,12 @@ alphabetical roots when parentId is absent and direct children when it is suppli
 The six expression categories now sit under the `Expresii` parent inside Video.
 The parent reuses the former Expressions section UUID; existing expression IDs,
 media keys, descendant links and favorites are retained. The two remaining main
-sections are Video and Voice to Sign. Category creation and updates need no sectionId.
+sections are Video and Voice to Sign. Category updates need no sectionId.
+
+Category/subcategory creation has been removed from Android and the API. The
+`/api/categories` collection supports GET only; POST returns 405 even for an
+authenticated administrator. Existing catalog reads, updates, deletion and favorites
+remain available. This change does not modify existing database records.
 
 Catalog record maintenance is separate from V14. On an existing V13 database,
 back up and regroup expressions before applying the schema migration:
@@ -177,6 +190,9 @@ database-independent menu in fixed order: VIDEO, then VOICE_TO_SIGN. Each respon
 entry has type, name, mediaKey and iconKey; section UUIDs and section mutation/detail
 endpoints are removed. Menu definitions and ordering can only change in API code.
 All remaining application records are preserved. Applied migration files remain immutable.
+Section display names are Romanian: „Secțiune video” and „Secțiune voce-semn”. Enum
+types and media keys stay unchanged. Catalog spelling corrections are record
+maintenance after a backup, rather than schema migrations.
 
 For a separate empty PostgreSQL database:
 
@@ -196,9 +212,9 @@ upgrade and record preservation were verified using a temporary database copy;
 there is no PostgreSQL provisioning or rehearsal configuration in the project.
 
 Favorites endpoints require `userId`; a category read accepts optional `userId`
-to return that user's favorite status. Profile selection is not authentication:
-the existing API remains public and needs an authentication layer before serving
-private accounts in production. Catalog filters use the selected parent UUID. Clients can
+to return that user's favorite status. Favorite requests require a session, and the supplied user UUID must match
+the authenticated account. Account listing and CRUD, role management, and catalog
+mutations require the ADMIN role. Catalog filters use the selected parent UUID. Clients can
 rename category labels without changing UUIDs, children or media keys.
 
 ## HTTP contract
@@ -213,11 +229,60 @@ Errors use RFC 9457 problem details (`application/problem+json`), including fiel
 validation errors. Database conflicts return 409 without exposing SQL details.
 New and updated user passwords are hashed with BCrypt (`$2b$`, cost factor 12),
 using a fresh random salt for each hash. User HTTP responses exclude passwords.
-Passwords must contain 8 to 72 characters and fit within 72 UTF-8 bytes; oversized
-values return HTTP 400. Existing credentials are not silently rewritten; password
-updates store BCrypt.
+Public registration requires 15 to 72 characters and at most 72 UTF-8 bytes;
+oversized values return HTTP 400. Existing BCrypt credentials remain valid.
+Administrator account updates retain their existing validation rules. Stored credentials
+use `passwordHash` in Java and `users.password_hash` in PostgreSQL. Request-only
+`password` fields accept raw passwords; response mappings never copy stored hashes.
+
+V16 renames the column and migrates legacy plaintext credentials to BCrypt (`$2b$`,
+cost 12), preserving existing BCrypt hashes, user UUIDs, profiles, roles, schools,
+and favorites. Invalid BCrypt values and legacy passwords over 72 UTF-8 bytes
+abort the migration instead of being truncated. Apply V16 before starting this
+backend; migrations and directory imports remain disabled during normal startup.
+
+## Authentication
+
+`POST /api/auth/register` accepts name, email, password, phone and schoolId. It
+always assigns the existing USER role; callers cannot choose a role or user ID.
+Emails are normalized and unique. Registration signs in the new account.
+`POST /api/auth/login` verifies BCrypt credentials and rotates the session ID.
+Failed login attempts are limited to five per IP/email pair in 15 minutes.
+Registration is limited to 30 attempts per IP in 15 minutes. Limits reserve an
+attempt before credential checks, so concurrent requests cannot bypass them.
+
+`GET /api/auth/me` returns the authenticated account without its password.
+`POST /api/auth/logout` invalidates the session. Sessions expire after 30 idle
+minutes and are held in memory, so an API restart signs clients out. No schema
+migration or account rewrite is required. Existing development records are unchanged.
+
+Cookie authentication uses HttpOnly, SameSite=Strict cookies. Cookies are Secure
+by default; production must use HTTPS. For local HTTP previews only, explicitly
+set `SESSION_COOKIE_SECURE=false`. Fetch `GET /api/auth/csrf` first, retain its
+JSESSIONID cookie, and send its
+`token` in `X-CSRF-TOKEN` for every POST, PUT, PATCH and DELETE. Fetch a new token
+after login or registration because authentication rotates it. Catalog and school
+directory reads remain public; private account data and favorites are protected.
+
+The Android app stores only an encrypted session cookie and validates it with
+`/api/auth/me`. Local profile selection never establishes authentication.
+Authentication integration tests use isolated H2 data and cover permissions,
+CSRF, role assignment, duplicate accounts, session fixation protection, logout,
+password verification, and login throttling. Deployment can scale to multiple
+instances by replacing in-memory sessions and throttling with shared storage.
+
+References: [Spring Security sessions](https://docs.spring.io/spring-security/reference/servlet/authentication/persistence.html),
+[CSRF](https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html),
+and [Android Keystore](https://developer.android.com/privacy-and-security/keystore).
 
 ## Structure
+
+The alphabet catalog stores distinct media keys for Ă (`a_breve`),
+Â (`a_circumflex`), Î (`i_circumflex`), Ș (`s_comma`)
+and Ț (`t_comma`). A keeps `a`. These catalog data corrections
+are already persisted in the database and do not require schema migrations.
+Category IDs, names, hierarchy, favorites and customized media keys are preserved.
+The Android repository documents the verified clip sources in `media/alphabet/README.md`.
 
 - `domain`: framework-independent models and domain exceptions.
 - `application`: input/output ports, use cases, validation models, and MapStruct mappings.

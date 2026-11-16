@@ -7,6 +7,9 @@ public final class TestIds {
     public static final UUID CATEGORY_CHILD = UUID.fromString("f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185");
     public static final UUID SCHOOL_A = UUID.fromString("e882d373-7f2f-44b2-8c87-530cd04964d4");
     public static final UUID ROLE_USER = UUID.fromString("99d0dd27-ea57-42b3-8fd8-64e3973a05d3");
+    public static final UUID ROLE_ADMIN = UUID.fromString("4c517662-ab55-47ea-b758-84c1af759525");
+    public static final UUID USER_ANA = UUID.fromString("4b16f89f-f513-4723-9d19-5750cf7199d6");
+    public static final UUID USER_DAN = UUID.fromString("0f7cc0da-f19f-48b7-ae3b-5139cdfbd690");
 
     private TestIds() {}
 

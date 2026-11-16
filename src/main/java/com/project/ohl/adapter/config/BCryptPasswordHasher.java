@@ -18,4 +18,12 @@ public final class BCryptPasswordHasher implements PasswordHasher {
         }
         return encoder.encode(password);
     }
+
+    @Override
+    public boolean matches(String password, String hash) {
+        if (password == null || hash == null || password.getBytes(StandardCharsets.UTF_8).length > 72) return false;
+        if (!hash.matches("\\$2[aby]\\$\\d{2}\\$.{53}")) return false;
+        try { return encoder.matches(password, hash); }
+        catch (IllegalArgumentException exception) { return false; }
+    }
 }

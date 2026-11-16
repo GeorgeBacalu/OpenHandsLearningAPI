@@ -40,45 +40,8 @@
               }
             }
           }
-        }
-      },
-      "post": {
-        "operationId": "saveCategory",
-        "tags": [
-          "categories"
-        ],
-        "responses": {
-          "201": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CategoryDto"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Request or server error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
         },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CategoryDto"
-              }
-            }
-          }
-        }
+        "security": []
       }
     },
     "/api/categories/{id}": {
@@ -128,7 +91,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "security": []
       },
       "put": {
         "operationId": "updateCategoryById",
@@ -155,6 +119,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "requestBody": {
@@ -177,6 +147,12 @@
               "format": "uuid"
             }
           }
+        ],
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
+          }
         ]
       },
       "delete": {
@@ -197,6 +173,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "parameters": [
@@ -208,6 +190,12 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        ],
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
           }
         ]
       }
@@ -261,7 +249,8 @@
               "default": ""
             }
           }
-        ]
+        ],
+        "security": []
       }
     },
     "/api/categories/favorites": {
@@ -293,6 +282,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Insufficient permissions or another account requested"
           }
         },
         "parameters": [
@@ -304,6 +299,11 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        ],
+        "security": [
+          {
+            "SessionCookie": []
           }
         ]
       }
@@ -337,6 +337,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Insufficient permissions or another account requested"
           }
         },
         "parameters": [
@@ -356,6 +362,11 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        ],
+        "security": [
+          {
+            "SessionCookie": []
           }
         ]
       }
@@ -386,6 +397,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "parameters": [
@@ -406,6 +423,12 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        ],
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
           }
         ]
       }
@@ -436,6 +459,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "parameters": [
@@ -456,6 +485,12 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        ],
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
           }
         ]
       }
@@ -490,7 +525,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       },
       "post": {
         "operationId": "saveSchool",
@@ -517,6 +553,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "requestBody": {
@@ -528,7 +570,13 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
+          }
+        ]
       }
     },
     "/api/schools/{id}": {
@@ -569,7 +617,8 @@
               "format": "uuid"
             }
           }
-        ]
+        ],
+        "security": []
       },
       "put": {
         "operationId": "updateSchoolById",
@@ -596,6 +645,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "requestBody": {
@@ -618,6 +673,12 @@
               "format": "uuid"
             }
           }
+        ],
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
+          }
         ]
       },
       "delete": {
@@ -638,6 +699,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "parameters": [
@@ -649,6 +716,12 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        ],
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
           }
         ]
       }
@@ -682,8 +755,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Insufficient permissions or another account requested"
           }
-        }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ]
       },
       "post": {
         "operationId": "saveRole",
@@ -710,6 +794,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "requestBody": {
@@ -721,7 +811,13 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
+          }
+        ]
       }
     },
     "/api/roles/{id}": {
@@ -750,6 +846,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Insufficient permissions or another account requested"
           }
         },
         "parameters": [
@@ -761,6 +863,11 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        ],
+        "security": [
+          {
+            "SessionCookie": []
           }
         ]
       },
@@ -789,6 +896,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "requestBody": {
@@ -811,6 +924,12 @@
               "format": "uuid"
             }
           }
+        ],
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
+          }
         ]
       },
       "delete": {
@@ -831,6 +950,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "parameters": [
@@ -842,6 +967,12 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        ],
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
           }
         ]
       }
@@ -876,7 +1007,8 @@
               }
             }
           }
-        }
+        },
+        "security": []
       }
     },
     "/api/users": {
@@ -908,8 +1040,19 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Insufficient permissions or another account requested"
           }
-        }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ]
       },
       "post": {
         "operationId": "saveUser",
@@ -936,6 +1079,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "requestBody": {
@@ -947,7 +1096,13 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
+          }
+        ]
       }
     },
     "/api/users/{id}": {
@@ -976,6 +1131,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Insufficient permissions or another account requested"
           }
         },
         "parameters": [
@@ -987,6 +1148,11 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        ],
+        "security": [
+          {
+            "SessionCookie": []
           }
         ]
       },
@@ -1015,6 +1181,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "requestBody": {
@@ -1037,6 +1209,12 @@
               "format": "uuid"
             }
           }
+        ],
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
+          }
         ]
       },
       "delete": {
@@ -1057,6 +1235,12 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
           }
         },
         "parameters": [
@@ -1068,6 +1252,12 @@
               "type": "string",
               "format": "uuid"
             }
+          }
+        ],
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
           }
         ]
       }
@@ -1096,7 +1286,8 @@
           "400": {
             "description": "Invalid parameters"
           }
-        }
+        },
+        "security": []
       }
     },
     "/api/cities": {
@@ -1160,7 +1351,8 @@
           "400": {
             "description": "Invalid parameters"
           }
-        }
+        },
+        "security": []
       }
     },
     "/api/schools/search": {
@@ -1224,7 +1416,167 @@
           "400": {
             "description": "Invalid parameters"
           }
-        }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/csrf": {
+      "get": {
+        "summary": "Get a CSRF token for the current session",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CsrfResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Authenticate with email and password",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
+          },
+          "400": {
+            "description": "Invalid fields"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "429": {
+            "description": "Too many failed login attempts"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CsrfToken": []
+          }
+        ]
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "Create a normal USER account and authenticate",
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
+          },
+          "400": {
+            "description": "Invalid fields"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "429": {
+            "description": "Too many registration attempts from this address"
+          },
+          "409": {
+            "description": "Email already registered"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Registration"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CsrfToken": []
+          }
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "Get the authenticated account",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Insufficient permissions or another account requested"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "Invalidate the authenticated session",
+        "responses": {
+          "204": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "CSRF token required; operation must be authorized"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": [],
+            "CsrfToken": []
+          }
+        ]
       }
     }
   },
@@ -1495,6 +1847,134 @@
           "name",
           "countyId"
         ]
+      },
+      "Credentials": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "writeOnly": true
+          }
+        }
+      },
+      "Registration": {
+        "type": "object",
+        "required": [
+          "name",
+          "email",
+          "password",
+          "phone",
+          "schoolId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 15,
+            "maxLength": 72,
+            "writeOnly": true,
+            "description": "At most 72 UTF-8 bytes."
+          },
+          "phone": {
+            "type": "string",
+            "pattern": "^0[0-9]{9}$"
+          },
+          "schoolId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Account": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "email",
+            "minLength": 1
+          },
+          "schoolId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "roleId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 10,
+            "maxLength": 10
+          },
+          "authority": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ADMIN"
+            ]
+          }
+        }
+      },
+      "CsrfResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "SessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID"
+      },
+      "CsrfToken": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-CSRF-TOKEN"
       }
     }
   }

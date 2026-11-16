@@ -2,6 +2,9 @@ package com.project.ohl.adapter.web.error;
 
 import com.project.ohl.domain.exception.InvalidRequestException;
 import com.project.ohl.domain.exception.ResourceNotFoundException;
+import com.project.ohl.domain.exception.AccountConflictException;
+import com.project.ohl.domain.exception.AuthenticationFailedException;
+import org.springframework.security.core.AuthenticationException;
 import java.util.LinkedHashMap;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,6 +21,16 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler({AuthenticationException.class, AuthenticationFailedException.class})
+    ProblemDetail unauthorized(Exception exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
+    }
+
+    @ExceptionHandler(AccountConflictException.class)
+    ProblemDetail accountConflict(AccountConflictException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     ProblemDetail notFound(ResourceNotFoundException exception) {

@@ -77,15 +77,6 @@ class CategoryControllerTest {
     }
 
     @Test
-    void saveCategory_shouldAddCategoryToList() {
-        given(categoryService.saveCategory(any(CategoryDto.class))).willReturn(categoryDtoOne);
-        ResponseEntity<CategoryDto> response = categoryController.saveCategory(categoryDtoOne);
-        assertNotNull(response);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).isEqualTo(categoryDtoOne);
-    }
-
-    @Test
     void updateCategoryById_shouldUpdateCategoryWithGivenId() {
         CategoryDto categoryDto = categoryDtoTwo; categoryDto.setId(VALID_ID);
         given(categoryService.updateCategoryById(any(CategoryDto.class), any(UUID.class))).willReturn(categoryDto);

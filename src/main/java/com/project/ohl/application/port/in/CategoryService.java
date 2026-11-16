@@ -11,8 +11,6 @@ public interface CategoryService {
     CategoryDto getCategoryById(UUID id);
     CategoryDto getCategoryById(UUID id, UUID userId);
 
-    CategoryDto saveCategory(CategoryDto categoryDto);
-
     CategoryDto updateCategoryById(CategoryDto categoryDto, UUID id);
 
     void deleteCategoryById(UUID id);

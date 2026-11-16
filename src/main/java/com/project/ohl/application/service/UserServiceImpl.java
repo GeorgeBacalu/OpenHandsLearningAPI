@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto saveUser(UserDto userDto) {
         User user = mapper.convertToEntity(userDto);
-        user.setPassword(passwordHasher.hash(userDto.getPassword()));
+        user.setPasswordHash(passwordHasher.hash(userDto.getPassword()));
         User savedUser = userRepository.save(user);
         return mapper.convertToDto(savedUser);
     }
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
         User userToUpdate = getUserEntityById(id);
         userToUpdate.setName(userDto.getName());
         userToUpdate.setEmail(userDto.getEmail());
-        userToUpdate.setPassword(passwordHasher.hash(userDto.getPassword()));
+        userToUpdate.setPasswordHash(passwordHasher.hash(userDto.getPassword()));
         userToUpdate.setPhone(userDto.getPhone());
         userToUpdate.setSchool(schoolService.getSchoolEntityById(userDto.getSchoolId()));
         userToUpdate.setRole(roleService.getRoleEntityById(userDto.getRoleId()));
