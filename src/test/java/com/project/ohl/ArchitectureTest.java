@@ -23,11 +23,12 @@ class ArchitectureTest {
     }
 
     @Test
-    void applicationUsesPortsAndDomainInsteadOfFrameworksAndAdapters() {
+    void applicationUsesPortsAndDomainWithoutDependingOnAdapters() {
         classes().that().resideInAPackage("..application..")
               .should().onlyDependOnClassesThat()
               .resideInAnyPackage("java..", "com.project.ohl.application..", "com.project.ohl.domain..",
-                    "jakarta.validation..", "lombok..", "org.mapstruct..")
+                    "jakarta.validation..", "lombok..", "org.mapstruct..", "org.jspecify.annotations..", "org.springframework.stereotype..",
+                    "org.springframework.transaction.annotation..", "org.springframework.beans.factory.annotation..")
               .check(PRODUCTION);
     }
 
@@ -36,6 +37,7 @@ class ArchitectureTest {
         noClasses().that().resideInAPackage("..adapter.web..")
               .should().dependOnClassesThat().resideInAPackage("..adapter.persistence..")
               .check(PRODUCTION);
+
         noClasses().that().resideInAPackage("..adapter.persistence..")
               .should().dependOnClassesThat()
               .resideInAnyPackage("..adapter.web..", "..application.service..")

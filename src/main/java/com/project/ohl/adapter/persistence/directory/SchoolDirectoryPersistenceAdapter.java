@@ -3,8 +3,8 @@ package com.project.ohl.adapter.persistence.directory;
 import com.project.ohl.application.port.out.SchoolDirectoryPort;
 import com.project.ohl.domain.model.SchoolDirectory;
 import java.util.List;
-import java.util.Map;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -72,9 +72,9 @@ public class SchoolDirectoryPersistenceAdapter implements SchoolDirectoryPort {
         replacements.forEach((oldId, school) -> {
             var existing = database.queryForList("SELECT name FROM schools WHERE id = ? FOR UPDATE", String.class, oldId);
             if (existing.isEmpty()) return;
-            if (!existing.getFirst().equals(school[0])) throw new IllegalStateException("Placeholder school has been changed; review its replacement");
+            if (!school[0].equals(existing.getFirst())) throw new IllegalStateException("Placeholder school has been changed; review its replacement");
             UUID replacement = sourceId("school", school[1]);
-            if (database.queryForObject("SELECT COUNT(*) FROM schools WHERE id = ?", Integer.class, replacement) != 1)
+            if (!Integer.valueOf(1).equals(database.queryForObject("SELECT COUNT(*) FROM schools WHERE id = ?", Integer.class, replacement)))
                 throw new IllegalStateException("Replacement school is absent from the government dataset");
             database.update("UPDATE users SET school_id = ? WHERE school_id = ?", replacement, oldId);
             database.update("DELETE FROM schools WHERE id = ?", oldId);

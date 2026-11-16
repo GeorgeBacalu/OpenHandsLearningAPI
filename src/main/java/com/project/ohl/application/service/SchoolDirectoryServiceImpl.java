@@ -7,12 +7,18 @@ import com.project.ohl.domain.model.SchoolDirectory;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
+@Service
+@Transactional(readOnly = true)
 public class SchoolDirectoryServiceImpl implements SchoolDirectoryService {
     private final SchoolDirectoryPort directory;
 
-    @Override public void importDirectory(SchoolDirectory data) {
+    @Override
+    @Transactional
+    public void importDirectory(SchoolDirectory data) {
         if (data.counties().size() != 42 || data.cities().size() < 13000 || data.schools().size() < 15000)
             throw new IllegalArgumentException("A complete Romania directory is required");
         directory.importDirectory(data);

@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class OpenHandsLearningApplication {
+public class Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(OpenHandsLearningApplication.class, args);
+        SpringApplication.run(Application.class, args);
     }
 
 }

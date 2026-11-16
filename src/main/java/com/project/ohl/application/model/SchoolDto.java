@@ -18,6 +18,7 @@ public class SchoolDto {
 
     @NotBlank(message = "School must not be blank")
     private String name;
+
     @NotNull
     private UUID cityId;
 

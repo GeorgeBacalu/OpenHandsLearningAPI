@@ -1,5 +1,6 @@
 package com.project.ohl.mock;
 
+import com.project.ohl.domain.model.Role;
 import com.project.ohl.domain.model.User;
 import java.util.List;
 import lombok.AccessLevel;
@@ -8,8 +9,6 @@ import lombok.NoArgsConstructor;
 import static com.project.ohl.TestIds.id;
 import static com.project.ohl.mock.SchoolMock.getMockedSchool1;
 import static com.project.ohl.mock.SchoolMock.getMockedSchool2;
-import static com.project.ohl.mock.RoleMock.getMockedRole1;
-import static com.project.ohl.mock.RoleMock.getMockedRole2;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMock {
@@ -26,7 +25,7 @@ public class UserMock {
               .passwordHash("$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy")
               .phone("0000000001")
               .school(getMockedSchool1())
-              .role(getMockedRole1())
+              .role(Role.USER)
               .build();
     }
 
@@ -38,7 +37,7 @@ public class UserMock {
               .passwordHash("$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy")
               .phone("0000000002")
               .school(getMockedSchool2())
-              .role(getMockedRole2())
+              .role(Role.ADMIN)
               .build();
     }
 }

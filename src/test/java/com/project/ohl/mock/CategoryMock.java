@@ -58,9 +58,6 @@ public class CategoryMock {
         return Category.builder()
               .id(id(1))
               .name("Alfabet")
-
-              .isExpanded(false)
-              .isFavorite(true)
               .parent(null)
               .build();
     }
@@ -69,9 +66,6 @@ public class CategoryMock {
         return Category.builder()
               .id(id(2))
               .name("Numere")
-
-              .isExpanded(false)
-              .isFavorite(false)
               .parent(null)
               .build();
     }
@@ -80,9 +74,6 @@ public class CategoryMock {
         return Category.builder()
               .id(id(3))
               .name("Culori")
-
-              .isExpanded(false)
-              .isFavorite(true)
               .parent(null)
               .build();
     }
@@ -91,9 +82,6 @@ public class CategoryMock {
         return Category.builder()
               .id(id(10))
               .name("a")
-
-              .isExpanded(false)
-              .isFavorite(true)
               .parent(getMockedCategoryAlphabet())
               .build();
     }
@@ -102,9 +90,6 @@ public class CategoryMock {
         return Category.builder()
               .id(id(13))
               .name("b")
-
-              .isExpanded(false)
-              .isFavorite(false)
               .parent(getMockedCategoryAlphabet())
               .build();
     }
@@ -113,9 +98,6 @@ public class CategoryMock {
         return Category.builder()
               .id(id(41))
               .name("unu")
-
-              .isExpanded(false)
-              .isFavorite(false)
               .parent(getMockedCategoryNumbers())
               .build();
     }
@@ -124,9 +106,6 @@ public class CategoryMock {
         return Category.builder()
               .id(id(42))
               .name("doi")
-
-              .isExpanded(false)
-              .isFavorite(true)
               .parent(getMockedCategoryNumbers())
               .build();
     }
@@ -135,9 +114,6 @@ public class CategoryMock {
         return Category.builder()
               .id(id(51))
               .name("rosu")
-
-              .isExpanded(false)
-              .isFavorite(false)
               .parent(getMockedCategoryColors())
               .build();
     }
@@ -146,9 +122,6 @@ public class CategoryMock {
         return Category.builder()
               .id(id(52))
               .name("portocaliu")
-
-              .isExpanded(false)
-              .isFavorite(true)
               .parent(getMockedCategoryColors())
               .build();
     }

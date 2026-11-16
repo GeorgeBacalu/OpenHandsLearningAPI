@@ -6,10 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.UUID;
+import org.jspecify.annotations.NonNull;
 
-public record Registration(@NotBlank @Size(max = 100) String name,
+public record Registration(
+        @NotBlank @Size(max = 100) String name,
         @NotBlank @Email @Size(max = 254) String email,
         @NotBlank String password,
-        @NotBlank @Pattern(regexp = "0[0-9]{9}") String phone, @NotNull UUID schoolId) {
-    @Override public String toString() { return "Registration[email=" + email + "]"; }
+        @NotBlank @Pattern(regexp = "0[0-9]{9}") String phone,
+        @NotNull UUID schoolId) {
+    @Override public @NonNull String toString() { return "Registration[email=" + email + "]"; }
 }

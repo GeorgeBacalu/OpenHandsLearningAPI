@@ -2,10 +2,12 @@ package com.project.ohl.adapter.persistence.user;
 
 import com.project.ohl.adapter.persistence.PersistentEntity;
 import com.project.ohl.adapter.persistence.school.SchoolEntity;
-import com.project.ohl.adapter.persistence.role.RoleEntity;
-import jakarta.persistence.Column;
+import com.project.ohl.domain.model.Role;
 import jakarta.persistence.CheckConstraint;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -19,10 +21,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "users", indexes = {
-      @Index(name = "idx_users_school", columnList = "school_id"),
-      @Index(name = "idx_users_role", columnList = "role_id")
-}, check = @CheckConstraint(constraint = "trim(name) <> '' AND trim(email) <> '' AND trim(password_hash) <> '' AND trim(phone) <> ''"))
+@Table(name = "users", indexes = @Index(name = "idx_users_school", columnList = "school_id"), check = @CheckConstraint(constraint = "trim(name) <> '' AND trim(email) <> '' AND trim(password_hash) <> '' AND trim(phone) <> ''"))
 public class UserEntity extends PersistentEntity {
     @Column(name = "name", nullable = false)
     private String name;
@@ -35,7 +34,7 @@ public class UserEntity extends PersistentEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "school_id", nullable = false)
     private SchoolEntity school;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false)
-    private RoleEntity role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, length = 5)
+    private Role role;
 }

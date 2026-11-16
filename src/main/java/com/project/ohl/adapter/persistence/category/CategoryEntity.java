@@ -1,8 +1,8 @@
 package com.project.ohl.adapter.persistence.category;
 
 import com.project.ohl.adapter.persistence.PersistentEntity;
-import jakarta.persistence.Column;
 import jakarta.persistence.CheckConstraint;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Index;

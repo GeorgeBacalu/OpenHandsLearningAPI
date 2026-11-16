@@ -18,10 +18,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.CATEGORY_NOT_FOUND;
 
 @RequiredArgsConstructor
+@Service
+@Transactional(readOnly = true)
 public class CategoryServiceImpl implements CategoryService {
     private static final Collator ROMANIAN_COLLATOR = romanianCollator();
 
@@ -44,6 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto updateCategoryById(CategoryDto categoryDto, UUID id) {
         Category categoryToUpdate = getCategoryEntityById(id);
         validateParent(id, categoryDto.getParentId());
@@ -51,14 +56,13 @@ public class CategoryServiceImpl implements CategoryService {
         categoryToUpdate.setVideoUrl(categoryDto.getVideoUrl());
         categoryToUpdate.setName(categoryDto.getName());
 
-        categoryToUpdate.setIsExpanded(categoryDto.getIsExpanded());
-        categoryToUpdate.setIsFavorite(categoryDto.getIsFavorite());
         categoryToUpdate.setParent(categoryDto.getParentId() == null ? null : getCategoryEntityById(categoryDto.getParentId()));
         Category updatedCategory = categoryRepository.update(categoryToUpdate);
         return mapper.convertToDto(updatedCategory);
     }
 
     @Override
+    @Transactional
     public void deleteCategoryById(UUID id) {
         Category categoryToDelete = getCategoryEntityById(id);
         categoryRepository.delete(categoryToDelete);
@@ -102,6 +106,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto saveFavorite(UUID userId, UUID categoryId) {
         requireUser(userId);
         CategoryDto result = getCategoryById(categoryId);
@@ -111,6 +116,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto deleteFavorite(UUID userId, UUID categoryId) {
         requireUser(userId);
         CategoryDto result = getCategoryById(categoryId);

@@ -1,14 +1,18 @@
 package com.project.ohl.adapter.security;
 
 import com.project.ohl.application.model.Account;
-import com.project.ohl.domain.model.Authority;
+import com.project.ohl.domain.model.Role;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,7 +21,7 @@ class JwtTokensTest {
     private final SecretKeySpec key = new SecretKeySpec(new byte[32], "HmacSHA256");
     private final JwtTokens tokens = new JwtTokens(key);
     private final Account account = new Account(UUID.randomUUID(), "Ana", "ana@example.test", "0712345678",
-            UUID.randomUUID(), UUID.randomUUID(), Authority.USER);
+            Role.USER, UUID.randomUUID());
 
     @Test void issuedTokensIdentifyTheAccountAndAreRevokedIndividually() {
         var first = tokens.issue(account);

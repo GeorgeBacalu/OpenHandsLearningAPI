@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
+import static com.project.ohl.TestIds.VALID_ID;
 import static com.project.ohl.mock.CategoryMock.getMockedCategories;
 import static com.project.ohl.mock.CategoryMock.getMockedCategoryAlphabet;
 import static com.project.ohl.mock.CategoryMock.getMockedCategoryNumbers;
@@ -32,7 +32,6 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryControllerTest {
-
     private final CategoryMapper mapper = Mappers.getMapper(CategoryMapper.class);
 
     @InjectMocks
@@ -52,16 +51,18 @@ class CategoryControllerTest {
     void setUp() {
         categoryDtoOne = mapper.convertToDto(getMockedCategoryAlphabet());
         categoryDtoTwo = mapper.convertToDto(getMockedCategoryNumbers());
-        categoryDtos = mapper.convertToDtoList(getMockedCategories());
-        filteredCategoryDtos = mapper.convertToDtoList(getMockedParentCategoriesFilteredByName());
-        favoriteCategoryDtos = mapper.convertToDtoList(getMockedFavoriteCategories());
-        filteredFavoriteCategoryDtos = mapper.convertToDtoList(getMockedFavoriteCategoriesFilteredByName());
+        categoryDtos = getMockedCategories().stream().map(mapper::convertToDto).toList();
+        filteredCategoryDtos = getMockedParentCategoriesFilteredByName().stream().map(mapper::convertToDto).toList();
+        favoriteCategoryDtos = getMockedFavoriteCategories().stream().map(mapper::convertToDto).toList();
+        filteredFavoriteCategoryDtos = getMockedFavoriteCategoriesFilteredByName().stream().map(mapper::convertToDto).toList();
     }
 
     @Test
     void getAllCategories_shouldReturnListOfCategories() {
         given(categoryService.getAllCategories()).willReturn(categoryDtos);
+
         ResponseEntity<List<CategoryDto>> response = categoryController.getAllCategories();
+
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(categoryDtos);
@@ -70,7 +71,9 @@ class CategoryControllerTest {
     @Test
     void getCategoryById_shouldReturnCategoryWithGivenId() {
         given(categoryService.getCategoryById(any(UUID.class))).willReturn(categoryDtoOne);
+
         ResponseEntity<CategoryDto> response = categoryController.getCategoryById(VALID_ID, null);
+
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(categoryDtoOne);
@@ -79,8 +82,11 @@ class CategoryControllerTest {
     @Test
     void updateCategoryById_shouldUpdateCategoryWithGivenId() {
         CategoryDto categoryDto = categoryDtoTwo; categoryDto.setId(VALID_ID);
+
         given(categoryService.updateCategoryById(any(CategoryDto.class), any(UUID.class))).willReturn(categoryDto);
+
         ResponseEntity<CategoryDto> response = categoryController.updateCategoryById(categoryDtoTwo, VALID_ID);
+
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(categoryDto);
@@ -89,7 +95,9 @@ class CategoryControllerTest {
     @Test
     void deleteCategoryById_shouldRemoveCategoryWithGivenIdFromList() {
         ResponseEntity<Void> response = categoryController.deleteCategoryById(VALID_ID);
+
         verify(categoryService).deleteCategoryById(VALID_ID);
+
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
@@ -97,7 +105,9 @@ class CategoryControllerTest {
     @Test
     void getCategoriesByParentIdAndName_shouldReturnListOfCategoriesFilteredByName() {
         given(categoryService.getCategoriesByParentIdAndName(any(UUID.class), anyString())).willReturn(filteredCategoryDtos);
+
         ResponseEntity<List<CategoryDto>> response = categoryController.getCategoriesByParentIdAndName(VALID_ID, "a");
+
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(filteredCategoryDtos);
@@ -106,7 +116,9 @@ class CategoryControllerTest {
     @Test
     void getFavoriteCategories_shouldReturnListOfFavorites() {
         given(categoryService.getFavoriteCategories(any(UUID.class))).willReturn(favoriteCategoryDtos);
+
         ResponseEntity<List<CategoryDto>> response = categoryController.getFavoriteCategories(VALID_ID);
+
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(favoriteCategoryDtos);
@@ -115,7 +127,9 @@ class CategoryControllerTest {
     @Test
     void getFavoritesByName_shouldReturnListOfFavoritesFilteredByName() {
         given(categoryService.getFavoritesByName(any(UUID.class), anyString())).willReturn(filteredFavoriteCategoryDtos);
+
         ResponseEntity<List<CategoryDto>> response = categoryController.getFavoritesByName(VALID_ID, "a");
+
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(filteredFavoriteCategoryDtos);
@@ -124,7 +138,9 @@ class CategoryControllerTest {
     @Test
     void saveFavorite_saveFavorite_shouldAddFavoriteCategoryToList() {
         given(categoryService.saveFavorite(any(UUID.class), any(UUID.class))).willReturn(categoryDtoOne);
+
         ResponseEntity<CategoryDto> response = categoryController.saveFavorite(VALID_ID, VALID_ID);
+
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(categoryDtoOne);
@@ -133,7 +149,9 @@ class CategoryControllerTest {
     @Test
     void deleteFavorite_saveFavorite_shouldAddFavoriteCategoryToList() {
         given(categoryService.deleteFavorite(any(UUID.class), any(UUID.class))).willReturn(categoryDtoOne);
+
         ResponseEntity<CategoryDto> response = categoryController.deleteFavorite(VALID_ID, VALID_ID);
+
         assertNotNull(response);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(categoryDtoOne);

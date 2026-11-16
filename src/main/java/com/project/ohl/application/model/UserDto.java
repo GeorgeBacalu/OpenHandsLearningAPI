@@ -1,5 +1,6 @@
 package com.project.ohl.application.model;
 
+import com.project.ohl.domain.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,6 +38,6 @@ public class UserDto {
     @NotNull(message = "School ID must not be null")
     private UUID schoolId;
 
-    @NotNull(message = "Role ID must not be null")
-    private UUID roleId;
+    @NotNull(message = "Role must not be null")
+    private Role role;
 }

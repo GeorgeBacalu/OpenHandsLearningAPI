@@ -3,7 +3,6 @@ package com.project.ohl.application.service;
 import com.project.ohl.application.mapper.UserMapper;
 import com.project.ohl.application.model.UserDto;
 import com.project.ohl.application.port.in.SchoolService;
-import com.project.ohl.application.port.in.RoleService;
 import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.application.port.out.PasswordHasher;
 import com.project.ohl.application.port.out.UserRepositoryPort;
@@ -12,15 +11,18 @@ import com.project.ohl.domain.model.User;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.project.ohl.application.error.ExceptionMessageConstants.USER_NOT_FOUND;
 
 @RequiredArgsConstructor
+@Service
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepositoryPort userRepository;
     private final SchoolService schoolService;
-    private final RoleService roleService;
     private final PasswordHasher passwordHasher;
 
     private final UserMapper mapper;
@@ -38,6 +40,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto saveUser(UserDto userDto) {
         User user = mapper.convertToEntity(userDto);
         user.setPasswordHash(passwordHasher.hash(userDto.getPassword()));
@@ -46,6 +49,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto updateUserById(UserDto userDto, UUID id) {
         User userToUpdate = getUserEntityById(id);
         userToUpdate.setName(userDto.getName());
@@ -53,19 +57,19 @@ public class UserServiceImpl implements UserService {
         userToUpdate.setPasswordHash(passwordHasher.hash(userDto.getPassword()));
         userToUpdate.setPhone(userDto.getPhone());
         userToUpdate.setSchool(schoolService.getSchoolEntityById(userDto.getSchoolId()));
-        userToUpdate.setRole(roleService.getRoleEntityById(userDto.getRoleId()));
+        userToUpdate.setRole(userDto.getRole());
         User updatedUser = userRepository.update(userToUpdate);
         return mapper.convertToDto(updatedUser);
     }
 
     @Override
+    @Transactional
     public void deleteUserById(UUID id) {
         User userToDelete = getUserEntityById(id);
         userRepository.delete(userToDelete);
     }
 
-    @Override
-    public User getUserEntityById(UUID id) {
+    private User getUserEntityById(UUID id) {
         return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(String.format(USER_NOT_FOUND, id)));
     }
 }

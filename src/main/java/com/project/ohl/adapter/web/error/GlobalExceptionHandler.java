@@ -1,12 +1,12 @@
 package com.project.ohl.adapter.web.error;
 
-import com.project.ohl.domain.exception.InvalidRequestException;
-import com.project.ohl.domain.exception.ResourceNotFoundException;
 import com.project.ohl.domain.exception.AccountConflictException;
 import com.project.ohl.domain.exception.AuthenticationFailedException;
+import com.project.ohl.domain.exception.InvalidRequestException;
 import com.project.ohl.domain.exception.MediaStorageException;
-import org.springframework.security.core.AuthenticationException;
+import com.project.ohl.domain.exception.ResourceNotFoundException;
 import java.util.LinkedHashMap;
+import org.jspecify.annotations.NonNull;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -64,7 +65,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
-            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+            @NonNull HttpHeaders headers, @NonNull HttpStatusCode status, @NonNull WebRequest request) {
         var problem = ProblemDetail.forStatusAndDetail(status, "The request contains invalid fields.");
         var errors = new LinkedHashMap<String, String>();
         exception.getBindingResult().getFieldErrors().forEach(error ->

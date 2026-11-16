@@ -1,6 +1,7 @@
 package com.project.ohl.adapter.directory;
 
 import com.project.ohl.application.port.in.SchoolDirectoryService;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -19,7 +20,7 @@ public class SchoolDirectoryImportRunner implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments arguments) throws Exception {
+    public void run(@NonNull ApplicationArguments arguments) throws Exception {
         var data = new GovernmentSchoolDirectoryClient().download();
         directory.importDirectory(data);
         LOG.info("Imported Romania directory: {} counties, {} localities, {} schools",

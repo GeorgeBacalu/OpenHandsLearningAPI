@@ -2,14 +2,12 @@ package com.project.ohl.adapter.persistence.user;
 
 import com.project.ohl.adapter.persistence.JpaPersistenceAdapter;
 import com.project.ohl.adapter.persistence.school.SchoolEntity;
-import com.project.ohl.adapter.persistence.role.RoleEntity;
 import com.project.ohl.application.port.out.UserRepositoryPort;
 import com.project.ohl.domain.model.School;
-import com.project.ohl.domain.model.Role;
 import com.project.ohl.domain.model.User;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,7 +45,7 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
                       .name(entity.getSchool().getName())
                       .cityName(entity.getSchool().getCity() == null ? null : entity.getSchool().getCity().getName())
                       .countyName(entity.getSchool().getCity() == null ? null : entity.getSchool().getCity().getCounty().getName()).build())
-              .role(entity.getRole() == null ? null : Role.builder().id(entity.getRole().getId()).authority(entity.getRole().getAuthority()).build())
+              .role(entity.getRole())
               .build();
     }
 
@@ -58,6 +56,6 @@ public class UserPersistenceAdapter extends JpaPersistenceAdapter<User, UserEnti
         entity.setPasswordHash(model.getPasswordHash());
         entity.setPhone(model.getPhone());
         entity.setSchool(reference(SchoolEntity.class, model.getSchool() == null ? null : model.getSchool().getId()));
-        entity.setRole(reference(RoleEntity.class, model.getRole() == null ? null : model.getRole().getId()));
+        entity.setRole(model.getRole());
     }
 }

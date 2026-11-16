@@ -17,8 +17,11 @@ import static org.mockito.Mockito.doAnswer;
 
 @SpringBootTest
 class TransactionBoundaryIntegrationTest extends DatabaseIntegrationTest {
-    @Autowired CategoryService service;
-    @MockitoSpyBean CategoryRepositoryPort categories;
+    @Autowired
+    CategoryService service;
+
+    @MockitoSpyBean
+    CategoryRepositoryPort categories;
 
     @Test void queriesRunInReadOnlyUseCaseTransactions() {
         doAnswer(invocation -> {
@@ -26,19 +29,24 @@ class TransactionBoundaryIntegrationTest extends DatabaseIntegrationTest {
             assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isTrue();
             return invocation.callRealMethod();
         }).when(categories).findAll();
+
         assertThat(service.getAllCategories()).hasSize(2);
     }
 
     @Test void aFailureAfterFlushingStillRollsBackTheCompleteUseCase() {
         var category = service.getCategoryById(TestIds.CATEGORY_CHILD);
+
         String originalName = category.getName();
+
         category.setName("Changed name");
+
         doAnswer(invocation -> {
             assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
             assertThat(TransactionSynchronizationManager.isCurrentTransactionReadOnly()).isFalse();
             invocation.callRealMethod();
             throw new InvalidRequestException("Fail after the persistence adapter flushed");
         }).when(categories).update(any(Category.class));
+
         assertThatThrownBy(() -> service.updateCategoryById(category, category.getId()))
                 .isInstanceOf(InvalidRequestException.class);
         assertThat(service.getCategoryById(category.getId()).getName()).isEqualTo(originalName);

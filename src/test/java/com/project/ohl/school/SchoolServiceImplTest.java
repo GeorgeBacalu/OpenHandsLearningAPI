@@ -20,9 +20,9 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.project.ohl.TestIds.INVALID_ID;
+import static com.project.ohl.TestIds.VALID_ID;
 import static com.project.ohl.application.error.ExceptionMessageConstants.SCHOOL_NOT_FOUND;
-import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
-import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
 import static com.project.ohl.mock.SchoolMock.getMockedSchool1;
 import static com.project.ohl.mock.SchoolMock.getMockedSchool2;
 import static com.project.ohl.mock.SchoolMock.getMockedSchools;
@@ -45,7 +45,6 @@ class SchoolServiceImplTest {
     @Mock
     private SchoolRepositoryPort schoolRepository;
 
-
     @Captor
     private ArgumentCaptor<School> schoolCaptor;
 
@@ -63,20 +62,24 @@ class SchoolServiceImplTest {
         schools = getMockedSchools();
         schoolDto1 = mapper.convertToDto(school1);
         schoolDto2 = mapper.convertToDto(school2);
-        schoolDtos = schools.stream().map(school -> mapper.convertToDto(school)).toList();
+        schoolDtos = schools.stream().map(mapper::convertToDto).toList();
     }
 
     @Test
     void getAllSchools_shouldReturnListOfSchools() {
         given(schoolRepository.findAll()).willReturn(schools);
+
         List<SchoolDto> result = schoolService.getAllSchools();
+
         assertThat(result).isEqualTo(schoolDtos);
     }
 
     @Test
     void getSchoolById_withValidId_shouldReturnSchoolWithGivenId() {
         given(schoolRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(school1));
+
         SchoolDto result = schoolService.getSchoolById(VALID_ID);
+
         assertThat(result).isEqualTo(schoolDto1);
     }
 
@@ -90,8 +93,11 @@ class SchoolServiceImplTest {
     @Test
     void saveSchool_shouldAddSchoolToList() {
         given(schoolRepository.save(any(School.class))).willReturn(school1);
+
         SchoolDto result = schoolService.saveSchool(schoolDto1);
+
         verify(schoolRepository).save(schoolCaptor.capture());
+
         assertThat(result).isEqualTo(mapper.convertToDto(schoolCaptor.getValue()));
     }
 
@@ -116,7 +122,9 @@ class SchoolServiceImplTest {
     @Test
     void deleteSchoolById_withValidId_shouldRemoveSchoolWithGivenIdFromList() {
         given(schoolRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(school1));
+
         schoolService.deleteSchoolById(VALID_ID);
+
         verify(schoolRepository).delete(school1);
     }
 
@@ -125,6 +133,7 @@ class SchoolServiceImplTest {
         assertThatThrownBy(() -> schoolService.deleteSchoolById(INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(SCHOOL_NOT_FOUND, INVALID_ID));
+
         verify(schoolRepository, never()).delete(any(School.class));
     }
 }

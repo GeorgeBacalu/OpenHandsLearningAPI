@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,9 +28,9 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static com.project.ohl.TestIds.INVALID_ID;
+import static com.project.ohl.TestIds.VALID_ID;
 import static com.project.ohl.application.error.ExceptionMessageConstants.CATEGORY_NOT_FOUND;
-import static com.project.ohl.constants.IdentifierConstants.INVALID_ID;
-import static com.project.ohl.constants.IdentifierConstants.VALID_ID;
 import static com.project.ohl.mock.CategoryMock.getMockedCategories;
 import static com.project.ohl.mock.CategoryMock.getMockedCategoryOne;
 import static com.project.ohl.mock.CategoryMock.getMockedCategoryTwo;
@@ -99,24 +100,28 @@ class CategoryServiceImplTest {
         filteredFavoriteCategories = getMockedFavoriteCategoriesFilteredByName();
         categoryDtoOne = mapper.convertToDto(categoryOne);
         categoryDtoTwo = mapper.convertToDto(categoryTwo);
-        categoryDtos = mapper.convertToDtoList(List.of(
+        categoryDtos = Stream.of(
                 categories.get(3), categories.get(0), categories.get(4),
                 categories.get(2), categories.get(6), categories.get(1),
-                categories.get(8), categories.get(7), categories.get(5)));
-        parentCategoryDtos = mapper.convertToDtoList(List.of(parentCategories.get(0), parentCategories.get(2), parentCategories.get(1)));
-        filteredParentCategoryDtos = mapper.convertToDtoList(filteredParentCategories);
-        childrenCategoryDtosAlphabet = mapper.convertToDtoList(childrenCategoriesAlphabet);
-        filteredChildrenCategoryDtosAlphabet = mapper.convertToDtoList(filteredChildrenCategoriesAlphabet);
-        favoriteCategoryDtos = mapper.convertToDtoList(List.of(
+                categories.get(8), categories.get(7), categories.get(5)).map(mapper::convertToDto).toList();
+        parentCategoryDtos = Stream.of(parentCategories.get(0), parentCategories.get(2), parentCategories.get(1)).map(mapper::convertToDto).toList();
+        filteredParentCategoryDtos = filteredParentCategories.stream().map(mapper::convertToDto).toList();
+        childrenCategoryDtosAlphabet = childrenCategoriesAlphabet.stream().map(mapper::convertToDto).toList();
+        filteredChildrenCategoryDtosAlphabet = filteredChildrenCategoriesAlphabet.stream().map(mapper::convertToDto).toList();
+        favoriteCategoryDtos = Stream.of(
                 favoriteCategories.get(2), favoriteCategories.get(0), favoriteCategories.get(1),
-                favoriteCategories.get(3), favoriteCategories.get(4)));
-        filteredFavoriteCategoryDtos = mapper.convertToDtoList(List.of(filteredFavoriteCategories.get(1), filteredFavoriteCategories.get(0)));
+                favoriteCategories.get(3), favoriteCategories.get(4)).map(mapper::convertToDto).toList();
+        filteredFavoriteCategoryDtos = Stream.of(filteredFavoriteCategories.get(1), filteredFavoriteCategories.get(0)).map(mapper::convertToDto).toList();
+        favoriteCategoryDtos.forEach(category -> category.setIsFavorite(true));
+        filteredFavoriteCategoryDtos.forEach(category -> category.setIsFavorite(true));
     }
 
     @Test
     void getAllCategories_shouldReturnListOfCategories() {
         given(categoryRepository.findAll()).willReturn(categories);
+
         List<CategoryDto> result = categoryService.getAllCategories();
+
         assertThat(result).isEqualTo(categoryDtos);
     }
 
@@ -124,11 +129,16 @@ class CategoryServiceImplTest {
     void categoriesUseRomanianAlphabeticalOrderIndependentlyOfTheDefaultLocale() {
         List<String> names = List.of("Zebră", "Țară", "Tată", "Șarpe", "Sare",
                 "Înger", "Inel", "Ânger", "Ălbină", "Arici");
+
         var values = new ArrayList<Category>();
+
         for (int i = 0; i < names.size(); i++)
             values.add(Category.builder().id(new UUID(0, i + 1)).name(names.get(i)).build());
+
         given(categoryRepository.findAll()).willReturn(values);
+
         Locale original = Locale.getDefault();
+
         try {
             Locale.setDefault(Locale.forLanguageTag("tr-TR"));
             assertThat(categoryService.getAllCategories()).extracting(CategoryDto::getName)
@@ -143,7 +153,9 @@ class CategoryServiceImplTest {
     void equivalentNamesUseTheUuidForStableOrdering() {
         var first = Category.builder().id(new UUID(0, 1)).name("alfa").build();
         var second = Category.builder().id(new UUID(0, 2)).name("ALFA").build();
+
         given(categoryRepository.findAll()).willReturn(List.of(second, first));
+
         assertThat(categoryService.getAllCategories()).extracting(CategoryDto::getId)
                 .containsExactly(first.getId(), second.getId());
     }
@@ -151,7 +163,9 @@ class CategoryServiceImplTest {
     @Test
     void getCategoryById_withValidId_shouldReturnCategoryWithGivenId() {
         given(categoryRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(categoryOne));
+
         CategoryDto result = categoryService.getCategoryById(VALID_ID);
+
         assertThat(result).isEqualTo(categoryDtoOne);
     }
 
@@ -165,11 +179,15 @@ class CategoryServiceImplTest {
     @Test
     void updateCategoryById_withValidId_shouldUpdateCategoryWithGivenId() {
         Category category = categoryTwo; category.setId(VALID_ID);
+
         given(categoryRepository.findById(VALID_ID)).willReturn(Optional.of(category));
         given(categoryRepository.findById(categoryDtoTwo.getParentId())).willReturn(Optional.of(categoryTwo.getParent()));
         given(categoryRepository.update(any(Category.class))).willReturn(category);
+
         CategoryDto result = categoryService.updateCategoryById(categoryDtoTwo, VALID_ID);
+
         verify(categoryRepository).update(categoryCaptor.capture());
+
         assertThat(result).isEqualTo(mapper.convertToDto(categoryCaptor.getValue()));
     }
 
@@ -178,13 +196,16 @@ class CategoryServiceImplTest {
         assertThatThrownBy(() -> categoryService.updateCategoryById(categoryDtoTwo, INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(CATEGORY_NOT_FOUND, INVALID_ID));
+
         verify(categoryRepository, never()).update(any(Category.class));
     }
 
     @Test
     void deleteCategoryById_withValidId_shouldRemoveCategoryWithGivenIdFromList() {
         given(categoryRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(categoryOne));
+
         categoryService.deleteCategoryById(VALID_ID);
+
         verify(categoryRepository).delete(categoryOne);
     }
 
@@ -193,41 +214,52 @@ class CategoryServiceImplTest {
         assertThatThrownBy(() -> categoryService.deleteCategoryById(INVALID_ID))
               .isInstanceOf(ResourceNotFoundException.class)
               .hasMessage(String.format(CATEGORY_NOT_FOUND, INVALID_ID));
+
         verify(categoryRepository, never()).delete(any(Category.class));
     }
 
     @Test
     void getCategoriesByParentIdAndName_whenParentIdNullAndNameBlank_shouldReturnListOfParentCategories() {
         given(categoryRepository.findByParentIdNull()).willReturn(parentCategories);
+
         List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(null, "");
+
         assertThat(result).isEqualTo(parentCategoryDtos);
     }
 
     @Test
     void getCategoriesByParentIdAndName_whenParentIdNullAndNameNotBlank_shouldReturnListOfParentCategoriesFilteredByName() {
         given(categoryRepository.findByParentIdNullAndNameStartingWith(anyString())).willReturn(filteredParentCategories);
+
         List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(null, "a");
+
         assertThat(result).isEqualTo(filteredParentCategoryDtos);
     }
 
     @Test
     void getCategoriesByParentIdAndName_whenParentIdNotNullAndNameBlank_shouldReturnListOfChildrenCategories() {
         given(categoryRepository.findByParentId(any(UUID.class))).willReturn(childrenCategoriesAlphabet);
+
         List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(VALID_ID, "");
+
         assertThat(result).isEqualTo(childrenCategoryDtosAlphabet);
     }
 
     @Test
     void getCategoriesByParentIdAndName_whenParentIdNotNullAndNameNotBlank_shouldReturnListOfChildrenCategoriesFilteredByName() {
         given(categoryRepository.findByParentIdAndNameStartingWith(any(UUID.class), anyString())).willReturn(filteredChildrenCategoriesAlphabet);
+
         List<CategoryDto> result = categoryService.getCategoriesByParentIdAndName(VALID_ID, "a");
+
         assertThat(result).isEqualTo(filteredChildrenCategoryDtosAlphabet);
     }
 
     @Test
     void getFavoriteCategories_shouldReturnListOfFavorites() {
         given(favorites.findByUserAndName(any(UUID.class), ArgumentMatchers.eq(""))).willReturn(favoriteCategories);
+
         List<CategoryDto> result = categoryService.getFavoriteCategories(VALID_ID);
+
         assertThat(result).isEqualTo(favoriteCategoryDtos);
     }
 
@@ -241,25 +273,31 @@ class CategoryServiceImplTest {
     @Test
     void getFavoritesByName_whenNameIsNotBlank_shouldReturnListOfFavoritesFilteredByName() {
         given(favorites.findByUserAndName(any(UUID.class), anyString())).willReturn(filteredFavoriteCategories);
+
         List<CategoryDto> result = categoryService.getFavoritesByName(VALID_ID, "a");
+
         assertThat(result).isEqualTo(filteredFavoriteCategoryDtos);
     }
 
     @Test
     void saveFavorite_shouldAddFavoriteCategoryToList() {
-        Category category = categoryOne; category.setIsFavorite(true);
         given(categoryRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(categoryOne));
+
         CategoryDto result = categoryService.saveFavorite(VALID_ID, categoryOne.getId());
+
         verify(favorites).save(VALID_ID, categoryOne.getId());
+
         assertThat(result.getIsFavorite()).isTrue();
     }
 
     @Test
     void deleteFavorite_shouldAddFavoriteCategoryToList() {
-        Category category = categoryOne; category.setIsFavorite(false);
         given(categoryRepository.findById(any(UUID.class))).willReturn(Optional.ofNullable(categoryOne));
+
         CategoryDto result = categoryService.deleteFavorite(VALID_ID, categoryOne.getId());
+
         verify(favorites).delete(VALID_ID, categoryOne.getId());
+
         assertThat(result.getIsFavorite()).isFalse();
     }
 }

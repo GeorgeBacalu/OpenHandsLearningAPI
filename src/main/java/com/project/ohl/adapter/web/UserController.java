@@ -24,7 +24,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/users", produces = APPLICATION_JSON_VALUE)
 public class UserController {
-
     private final UserService userService;
 
     @GetMapping

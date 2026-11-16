@@ -4,28 +4,29 @@ import com.project.ohl.application.model.Account;
 import com.project.ohl.application.model.Registration;
 import com.project.ohl.application.port.in.AccountService;
 import com.project.ohl.application.port.out.PasswordHasher;
-import com.project.ohl.application.port.out.RoleRepositoryPort;
 import com.project.ohl.application.port.out.SchoolRepositoryPort;
 import com.project.ohl.application.port.out.UserRepositoryPort;
 import com.project.ohl.domain.exception.AccountConflictException;
 import com.project.ohl.domain.exception.AuthenticationFailedException;
 import com.project.ohl.domain.exception.InvalidRequestException;
-import com.project.ohl.domain.model.Authority;
+import com.project.ohl.domain.model.Role;
 import com.project.ohl.domain.model.User;
 import java.util.Locale;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-public final class AccountServiceImpl implements AccountService {
+@Service
+@Transactional(readOnly = true)
+public class AccountServiceImpl implements AccountService {
     private final UserRepositoryPort users;
-    private final RoleRepositoryPort roles;
     private final SchoolRepositoryPort schools;
     private final PasswordHasher passwords;
     private final String dummyHash;
 
-    public AccountServiceImpl(UserRepositoryPort users, RoleRepositoryPort roles,
+    public AccountServiceImpl(UserRepositoryPort users,
             SchoolRepositoryPort schools, PasswordHasher passwords) {
         this.users = users;
-        this.roles = roles;
         this.schools = schools;
         this.passwords = passwords;
         dummyHash = passwords.hash(UUID.randomUUID().toString());
@@ -40,16 +41,15 @@ public final class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public Account register(Registration registration) {
         String email = normalize(registration.email());
         if (users.findByEmail(email).isPresent()) throw new AccountConflictException();
-        var role = roles.findAll().stream().filter(value -> value.getAuthority() == Authority.USER)
-                .findFirst().orElseThrow(() -> new IllegalStateException("The USER role must be configured."));
         var school = schools.findById(registration.schoolId())
                 .orElseThrow(() -> new InvalidRequestException("Select an existing school."));
         var user = User.builder().name(registration.name().strip()).email(email)
                 .phone(registration.phone()).passwordHash(passwords.hash(registration.password()))
-                .school(school).role(role).build();
+                .school(school).role(Role.USER).build();
         return Account.from(users.save(user));
     }
 
@@ -59,6 +59,7 @@ public final class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public void updatePassword(UUID id, String currentPassword, String newPassword) {
         var user = verifiedUser(id, currentPassword);
         user.setPasswordHash(passwords.hash(newPassword));
@@ -66,6 +67,7 @@ public final class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @Transactional
     public void deleteAccount(UUID id, String currentPassword) {
         users.delete(verifiedUser(id, currentPassword));
     }

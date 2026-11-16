@@ -19,22 +19,27 @@ class SchoolDirectoryServiceTest {
 
     @Test void rejectsInvalidPaginationBeforeAccessingPersistence() {
         var parent = UUID.randomUUID();
+
         assertThatThrownBy(() -> service.cities(parent, "", -1, 50)).isInstanceOf(InvalidRequestException.class);
         assertThatThrownBy(() -> service.schools(parent, "", 0, 0)).isInstanceOf(InvalidRequestException.class);
         assertThatThrownBy(() -> service.schools(parent, "", 0, 201)).isInstanceOf(InvalidRequestException.class);
+
         verifyNoInteractions(directory);
     }
 
     @Test void rejectsIncompleteImportsBeforeWritingAnything() {
         assertThatThrownBy(() -> service.importDirectory(new SchoolDirectory(List.of(), List.of(), List.of())))
                 .isInstanceOf(IllegalArgumentException.class);
+
         verifyNoInteractions(directory);
     }
 
     @Test void searchesOnlyTheRequestedParentAndPage() {
         var parent = UUID.randomUUID();
+
         service.cities(parent, "Cluj", 20, 200);
         service.schools(parent, "School", 0, 1);
+
         verify(directory).cities(parent, "Cluj", 20, 200);
         verify(directory).schools(parent, "School", 0, 1);
     }

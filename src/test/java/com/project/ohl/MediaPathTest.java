@@ -15,12 +15,19 @@ class MediaPathTest {
     void environmentIsConfigurationAndCannotBeOverriddenByAnObjectPath() {
         var storage = mock(MediaStoragePort.class);
         var media = new MediaServiceImpl(storage, "prod");
-        media.download("images", "categories/obiecte/magazin/produse/ardei.webp");
-        media.download("videos", "categories/alfabet/a_breve.mp4");
-        media.download("images", "voice/voice_a_breve.webp");
-        verify(storage).download("prod/categories/obiecte/magazin/produse/ardei.webp");
-        verify(storage).download("prod/categories/alfabet/a_breve.mp4");
-        verify(storage).download("prod/voice/voice_a_breve.webp");
+
+        media.download("images", "categories/obiecte/magazin/produse/ardei/main.webp");
+        media.download("videos", "categories/alfabet/a_breve/main.mp4");
+        media.download("images", "voice/a_breve.webp");
+        media.download("images", "categories/main.webp");
+        media.download("images", "categories/header.webp");
+
+        verify(storage).download("prod/categories/obiecte/magazin/produse/ardei/main.webp");
+        verify(storage).download("prod/categories/alfabet/a_breve/main.mp4");
+        verify(storage).download("prod/voice/a_breve.webp");
+        verify(storage).download("prod/categories/main.webp");
+        verify(storage).download("prod/categories/header.webp");
+
         assertThatThrownBy(() -> new MediaServiceImpl(storage, "staging"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
@@ -29,8 +36,9 @@ class MediaPathTest {
     void rejectsTraversalWrongExtensionsAndForeignEnvironmentPrefixes() {
         var storage = mock(MediaStoragePort.class);
         var media = new MediaServiceImpl(storage, "dev");
-        for (String key : new String[]{"categories/../a.webp", "prod/categories/alfabet/a.webp",
-                "categories/alfabet/a.png", "categories/alfabet/a.webp/", "voice/a.mp4", "categories//a.webp"}) {
+
+        for (String key : new String[]{"categories/../a.webp", "prod/categories/alfabet/a/main.webp",
+                "categories/alfabet/a.png", "categories/alfabet/a/main.webp/", "voice/a.mp4", "categories//a.webp"}) {
             assertThatThrownBy(() -> media.download("images", key)).isInstanceOf(InvalidRequestException.class);
         }
         verifyNoInteractions(storage);

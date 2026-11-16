@@ -14,11 +14,17 @@ import lombok.ToString;
 public class User {
 
     private UUID id;
+
     private String name;
+
     private String email;
+
     @ToString.Exclude
     private String passwordHash;
+
     private String phone;
+
     private School school;
+
     private Role role;
 }
