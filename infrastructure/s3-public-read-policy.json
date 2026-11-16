@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadApplicationMedia",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": [
+        "arn:aws:s3:::open-hands-learning/dev/voice/*",
+        "arn:aws:s3:::open-hands-learning/dev/categories/*",
+        "arn:aws:s3:::open-hands-learning/prod/voice/*",
+        "arn:aws:s3:::open-hands-learning/prod/categories/*"
+      ]
+    }
+  ]
+}

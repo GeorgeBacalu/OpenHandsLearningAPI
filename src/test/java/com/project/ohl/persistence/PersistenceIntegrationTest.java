@@ -84,7 +84,7 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
               .passwordHash("$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy").phone("0712345678")
               .school(school).role(role).build());
         var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
-        var child = categories.save(Category.builder().name("C").parent(parent).build());
+        var child = categories.save(Category.builder().imageUrl("https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/test_image.webp").name("C").parent(parent).build());
 
         assertThat(List.of(school.getId(), role.getId(), user.getId(),
                 child.getId()))
@@ -136,9 +136,9 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
     void prefixSearchTreatsSqlWildcardsLiterallyAtEveryLevelAndInFavorites() {
         var parent = categories.findById(CATEGORY_PARENT).orElseThrow();
         for (String prefix : List.of("%", "_", "\\")) {
-            var root = categories.save(Category.builder().name(prefix + "Root").build());
-            var child = categories.save(Category.builder().name(prefix + "Child").parent(parent).build());
-            var substring = categories.save(Category.builder().name("X" + prefix + "Child").parent(parent).build());
+            var root = categories.save(Category.builder().imageUrl("https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/test_image.webp").name(prefix + "Root").build());
+            var child = categories.save(Category.builder().imageUrl("https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/test_image.webp").name(prefix + "Child").parent(parent).build());
+            var substring = categories.save(Category.builder().imageUrl("https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/test_image.webp").name("X" + prefix + "Child").parent(parent).build());
             categoryService.saveFavorite(com.project.ohl.TestIds.USER_ANA, root.getId());
             categoryService.saveFavorite(com.project.ohl.TestIds.USER_ANA, child.getId());
             categoryService.saveFavorite(com.project.ohl.TestIds.USER_ANA, substring.getId());
@@ -154,7 +154,7 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
 
     @Test
     void databaseRejectsDanglingForeignKeys() {
-        var invalid = Category.builder().name("Invalid")
+        var invalid = Category.builder().imageUrl("https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/test_image.webp").name("Invalid")
               .parent(Category.builder().id(id(999999)).build()).build();
 
         assertThatThrownBy(() -> categories.save(invalid)).isInstanceOf(DataIntegrityViolationException.class);

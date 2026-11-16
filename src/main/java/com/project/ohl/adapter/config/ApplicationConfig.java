@@ -8,6 +8,9 @@ import com.project.ohl.application.port.in.CategoryService;
 import com.project.ohl.application.port.in.SchoolService;
 import com.project.ohl.application.port.in.RoleService;
 import com.project.ohl.application.port.in.SectionService;
+import com.project.ohl.application.port.in.MediaService;
+import com.project.ohl.application.port.out.MediaStoragePort;
+import com.project.ohl.application.service.MediaServiceImpl;
 import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.application.port.out.CategoryRepositoryPort;
 import com.project.ohl.application.port.out.FavoriteRepositoryPort;
@@ -31,6 +34,12 @@ import org.springframework.transaction.interceptor.TransactionProxyFactoryBean;
 
 @Configuration(proxyBeanMethods = false)
 public class ApplicationConfig {
+    @Bean
+    public MediaService mediaService(MediaStoragePort storage,
+            @org.springframework.beans.factory.annotation.Value("${app.storage.s3.environment:dev}") String environment) {
+        return new MediaServiceImpl(storage, environment);
+    }
+
     private final PlatformTransactionManager transactions;
 
     public ApplicationConfig(PlatformTransactionManager transactions) {
@@ -38,8 +47,8 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public SectionService sectionService() {
-        return new SectionServiceImpl();
+    public SectionService sectionService(MediaService media) {
+        return new SectionServiceImpl(media);
     }
 
     @Bean

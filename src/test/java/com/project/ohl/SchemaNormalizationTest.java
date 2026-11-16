@@ -29,16 +29,16 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
 
     @Test void expressionsCanBecomeChildrenWithoutChangingTheirIdentityOrFavorites() {
         UUID parentId = UUID.randomUUID();
-        database.update("INSERT INTO categories (id, name, parent_id, media_key) VALUES (?, ?, NULL, ?)",
-                parentId, "Expresii", "expressions_section");
+        database.update("INSERT INTO categories (id, name, parent_id, image_url) VALUES (?, ?, NULL, ?)",
+                parentId, "Expresii", "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/expressions_section.webp");
         var parent = categories.getCategoryById(parentId);
         var child = categories.getCategoryById(CATEGORY_CHILD);
-        String mediaKey = child.getMediaKey();
+        String imageUrl = child.getImageUrl();
         child.setParentId(parent.getId());
         var moved = categories.updateCategoryById(child, child.getId());
 
         assertThat(moved.getId()).isEqualTo(CATEGORY_CHILD);
-        assertThat(moved.getMediaKey()).isEqualTo(mediaKey);
+        assertThat(moved.getImageUrl()).isEqualTo(imageUrl);
         assertThat(categories.getCategoriesByParentIdAndName(null, ""))
                 .extracting(CategoryDto::getName).containsExactly("Alphabet", "Expresii");
         assertThat(categories.getCategoriesByParentIdAndName(parent.getId(), ""))
@@ -67,19 +67,19 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
         assertThat(categories.getCategoryById(CATEGORY_PARENT, dan).getIsFavorite()).isTrue();
     }
 
-    @Test void renamingCategoriesPreservesTheirUuidChildrenAndMediaKeys() {
+    @Test void renamingCategoriesPreservesTheirUuidChildrenAndImageUrls() {
         var parent = categories.getCategoryById(CATEGORY_PARENT);
-        parent.setName("Translated alphabet"); parent.setMediaKey(null);
+        parent.setName("Translated alphabet"); parent.setImageUrl(null);
         var changed = categories.updateCategoryById(parent, parent.getId());
         assertThat(changed.getId()).isEqualTo(CATEGORY_PARENT);
-        assertThat(changed.getMediaKey()).isEqualTo("alfabet");
+        assertThat(changed.getImageUrl()).isEqualTo("https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/alfabet.webp");
         assertThat(categories.getCategoriesByParentIdAndName(CATEGORY_PARENT, ""))
                 .extracting(value -> value.getId()).containsExactly(CATEGORY_CHILD);
     }
 
     @Test void categoriesHaveNoSectionReferenceAndRejectCycles() {
         var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'categories'", String.class);
-        assertThat(columns).containsExactlyInAnyOrder("id", "name", "parent_id", "media_key");
+        assertThat(columns).containsExactlyInAnyOrder("id", "name", "parent_id", "image_url", "video_url");
         var parent = categories.getCategoryById(CATEGORY_PARENT);
         parent.setParentId(CATEGORY_CHILD);
         assertThatThrownBy(() -> categories.updateCategoryById(parent, parent.getId())).isInstanceOf(InvalidRequestException.class);

@@ -42,13 +42,14 @@ validation, and timezone settings. Hibernate validates the existing development
 schema; startup does not create tables or seed data. No dev profile is required.
 
 All entity IDs and foreign keys use UUIDs. New records receive random UUIDs;
-Persisted entity IDs are UUID strings. The read-only section menu uses fixed type identifiers. Catalog images and icons use stable media keys; Android resource IDs remain local to the client.
+Persisted entity IDs are UUID strings. The read-only section menu uses fixed type identifiers. Categories store public S3 image URLs in `image_url`; category and section responses use `imageUrl`. The logo remains local to Android.
 
 ## Database migrations
 
 Flyway is explicitly disabled in `application.properties`; Hibernate only validates
-schema on startup. Development is baselined at V1 and has V2 through V16 applied; its existing
-records and memberships were verified after migration. The immutable V1 captures
+schema on startup. Existing development databases may use the original numbering
+through V16; this branch consolidates and renumbers that history as described below.
+The immutable V1 captures
 the previous UUID schema. V2 adds:
 
 - Per-user favorites; existing shared favorites are copied to each existing user.
@@ -62,7 +63,7 @@ content. Space characters remain valid sign entries. New empty databases contain
 no application records after V1 through V7. Back up and rehearse upgrades on a copy
 before deploying these branches. Existing duplicate account emails must be resolved explicitly; migration failures
 roll back V2.
-Migrate the database through V16 before running this backend.
+Migrate the database through V15 before running this backend. See the S3 migration notes below for the consolidated migration history.
 
 V3 corrects Romanian media-key transliteration, removes the obsolete duplicate
 `Ă` sign, and replaces resource integers with media keys throughout the catalog.
@@ -77,17 +78,17 @@ root categories. Shared media keys remain allowed.
 V4 removes the row revision counters from all nine entity tables. Applied
 migration files remain unchanged so Flyway can validate existing installations.
 
-V5 removes category display_order. V13 defines section ordering by UUID in application
+V5 removes category display_order. V11 defines section ordering by UUID in application
 code. Category lists, including favorites and filtered searches, use Java Stream sorting with Romanian alphabetical collation, ignoring case and using UUID
 as a stable tie-breaker. /api/categories/filter returns only root categories
 when no parent is supplied, or only the selected parent's direct children. Both
 levels are alphabetically ordered. The obsolete category ordering index and
 constraint are removed with the column; the sibling-name index supports parent
-filtering after V14.
+filtering after V12.
 
 V6 removes category codes. Category navigation and direct-child filters use UUIDs;
-the category filter accepts optional parentId and name; V14 removes sectionId.
-Renaming a parent leaves its UUID, children, and media keys unchanged. V13 also
+the category filter accepts optional parentId and name; V12 removes sectionId.
+Renaming a parent leaves its UUID, children, and media keys unchanged. V11 also
 removes section codes; Android selects main section screens by UUID.
 
 V7 removes the letter-sign table and its CRUD API. The fixed alphabet mappings
@@ -141,11 +142,11 @@ V11 keeps user ID, name, email, phone, password, role and school only. It rename
 The profile API uses `phone`; responses continue to exclude password hashes.
 Existing user UUIDs, credentials, roles and school memberships are preserved.
 
-V12 renames `user_favorites` to `favorites` and drops `created_at`. Each row is
+V11 renames `user_favorites` to `favorites` and drops `created_at`. Each row is
 only a user/category UUID pair. Existing pairs, composite uniqueness and cascading
 foreign keys are preserved; favorite lists continue to use alphabetical category order.
 
-V13 removes section `display_order` and `code`. V15 replaces UUID-based section
+V11 removes section `display_order` and `code`. V13 replaces UUID-based section
 ordering with the fixed declaration order of the API's Section enum.
 
 The retired Text to Sign section was deleted directly as a catalog record change,
@@ -153,7 +154,7 @@ without a schema migration. It had no linked categories in development. Remainin
 retained section IDs and all other records are preserved. Voice to Sign retains both typed
 input and speech recognition unchanged.
 
-V14 removes `categories.section_id` and replaces the composite parent foreign key
+V12 removes `categories.section_id` and replaces the composite parent foreign key
 with a parent-only foreign key. Sibling-name uniqueness covers the entire catalog,
 including roots; the database trigger still prevents hierarchy cycles. Categories
 use UUID, name, parent UUID and media key only. `/api/categories/filter` returns
@@ -169,7 +170,7 @@ Category/subcategory creation has been removed from Android and the API. The
 authenticated administrator. Existing catalog reads, updates, deletion and favorites
 remain available. This change does not modify existing database records.
 
-Catalog record maintenance is separate from V14. On an existing V13 database,
+Catalog record maintenance is separate from V12. On an existing V11 database,
 back up and regroup expressions before applying the schema migration:
 
 ```sql
@@ -185,9 +186,9 @@ DELETE FROM sections WHERE id = '1deb5200-b06d-3977-9426-e2ea373195f9';
 COMMIT;
 ```
 
-V15 drops the unreferenced `sections` table. `GET /api/sections` remains a read-only,
+V13 drops the unreferenced `sections` table. `GET /api/sections` remains a read-only,
 database-independent menu in fixed order: VIDEO, then VOICE_TO_SIGN. Each response
-entry has type, name, mediaKey and iconKey; section UUIDs and section mutation/detail
+entry has type, name, imageUrl and iconKey; section UUIDs and section mutation/detail
 endpoints are removed. Menu definitions and ordering can only change in API code.
 All remaining application records are preserved. Applied migration files remain immutable.
 Section display names are Romanian: „Secțiune video” and „Secțiune voce-semn”. Enum
@@ -235,11 +236,10 @@ Stored credentials
 use `passwordHash` in Java and `users.password_hash` in PostgreSQL. Request-only
 `password` fields accept raw passwords; response mappings never copy stored hashes.
 
-V16 renames the column and migrates legacy plaintext credentials to BCrypt (`$2b$`,
-cost 12), preserving existing BCrypt hashes, user UUIDs, profiles, roles, schools,
-and favorites. Invalid BCrypt values and legacy passwords over 72 UTF-8 bytes
-abort the migration instead of being truncated. Apply V16 before starting this
-backend; migrations and directory imports remain disabled during normal startup.
+V11 renames the password column to `password_hash` without changing credential
+values. There is no password-hashing migration; existing accounts must already
+store supported hashes. Registration and password changes hash passwords in the
+application. Migrations and directory imports remain disabled during normal startup.
 
 ## Authentication
 
@@ -326,3 +326,141 @@ ignored and are not part of the repository.
 `PUT /api/auth/password` accepts `currentPassword` and `newPassword`, verifies the current password, hashes the new password, and revokes the active token. Authenticate again after success.
 `DELETE /api/auth/me` accepts `currentPassword` and permanently removes the authenticated account and its favorites. Other accounts are unaffected; tokens for the deleted account can no longer authenticate.
 Both mutations require a bearer token, return 204 on success, reject an incorrect current password with 400, and throttle repeated attempts. User IDs in request bodies never select the target account.
+
+## AWS S3 media
+
+The backend uses AWS SDK for Java v2. The default bucket is `open-hands-learning`
+and the AWS region code for US East (N. Virginia) is `us-east-1`.
+Set `AWS_ACCESS_KEY` and `AWS_SECRET_ACCESS` in the process running the API.
+The checked-in configuration requires those two variables. The adapter also accepts
+the standard `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` names when the explicit
+credential properties are supplied through external Spring configuration. Empty
+credential properties select the AWS default credential chain for workload IAM roles.
+Credentials are read from the environment and are never included in responses.
+Restart the terminal or IDE after changing Windows user environment variables.
+
+The `app.storage.s3.bucket` and `app.storage.s3.region` Spring properties control
+uploads and newly resolved URLs. Stored URLs are permanent absolute URLs: changing
+the configuration does not rewrite database records or move objects between buckets.
+
+Application artwork and clips use permanent public HTTPS URLs, without signing
+or expiration. Logos remain bundled and unchanged. Set `MEDIA_ENVIRONMENT=dev`
+(the default) or `prod`; application uploads are confined to that environment.
+
+```
+open-hands-learning/
+  dev/
+    voice/voice_a.webp
+    categories/alfabet/alfabet.webp
+    categories/alfabet/a.webp
+    categories/alfabet/a.mp4
+    categories/animale/animale_domestice/caine.webp
+    categories/animale/animale_domestice/caine.mp4
+    categories/obiecte/magazin/produse/ardei.webp
+    categories/obiecte/magazin/produse/ardei.mp4
+    categories/application/video_section.webp
+  prod/
+    voice/...
+    categories/...
+```
+
+Folders follow the Romanian category names, normalized to lowercase ASCII and
+underscores, with every ancestor retained. A category containing children has its
+own folder; leaf files sit inside their parent's folder. Existing media filenames
+remain stable, including separate A/Ă/Â/Î/Ș/Ț assets. `categories/application/`
+holds noncatalog illustrations, icons and the splash clip. Voice illustrations and
+voice-section artwork are under `voice/`.
+
+Merge `infrastructure/s3-public-read-policy.json` into the bucket policy to permit
+anonymous `s3:GetObject` only on the four application prefixes. Public policy
+reads require `BlockPublicPolicy=false` and `RestrictPublicBuckets=false` at
+applicable bucket/account levels. Keep ACL blocking enabled and Object Ownership
+at Bucket owner enforced. The application never sends ACLs. The scoped uploader
+identity policy is `infrastructure/s3-media-uploader-policy.json`; routine API use
+needs object access only, while migration auditing also lists the bucket to check its structure.
+
+The media API accepts `type=images|videos` and the query parameter `mediaKey`, a
+relative object path such as `categories/alfabet/a.webp` or `voice/voice_a.webp`.
+The configured environment is prepended. Paths reject traversal, other extensions,
+wrong MIME types and cross-environment writes.
+
+| Operation | Access | Result |
+| --- | --- | --- |
+| `GET /api/media/{type}?mediaKey=...` | Public | JSON `key` and permanent `url`; no existence check |
+| `PUT /api/media/{type}?mediaKey=...` | Administrator bearer token | Upload/replace multipart part `file`; 204 |
+| `DELETE /api/media/{type}?mediaKey=...` | Administrator bearer token | Idempotent delete; 204 |
+
+Images must already be WebP (`image/webp`), and videos MP4 (`video/mp4`). The API
+does not recompress uploads. The default multipart size limit is 100 MB; oversized
+files return 413 and storage failures return a generic 503 Problem Detail.
+Category responses include `imageUrl` and nullable `videoUrl`. Omitted URLs retain
+their current values on category updates. Uploads do not automatically associate
+media with categories.
+
+### Compressing and migrating the existing catalog
+
+`infrastructure/migrate_media.py` prepares and audits the media; its public
+manifest records object paths, source files, byte sizes and SHA-256 hashes.
+Install the pinned `infrastructure/media-requirements.txt` in a local environment.
+Keep generated output, credentials and database backups outside Git.
+
+1. Take a full development `pg_dump` backup and export categories to JSON
+   (`SELECT json_agg(c) FROM (SELECT * FROM categories ORDER BY id) c`).
+2. Run `prepare` with `--android`, `--snapshot`, `--output`, and `--manifest` paths.
+   WebP uses maximum encoder effort (`method=6`): PNG artwork is lossless
+   with exact RGBA pixel verification; JPEG photos start at quality 90, raising
+   quality automatically until full-resolution RGB PSNR reaches 38 dB, with a
+   lossless fallback if necessary. Dimensions and transparency are preserved. MP4 uses H.264
+   `veryslow`, CRF 18, yuv420p, original audio and faststart. Already smaller
+   clips retain their original video/audio streams with faststart remuxing.
+   Dimensions and frame rate are retained; every output clip is fully decoded.
+3. Run `audit` to preserve embedded ICC profiles, verify original video frame
+   counts and durations, and require SSIM >= 0.98 against each original clip. Run `upload`
+   for both `--environments dev prod`, then `verify`. Verification
+   uses unsigned full GETs, correct Content-Type, byte count, complete SHA-256
+   hashes, and 206 Range responses for every video.
+4. Apply V15 with Flyway explicitly enabled. This additive migration preserves
+   legacy image URLs during the transition, adds nullable `video_url`, and creates
+   `media_assets` for all public asset URLs, including voice and section artwork.
+5. Run `database` to verify public dev objects again, then update category URLs
+   and the dev asset inventory in one transaction. The script checks that category
+   UUIDs, names, hierarchy and favorites remain unchanged. Production DBs are
+   not touched. `media_assets` exposes `object_key`, `public_url`, `content_type`,
+   `byte_size`, and `sha256` for inspection in the development database.
+6. Use the current S3-only Android build. It retains local logos and native UI
+   vectors, and loads artwork and videos from S3 with the same layouts. Do not
+   run `install` for this build: that legacy action restores bundled fallbacks
+   for older Android revisions. Glide retains its normal downloaded-image cache.
+
+Re-run `verify` after deployment. Legacy extensionless objects can be removed only
+after all consumers have migrated and replacement URLs have passed verification.
+
+### Consolidated migrations and image URLs
+
+The old V11–V13 are combined in V11, which also renames `password` to
+`password_hash` without changing values. The former V14/V15 are now V12/V13;
+the standalone password-hashing migration is removed. New V14 renames `categories.media_key` to
+`image_url`, widens it to 2048 characters, and replaces each existing key with
+`https://open-hands-learning.s3.us-east-1.amazonaws.com/images/{old-key}`.
+UUIDs, names, hierarchy, and favorites are preserved. V14 does not upload files:
+the matching image objects must exist in S3. Historical section and letter-sign
+tables were already removed; categories are the only remaining `media_key` column.
+
+This intentionally changes the API from `mediaKey` to `imageUrl` for categories
+and section artwork. Android consumers must read `imageUrl` to load remote images;
+the Android companion branch reads those URLs and preserves the original
+bundled resource identities as fallbacks. Keep logos local. V15 and the explicit
+media maintenance above replace the transitional V14 URLs with hierarchical
+`.webp`/`.mp4` URLs without editing the already applied V14 migration.
+
+All migrations are SQL files in `src/main/resources/db/migration`.
+For a fresh database, apply V1–V15 normally. For an existing installation that
+already applied all original versions through V16, back up the database and
+reconcile Flyway's history with `infrastructure/reconcile-migration-history.sql`
+before applying the new V14 followed by V15. The script checks the expected old history and schema,
+backs up the old history table, removes the absorbed and retired rows, and remaps the
+remaining versions and checksums. Do not run Flyway repair blindly before this
+step: the reused version numbers would otherwise identify different migrations.
+Databases stopped partway through the former V11–V16 must finish that original
+sequence before reconciliation. Hibernate validation and automatic Flyway migration
+remain configured as before; no live database changes happen on normal startup.

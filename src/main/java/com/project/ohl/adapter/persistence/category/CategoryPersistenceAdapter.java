@@ -32,7 +32,7 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
     @Override
     public Category toDomain(CategoryEntity entity) {
         return Category.builder().id(entity.getId())
-              .name(entity.getName()).mediaKey(entity.getMediaKey())
+              .name(entity.getName()).imageUrl(entity.getImageUrl()).videoUrl(entity.getVideoUrl())
 
               .isExpanded(false)
               .isFavorite(false)
@@ -43,7 +43,8 @@ public class CategoryPersistenceAdapter extends JpaPersistenceAdapter<Category, 
     @Override
     protected void apply(Category model, CategoryEntity entity) {
         entity.setName(model.getName());
-        entity.setMediaKey(CatalogMetadata.mediaKey(model.getMediaKey(), entity.getMediaKey(), model.getName()));
+        entity.setImageUrl(CatalogMetadata.imageUrl(model.getImageUrl(), entity.getImageUrl()));
+        entity.setVideoUrl(CatalogMetadata.videoUrl(model.getVideoUrl(), entity.getVideoUrl()));
 
         entity.setParent(reference(CategoryEntity.class, model.getParent() == null ? null : model.getParent().getId()));
     }

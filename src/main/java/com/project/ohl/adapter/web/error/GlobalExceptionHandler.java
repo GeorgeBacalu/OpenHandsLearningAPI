@@ -4,6 +4,7 @@ import com.project.ohl.domain.exception.InvalidRequestException;
 import com.project.ohl.domain.exception.ResourceNotFoundException;
 import com.project.ohl.domain.exception.AccountConflictException;
 import com.project.ohl.domain.exception.AuthenticationFailedException;
+import com.project.ohl.domain.exception.MediaStorageException;
 import org.springframework.security.core.AuthenticationException;
 import java.util.LinkedHashMap;
 import org.springframework.dao.DataAccessException;
@@ -21,6 +22,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(MediaStorageException.class)
+    ProblemDetail storageFailure(MediaStorageException exception) {
+        logger.error("Media storage operation failed", exception);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, exception.getMessage());
+    }
 
     @ExceptionHandler({AuthenticationException.class, AuthenticationFailedException.class})
     ProblemDetail unauthorized(Exception exception) {

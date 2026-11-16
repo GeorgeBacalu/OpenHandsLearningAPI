@@ -1,0 +1,69 @@
+{
+  "verified_on": "2026-11-16",
+  "timezone": "Europe/Bucharest",
+  "bucket": "open-hands-learning",
+  "media": {
+    "images": 251,
+    "videos": 184,
+    "original_bytes": 202014190,
+    "compressed_bytes": 142151782,
+    "logos_unchanged": true,
+    "icc_profiles_preserved": 31,
+    "minimum_video_ssim": 0.998031,
+    "all_video_frames_and_durations_preserved": true,
+    "size_reduction_percent": 29.63
+  },
+  "s3": {
+    "dev_objects": 435,
+    "prod_objects": 435,
+    "all_870_public_full_get_sha256_mime_checks_passed": true,
+    "all_368_video_range_requests_returned_206": true,
+    "known_legacy_images_and_videos_prefixes_empty": true,
+    "no_missing_extra_or_wrong_size_objects_in_dev_prod": true,
+    "root_listing": "IAM denies root listing; dev/, prod/, images/ and videos/ audited separately"
+  },
+  "development_database": {
+    "categories": 207,
+    "image_urls": 207,
+    "video_urls": 184,
+    "asset_inventory_rows": 435,
+    "all_stored_urls_read_back_and_publicly_verified": true,
+    "category_identity_names_hierarchy_users_favorites_preserved": true,
+    "migration": "V15__add_hierarchical_media_urls.sql"
+  },
+  "validation": {
+    "backend_full_suite": {
+      "tests": 139,
+      "failures": 0,
+      "errors": 0
+    },
+    "backend_final_focused_suite": {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0
+    },
+    "android_unit_tests": {
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "android_debug_and_release_builds": "passed",
+    "android_lint": "passed",
+    "device_media_and_layout_tests": {
+      "tests": 14,
+      "failures": 0
+    },
+    "device_direct_public_s3_tests": {
+      "tests": 2,
+      "failures": 0
+    },
+    "live_development_api": {
+      "categories": 207,
+      "videoUrls": 184,
+      "sections": 2,
+      "temporaryAccountRemoved": true,
+      "existingUsersAndFavoritesPreserved": true
+    }
+  }
+}

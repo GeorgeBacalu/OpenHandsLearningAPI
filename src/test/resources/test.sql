@@ -12,9 +12,9 @@ INSERT INTO roles (id, authority) VALUES
     ('99d0dd27-ea57-42b3-8fd8-64e3973a05d3', 'USER'),
     ('4c517662-ab55-47ea-b758-84c1af759525', 'ADMIN');
 
-INSERT INTO categories (id, name, parent_id, media_key) VALUES
-    ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 'Alphabet', NULL, 'alfabet'),
-    ('f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185', 'Letter A', '176ccfb5-fe9b-484c-a799-310eb72a02a5', 'a');
+INSERT INTO categories (id, name, parent_id, image_url) VALUES
+    ('176ccfb5-fe9b-484c-a799-310eb72a02a5', 'Alphabet', NULL, 'https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/alfabet.webp'),
+    ('f7198e8f-3cd4-4fe5-bc7e-8f0a39fcf185', 'Letter A', '176ccfb5-fe9b-484c-a799-310eb72a02a5', 'https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/a.webp');
 
 INSERT INTO users (id, name, email, password_hash, phone, school_id, role_id) VALUES
     ('4b16f89f-f513-4723-9d19-5750cf7199d6', 'Ana', 'ana@example.test', '$2b$12$Ha1CrwAOpG1UtXg6qdsCrOdDxxK8.gonT5w45mG1NBNqgudz9FYUy', '0712345678', 'e882d373-7f2f-44b2-8c87-530cd04964d4', '99d0dd27-ea57-42b3-8fd8-64e3973a05d3'),

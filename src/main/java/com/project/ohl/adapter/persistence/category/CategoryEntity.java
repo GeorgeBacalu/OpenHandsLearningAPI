@@ -22,8 +22,10 @@ import lombok.Setter;
 public class CategoryEntity extends PersistentEntity {
     @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "media_key", nullable = false)
-    private String mediaKey;
+    @Column(name = "image_url", nullable = false, length = 2048)
+    private String imageUrl;
+    @Column(name = "video_url", length = 2048)
+    private String videoUrl;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private CategoryEntity parent;
