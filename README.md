@@ -319,3 +319,10 @@ Release references: [Spring Boot](https://docs.spring.io/spring-boot/),
 
 IDE configuration, including `.idea` directories, and generated build output are
 ignored and are not part of the repository.
+
+## Account profile
+
+`GET /api/auth/me` includes `schoolName`, `cityName`, and `countyName` alongside the account details.
+`PUT /api/auth/password` accepts `currentPassword` and `newPassword`, verifies the current password, hashes the new password, and revokes the active token. Authenticate again after success.
+`DELETE /api/auth/me` accepts `currentPassword` and permanently removes the authenticated account and its favorites. Other accounts are unaffected; tokens for the deleted account can no longer authenticate.
+Both mutations require a bearer token, return 204 on success, reject an incorrect current password with 400, and throttle repeated attempts. User IDs in request bodies never select the target account.

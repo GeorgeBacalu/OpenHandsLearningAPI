@@ -1551,6 +1551,42 @@
             "bearerAuth": []
           }
         ]
+      },
+      "delete": {
+        "operationId": "deleteOwnAccount",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Permanently delete the authenticated account and its favorites",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountDeletion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success; authenticate again to continue."
+          },
+          "400": {
+            "description": "Invalid fields or incorrect current password."
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "429": {
+            "description": "Too many attempts."
+          }
+        }
       }
     },
     "/api/auth/logout": {
@@ -1572,6 +1608,44 @@
             "bearerAuth": []
           }
         ]
+      }
+    },
+    "/api/auth/password": {
+      "put": {
+        "operationId": "changePassword",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Change the authenticated account password and revoke the current token",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordChange"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success; authenticate again to continue."
+          },
+          "400": {
+            "description": "Invalid fields or incorrect current password."
+          },
+          "401": {
+            "description": "Authentication required."
+          },
+          "429": {
+            "description": "Too many attempts."
+          }
+        }
       }
     }
   },
@@ -1944,6 +2018,24 @@
               "USER",
               "ADMIN"
             ]
+          },
+          "schoolName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "cityName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "countyName": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -1969,6 +2061,41 @@
           },
           "user": {
             "$ref": "#/components/schemas/Account"
+          }
+        }
+      },
+      "PasswordChange": {
+        "type": "object",
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "format": "password",
+            "writeOnly": true,
+            "minLength": 1
+          },
+          "newPassword": {
+            "type": "string",
+            "format": "password",
+            "writeOnly": true,
+            "minLength": 1
+          }
+        }
+      },
+      "AccountDeletion": {
+        "type": "object",
+        "required": [
+          "currentPassword"
+        ],
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "format": "password",
+            "writeOnly": true,
+            "minLength": 1
           }
         }
       }

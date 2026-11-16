@@ -164,6 +164,57 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
         assertThat(login("throttle@example.test", "incorrect-password").statusCode()).isEqualTo(429);
     }
 
+    @Test
+    void profileIncludesTheAuthenticatedUsersSchoolCityAndCounty() throws Exception {
+        assertThat(login("ana@example.test", PASSWORD).statusCode()).isEqualTo(200);
+        var profile = json.readTree(send("GET", "/api/auth/me", null).body());
+        assertThat(profile.path("name").asString()).isEqualTo("Ana");
+        assertThat(profile.path("phone").asString()).isEqualTo("0712345678");
+        assertThat(profile.path("schoolName").asString()).isEqualTo("School A");
+        assertThat(profile.path("cityName").asString()).isEqualTo("Bucuresti");
+        assertThat(profile.path("countyName").asString()).isEqualTo("Bucuresti");
+        assertThat(profile.has("password") || profile.has("passwordHash")).isFalse();
+    }
+
+    @Test
+    void passwordChangeRequiresTheCurrentPasswordAndRevokesTheActiveSession() throws Exception {
+        assertThat(send("PUT", "/api/auth/password", "{}").statusCode()).isEqualTo(401);
+        assertThat(login("ana@example.test", PASSWORD).statusCode()).isEqualTo(200);
+        var change = json.createObjectNode().put("currentPassword", "wrong").put("newPassword", "parolă-nouă");
+        assertThat(send("PUT", "/api/auth/password", json.writeValueAsString(change)).statusCode()).isEqualTo(400);
+        assertThat(send("GET", "/api/auth/me", null).statusCode()).isEqualTo(200);
+        change.put("currentPassword", PASSWORD).put("newPassword", " ");
+        assertThat(send("PUT", "/api/auth/password", json.writeValueAsString(change)).statusCode()).isEqualTo(400);
+        change.put("newPassword", "parolă-nouă");
+        assertThat(send("PUT", "/api/auth/password", json.writeValueAsString(change)).statusCode()).isEqualTo(204);
+        assertThat(send("GET", "/api/auth/me", null).statusCode()).isEqualTo(401);
+        assertThat(login("ana@example.test", PASSWORD).statusCode()).isEqualTo(401);
+        assertThat(login("ana@example.test", "parolă-nouă").statusCode()).isEqualTo(200);
+        assertThat(login("dan@example.test", PASSWORD).statusCode()).isEqualTo(200);
+        String hash = database.queryForObject("SELECT password_hash FROM users WHERE id = ?", String.class, TestIds.USER_ANA);
+        assertThat(passwords.matches("parolă-nouă", hash)).isTrue();
+    }
+
+    @Test
+    void accountDeletionRequiresPasswordDeletesFavoritesAndInvalidatesAllItsSessions() throws Exception {
+        assertThat(send("DELETE", "/api/auth/me", "{}").statusCode()).isEqualTo(401);
+        assertThat(login("ana@example.test", PASSWORD).statusCode()).isEqualTo(200);
+        String firstSession = token;
+        assertThat(login("ana@example.test", PASSWORD).statusCode()).isEqualTo(200);
+        var deletion = json.createObjectNode().put("currentPassword", "wrong");
+        assertThat(send("DELETE", "/api/auth/me", json.writeValueAsString(deletion)).statusCode()).isEqualTo(400);
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM users", Long.class)).isEqualTo(2);
+        deletion.put("currentPassword", PASSWORD).put("userId", TestIds.USER_DAN.toString());
+        assertThat(send("DELETE", "/api/auth/me", json.writeValueAsString(deletion)).statusCode()).isEqualTo(204);
+        assertThat(send("GET", "/api/auth/me", null).statusCode()).isEqualTo(401);
+        assertThat(raw("GET", "/api/auth/me", null, firstSession).statusCode()).isEqualTo(401);
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM users WHERE id = ?", Long.class, TestIds.USER_ANA)).isZero();
+        assertThat(database.queryForObject("SELECT COUNT(*) FROM favorites WHERE user_id = ?", Long.class, TestIds.USER_ANA)).isZero();
+        assertThat(login("ana@example.test", PASSWORD).statusCode()).isEqualTo(401);
+        assertThat(login("dan@example.test", PASSWORD).statusCode()).isEqualTo(200);
+        assertThat(send("GET", "/api/categories/favorites?userId=" + TestIds.USER_DAN, null).body()).contains(CATEGORY_PARENT.toString());
+    }
+
     private HttpResponse<String> login(String email, String password) throws Exception {
         var response = raw("POST", "/api/auth/login", json.writeValueAsString(json.createObjectNode().put("email", email).put("password", password)), null);
         if (response.statusCode() == 200) token = json.readTree(response.body()).path("accessToken").asString();

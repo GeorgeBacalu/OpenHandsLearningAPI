@@ -8,4 +8,6 @@ public interface AccountService {
     Account authenticate(String email, String password);
     Account register(Registration registration);
     Account current(UUID id);
+    void updatePassword(UUID id, String currentPassword, String newPassword);
+    void deleteAccount(UUID id, String currentPassword);
 }
