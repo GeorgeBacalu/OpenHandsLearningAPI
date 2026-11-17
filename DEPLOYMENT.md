@@ -5,9 +5,9 @@ The user selected direct APK distribution outside Google Play and a $0 budget.
 - API: https://openhandslearning-api.onrender.com
 - Render service: https://dashboard.render.com/web/srv-dbu0di6k1f9s739v15b0
 - Neon project: https://console.neon.tech/app/projects/late-smoke-70539515
-- Database: PostgreSQL 18, project `openhandslearning`, production branch, Frankfurt.
-- Public media bucket: `openhandslearning-media` in that same Neon project.
-- Media origin: https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/
+- Database: `open-hands-learning`, PostgreSQL 18, project `open-hands-learning`, production branch, Frankfurt.
+- Public media bucket: `open-hands-learning` in that same Neon project.
+- Media origin: https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/open-hands-learning/
 
 Render uses the **Free** compute plan and Neon uses a separate **Free** organization
 named Open Hands Learning. No paid service or payment card is needed for this
@@ -27,7 +27,7 @@ in `render.yaml` so future Blueprint deployments use the same branch.
 | Profile | Database | Media operations and public URLs |
 | --- | --- | --- |
 | `dev` (default) | Local `open-hands-learning` | AWS S3 `open-hands-learning/` (bucket root) |
-| `prod` | Neon via `DATABASE_JDBC_URL` | Neon `openhandslearning-media/` (bucket root) |
+| `prod` | Neon via `DATABASE_JDBC_URL` | Neon `open-hands-learning/` (bucket root) |
 | `render` | Includes `prod` | Includes `prod` |
 
 The obsolete localhost production database configuration has been removed.

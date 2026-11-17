@@ -6,11 +6,11 @@ const root = path.resolve(__dirname, '..');
 const work = path.join(root, 'build', 'distribution');
 const { neon } = createRequire(path.join(work, 'tools', 'package.json'))('@neondatabase/serverless');
 const connection = JSON.parse(fs.readFileSync(path.join(work, 'neon-connection.private.json'), 'utf8'));
-const mediaBase = 'https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/';
+const mediaBase = 'https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/open-hands-learning/';
 const sourceOrigin = '^https://open-hands-learning[.]s3[.]us-east-1[.]amazonaws[.]com/((dev|prod)/)?';
 
 async function main() {
-    if (connection.database !== 'openhandslearning') throw new Error('Unexpected database.');
+    if (connection.database !== 'open-hands-learning') throw new Error('Unexpected database.');
     const url = new URL('postgresql://' + connection.host + '/' + connection.database);
     url.username = connection.username; url.password = connection.password;
     url.searchParams.set('sslmode', 'require');

@@ -7,7 +7,7 @@ const work = path.resolve(__dirname, '..', 'build', 'distribution');
 const sdkRequire = createRequire(path.join(work, 'tools', 'package.json'));
 const { S3Client, PutObjectCommand, HeadObjectCommand } = sdkRequire('@aws-sdk/client-s3');
 const settings = JSON.parse(fs.readFileSync(path.join(work, 'neon-storage.private.json'), 'utf8'));
-const bucket = 'openhandslearning-media';
+const bucket = 'open-hands-learning';
 const expectedEndpoint = 'https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech';
 
 async function main() {

@@ -44,6 +44,13 @@ class S3RootMediaMigrationTest {
                 assertThat(rows.getString("image_url")).isEqualTo(neon.replace("/prod/", "/") + "categories/alfabet/main.webp");
                 assertThat(rows.getString("video_url")).isEqualTo(neon.replace("/prod/", "/") + "categories/alfabet/a/main.mp4");
             }
+            ScriptUtils.executeSqlScript(connection, new ClassPathResource("db/migration/V20__rename_neon_media_bucket.sql"));
+            try (var rows = sql.executeQuery("SELECT image_url, video_url FROM categories WHERE id = 2")) {
+                assertThat(rows.next()).isTrue();
+                String renamed = neon.replace("/prod/", "/").replace("openhandslearning-media", "open-hands-learning");
+                assertThat(rows.getString("image_url")).isEqualTo(renamed + "categories/alfabet/main.webp");
+                assertThat(rows.getString("video_url")).isEqualTo(renamed + "categories/alfabet/a/main.mp4");
+            }
             sql.execute("INSERT INTO categories VALUES (4, '" + aws + "categories/alfabet/a/main.webp', NULL)");
             assertThatThrownBy(() -> sql.execute("UPDATE categories SET image_url = '" + aws + "categories/alfabet/main.html' WHERE id = 4"))
                     .isInstanceOf(java.sql.SQLException.class);

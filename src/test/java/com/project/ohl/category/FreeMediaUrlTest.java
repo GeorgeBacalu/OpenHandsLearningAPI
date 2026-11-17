@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FreeMediaUrlTest {
-    private static final String BASE = "https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/categories/alfabet/a/main";
+    private static final String BASE = "https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/open-hands-learning/categories/alfabet/a/main";
 
     @Test
     void approvedFreeMediaWorksAndExistingS3CatalogsStillWork() {
@@ -22,7 +22,7 @@ class FreeMediaUrlTest {
 
     @Test
     void otherBucketsHostsSchemesAndObjectTypesStayRejected() {
-        for (String invalid : new String[]{BASE.replace("openhandslearning-media", "private-documents") + ".webp",
+        for (String invalid : new String[]{BASE.replace("open-hands-learning", "private-documents") + ".webp",
                 BASE.replace("https:", "http:") + ".webp",
                 BASE.replace("br-red-base-b9fi1yrl", "another-project") + ".webp", BASE + ".html"}) {
             assertThatThrownBy(() -> CatalogMetadata.imageUrl(invalid, null)).isInstanceOf(InvalidRequestException.class);

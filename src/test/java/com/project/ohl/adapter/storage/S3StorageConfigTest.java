@@ -116,10 +116,10 @@ class S3StorageConfigTest {
                 assertThat(credentials.accessKeyId()).isEqualTo("neon-access");
                 assertThat(credentials.secretAccessKey()).isEqualTo("neon-secret");
                 var client = app.getBean(S3Client.class);
-                String expected = "https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/categories/alfabet/a/main.webp";
+                String expected = "https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/open-hands-learning/categories/alfabet/a/main.webp";
                 assertThat(client.serviceClientConfiguration().region().id()).isEqualTo("eu-central-1");
                 // Resolving this URL exercises the actual SDK endpoint + path-style configuration without network access.
-                assertThat(client.utilities().getUrl(request -> request.bucket("openhandslearning-media")
+                assertThat(client.utilities().getUrl(request -> request.bucket("open-hands-learning")
                         .key("categories/alfabet/a/main.webp")).toExternalForm()).isEqualTo(expected);
                 assertThat(app.getBean(MediaServiceImpl.class).download("images", "categories/alfabet/a/main.webp").url())
                         .isEqualTo(expected);

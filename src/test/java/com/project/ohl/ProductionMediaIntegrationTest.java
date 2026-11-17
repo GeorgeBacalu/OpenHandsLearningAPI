@@ -40,7 +40,7 @@ class ProductionMediaIntegrationTest extends DatabaseIntegrationTest {
         String route = "/api/media/images?mediaKey=" + KEY;
         var resolved = send("GET", route, null, null);
         assertThat(resolved.statusCode()).isEqualTo(200);
-        assertThat(resolved.body()).contains("https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/" + KEY);
+        assertThat(resolved.body()).contains("https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/open-hands-learning/" + KEY);
         assertThat(send("DELETE", route, null, null).statusCode()).isEqualTo(401);
         verifyNoInteractions(storage);
 
@@ -56,12 +56,12 @@ class ProductionMediaIntegrationTest extends DatabaseIntegrationTest {
 
         var uploaded = ArgumentCaptor.forClass(PutObjectRequest.class);
         verify(storage).putObject(uploaded.capture(), any(RequestBody.class));
-        assertThat(uploaded.getValue().bucket()).isEqualTo("openhandslearning-media");
+        assertThat(uploaded.getValue().bucket()).isEqualTo("open-hands-learning");
         assertThat(uploaded.getValue().key()).isEqualTo(KEY);
         assertThat(uploaded.getValue().aclAsString()).isNull();
         var deleted = ArgumentCaptor.forClass(DeleteObjectRequest.class);
         verify(storage).deleteObject(deleted.capture());
-        assertThat(deleted.getValue().bucket()).isEqualTo("openhandslearning-media");
+        assertThat(deleted.getValue().bucket()).isEqualTo("open-hands-learning");
         assertThat(deleted.getValue().key()).isEqualTo(KEY);
     }
 

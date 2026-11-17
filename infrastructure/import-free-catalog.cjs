@@ -9,7 +9,7 @@ const { neon } = driverRequire('@neondatabase/serverless');
 const connection = JSON.parse(fs.readFileSync(path.join(work, 'neon-connection.private.json'), 'utf8'));
 
 async function main() {
-    if (connection.database !== 'openhandslearning' ||
+    if (connection.database !== 'open-hands-learning' ||
         !connection.host.endsWith('.neon.tech')) throw new Error('Unexpected database target.');
     const uri = new URL('postgresql://' + connection.host + '/' + connection.database);
     uri.username = connection.username;
