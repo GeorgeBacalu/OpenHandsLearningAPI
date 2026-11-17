@@ -7,8 +7,8 @@
       "Principal": "*",
       "Action": "s3:GetObject",
       "Resource": [
-        "arn:aws:s3:::open-hands-learning/dev/voice/*",
-        "arn:aws:s3:::open-hands-learning/dev/categories/*",
+        "arn:aws:s3:::open-hands-learning/voice/*",
+        "arn:aws:s3:::open-hands-learning/categories/*",
         "arn:aws:s3:::open-hands-learning/prod/voice/*",
         "arn:aws:s3:::open-hands-learning/prod/categories/*"
       ]

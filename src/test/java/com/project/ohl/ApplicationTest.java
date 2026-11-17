@@ -253,7 +253,7 @@ class ApplicationTest extends DatabaseIntegrationTest {
     @Test
     void categoryCreationIsUnavailableEvenForAdministrators() throws Exception {
         Long before = categoryRepository.count();
-        var request = json.createObjectNode().put("name", "Categorie nouă").put("imageUrl", "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/new_category.webp");
+        var request = json.createObjectNode().put("name", "Categorie nouă").put("imageUrl", "https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/new_category.webp");
 
         assertThat(send("POST", "/api/categories", json.writeValueAsString(request)).statusCode()).isEqualTo(405);
 
@@ -274,10 +274,10 @@ class ApplicationTest extends DatabaseIntegrationTest {
         updateCategory(CATEGORY_CHILD, category -> category.setName("Șarpe"));
 
         var request = json.createObjectNode().put("name", "Arici")
-                .put("imageUrl", "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/arici.webp");
+                .put("imageUrl", "https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/arici.webp");
 
         String id = createCategory("Arici",
-                "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/arici.webp").toString();
+                "https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/arici.webp").toString();
 
         var roots = json.readTree(send("GET", "/api/categories/filter", null).body());
 

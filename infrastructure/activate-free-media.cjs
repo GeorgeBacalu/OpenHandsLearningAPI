@@ -6,8 +6,8 @@ const root = path.resolve(__dirname, '..');
 const work = path.join(root, 'build', 'distribution');
 const { neon } = createRequire(path.join(work, 'tools', 'package.json'))('@neondatabase/serverless');
 const connection = JSON.parse(fs.readFileSync(path.join(work, 'neon-connection.private.json'), 'utf8'));
-const mediaBase = 'https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/prod/';
-const sourceOrigin = '^https://open-hands-learning[.]s3[.]us-east-1[.]amazonaws[.]com/(dev|prod)/';
+const mediaBase = 'https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/';
+const sourceOrigin = '^https://open-hands-learning[.]s3[.]us-east-1[.]amazonaws[.]com/((dev|prod)/)?';
 
 async function main() {
     if (connection.database !== 'openhandslearning') throw new Error('Unexpected database.');
@@ -22,7 +22,7 @@ async function main() {
     for (const category of catalog.categories) {
         for (const field of ['image_url', 'video_url']) {
             if (!category[field]) continue;
-            const key = 'prod/' + new URL(category[field]).pathname.replace(/^\/(dev|prod)\//, '');
+            const key = new URL(category[field]).pathname.replace(/^\/(dev|prod)\//, '');
             if (!manifest.has(key)) throw new Error('Missing uploaded media mapping: ' + key);
         }
     }

@@ -7,7 +7,7 @@ The user selected direct APK distribution outside Google Play and a $0 budget.
 - Neon project: https://console.neon.tech/app/projects/late-smoke-70539515
 - Database: PostgreSQL 18, project `openhandslearning`, production branch, Frankfurt.
 - Public media bucket: `openhandslearning-media` in that same Neon project.
-- Media origin: https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/prod/
+- Media origin: https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/
 
 Render uses the **Free** compute plan and Neon uses a separate **Free** organization
 named Open Hands Learning. No paid service or payment card is needed for this
@@ -26,8 +26,8 @@ in `render.yaml` so future Blueprint deployments use the same branch.
 
 | Profile | Database | Media operations and public URLs |
 | --- | --- | --- |
-| `dev` (default) | Local `open-hands-learning` | AWS S3 `open-hands-learning/dev/` |
-| `prod` | Neon via `DATABASE_JDBC_URL` | Neon `openhandslearning-media/prod/` |
+| `dev` (default) | Local `open-hands-learning` | AWS S3 `open-hands-learning/` (bucket root) |
+| `prod` | Neon via `DATABASE_JDBC_URL` | Neon `openhandslearning-media/` (bucket root) |
 | `render` | Includes `prod` | Includes `prod` |
 
 The obsolete localhost production database configuration has been removed.
@@ -48,6 +48,20 @@ Development continues to accept the existing `AWS_ACCESS_KEY` and
 both are empty. Production uses an explicit HTTPS endpoint and path-style S3
 requests; development retains AWS's normal endpoint resolution. Both use the
 same streaming storage adapter and administrator-protected upload/delete routes.
+
+AWS development media uses `categories/` and `voice/` directly at the bucket root.
+Android debug builds use `https://open-hands-learning.s3.us-east-1.amazonaws.com/`.
+V18 permits these URLs and rewrites existing category image/video URLs for this
+bucket from `dev/categories/` to `categories/`. V19 performs the equivalent Neon rewrite after its objects have been copied
+to the bucket root. Deploy the updated API only after verifying these copies.
+Production applies V18 through Flyway. Local development has Flyway disabled;
+enable `spring.flyway.enabled=true` for one local startup to apply pending
+migrations through V18, then restore the normal setting. Use Flyway so V17 runs
+before V18 and both versions are recorded in the schema history.
+
+The S3 policy templates under `infrastructure/` now target root `categories/*`
+and `voice/*` keys. Existing AWS policies must allow those paths for public reads
+and administrator uploads/deletes; changing the JSON files does not deploy them.
 
 The build image installs `unzip` because the Maven wrapper's pinned checksum is
 for the ZIP distribution. Without it, the Unix wrapper chooses a tarball and

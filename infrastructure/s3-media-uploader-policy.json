@@ -6,8 +6,8 @@
       "Effect": "Allow",
       "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
       "Resource": [
-        "arn:aws:s3:::open-hands-learning/dev/voice/*",
-        "arn:aws:s3:::open-hands-learning/dev/categories/*",
+        "arn:aws:s3:::open-hands-learning/voice/*",
+        "arn:aws:s3:::open-hands-learning/categories/*",
         "arn:aws:s3:::open-hands-learning/prod/voice/*",
         "arn:aws:s3:::open-hands-learning/prod/categories/*"
       ]

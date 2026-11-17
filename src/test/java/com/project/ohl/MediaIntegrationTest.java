@@ -61,7 +61,7 @@ class MediaIntegrationTest extends DatabaseIntegrationTest {
             var media = json.readTree(response.body());
 
             assertThat(media.path("url").asString()).isEqualTo(
-                    "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/a/main." + (type.equals("images") ? "webp" : "mp4"));
+                    "https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/a/main." + (type.equals("images") ? "webp" : "mp4"));
             assertThat(media.has("expiresAt")).isFalse();
         }
         verifyNoInteractions(s3);
@@ -88,7 +88,7 @@ class MediaIntegrationTest extends DatabaseIntegrationTest {
             RequestBody body = invocation.getArgument(1);
 
             assertThat(request.bucket()).isEqualTo("open-hands-learning");
-            assertThat(request.key()).isIn("dev/categories/alfabet/a/main.webp", "dev/categories/alfabet/a/main.mp4");
+            assertThat(request.key()).isIn("categories/alfabet/a/main.webp", "categories/alfabet/a/main.mp4");
             assertThat(request.contentLength()).isEqualTo(3L);
             assertThat(request.aclAsString()).isNull();
 
@@ -107,7 +107,7 @@ class MediaIntegrationTest extends DatabaseIntegrationTest {
         verify(s3).deleteObject(deleted.capture());
 
         assertThat(deleted.getValue().bucket()).isEqualTo("open-hands-learning");
-        assertThat(deleted.getValue().key()).isEqualTo("dev/categories/alfabet/a/main.mp4");
+        assertThat(deleted.getValue().key()).isEqualTo("categories/alfabet/a/main.mp4");
     }
 
     @Test
@@ -148,15 +148,15 @@ class MediaIntegrationTest extends DatabaseIntegrationTest {
         var category = json.readTree(send("GET", path, null, null).body());
 
         assertThat(category.has("mediaKey")).isFalse();
-        assertThat(category.path("imageUrl").asString()).endsWith("/dev/categories/alfabet/main.webp");
+        assertThat(category.path("imageUrl").asString()).endsWith("/categories/alfabet/main.webp");
 
-        String updated = "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/new_image.webp";
+        String updated = "https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/new_image.webp";
         String body = "{\"name\":\"Alphabet\",\"imageUrl\":\"" + updated + "\"}";
 
         assertThat(send("PUT", path, "application/json", body).statusCode()).isEqualTo(200);
         assertThat(categoryRepository.findById(TestIds.CATEGORY_PARENT).orElseThrow().getImageUrl()).isEqualTo(updated);
 
-        String video = "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/demo.mp4";
+        String video = "https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/demo.mp4";
 
         assertThat(send("PUT", path, "application/json", "{\"name\":\"Alphabet\",\"videoUrl\":\"" + video + "\"}").statusCode()).isEqualTo(200);
         assertThat(send("PUT", path, "application/json", "{\"name\":\"Renamed\"}").statusCode()).isEqualTo(200);

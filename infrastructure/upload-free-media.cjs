@@ -23,7 +23,7 @@ async function main() {
         await Promise.all(Array.from({ length: 4 }, async () => {
             while (next < manifest.length) {
                 const item = manifest[next++];
-                if (!/^prod\/(categories|voice)\/[a-z0-9_/]+\.(webp|mp4)$/.test(item.key)) throw new Error('Unexpected media path.');
+                if (!/^(categories|voice)\/[a-z0-9_/]+\.(webp|mp4)$/.test(item.key)) throw new Error('Unexpected media path.');
                 const body = fs.readFileSync(path.join(work, 'media', item.key));
                 if (body.length !== item.bytes || crypto.createHash('sha256').update(body).digest('hex') !== item.sha256) {
                     throw new Error('Local media integrity check failed: ' + item.key);

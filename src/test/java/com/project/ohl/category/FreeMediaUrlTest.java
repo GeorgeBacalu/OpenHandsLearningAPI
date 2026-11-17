@@ -8,14 +8,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FreeMediaUrlTest {
-    private static final String BASE = "https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/prod/categories/alfabet/a/main";
+    private static final String BASE = "https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/categories/alfabet/a/main";
 
     @Test
     void approvedFreeMediaWorksAndExistingS3CatalogsStillWork() {
         assertThat(CatalogMetadata.imageUrl(BASE + ".webp", null)).isEqualTo(BASE + ".webp");
         assertThat(CatalogMetadata.videoUrl(BASE + ".mp4", null)).isEqualTo(BASE + ".mp4");
-        String s3 = "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/a/main.webp";
+        String s3 = "https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/a/main.webp";
         assertThat(CatalogMetadata.imageUrl(s3, null)).isEqualTo(s3);
+        String video = s3.replace(".webp", ".mp4");
+        assertThat(CatalogMetadata.videoUrl(video, null)).isEqualTo(video);
     }
 
     @Test
@@ -26,5 +28,7 @@ class FreeMediaUrlTest {
             assertThatThrownBy(() -> CatalogMetadata.imageUrl(invalid, null)).isInstanceOf(InvalidRequestException.class);
         }
         assertThatThrownBy(() -> CatalogMetadata.videoUrl(BASE + ".webp", null)).isInstanceOf(InvalidRequestException.class);
+        assertThatThrownBy(() -> CatalogMetadata.imageUrl(BASE.replace("/categories/", "/staging/categories/") + ".webp", null))
+                .isInstanceOf(InvalidRequestException.class);
     }
 }

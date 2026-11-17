@@ -5,20 +5,14 @@ import com.project.ohl.application.port.in.MediaService;
 import com.project.ohl.application.port.out.MediaStoragePort;
 import com.project.ohl.domain.exception.InvalidRequestException;
 import java.io.InputStream;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MediaServiceImpl implements MediaService {
     private final MediaStoragePort storage;
-    private final String environment;
 
-    public MediaServiceImpl(MediaStoragePort storage, @Value("${app.storage.s3.environment}") String environment) {
+    public MediaServiceImpl(MediaStoragePort storage) {
         this.storage = storage;
-        if (!"dev".equals(environment) && !"prod".equals(environment)) {
-            throw new IllegalArgumentException("Media environment must be dev or prod.");
-        }
-        this.environment = environment;
     }
 
     @Override
@@ -51,6 +45,6 @@ public class MediaServiceImpl implements MediaService {
         if (mediaKey == null || mediaKey.length() > 1000 || !(category || voice)) {
             throw new InvalidRequestException("Invalid media key.");
         }
-        return environment + "/" + mediaKey;
+        return mediaKey;
     }
 }

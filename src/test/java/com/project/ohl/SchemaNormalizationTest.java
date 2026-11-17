@@ -35,7 +35,7 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
 
     @Test void expressionsCanBecomeChildrenWithoutChangingTheirIdentityOrFavorites() {
         UUID parentId = createCategory("Expresii",
-                "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/expressions_section.webp");
+                "https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/expressions_section.webp");
 
         var parent = categories.getCategoryById(parentId);
         var child = categories.getCategoryById(CATEGORY_CHILD);
@@ -88,7 +88,7 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
         var changed = categories.updateCategoryById(parent, parent.getId());
 
         assertThat(changed.getId()).isEqualTo(CATEGORY_PARENT);
-        assertThat(changed.getImageUrl()).isEqualTo("https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/main.webp");
+        assertThat(changed.getImageUrl()).isEqualTo("https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/main.webp");
         assertThat(categories.getCategoriesByParentIdAndName(CATEGORY_PARENT, ""))
                 .extracting(CategoryDto::getId).containsExactly(CATEGORY_CHILD);
     }

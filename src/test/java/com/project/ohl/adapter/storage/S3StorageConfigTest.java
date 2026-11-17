@@ -44,8 +44,8 @@ class S3StorageConfigTest {
             String bucket = environment.getRequiredProperty("app.storage.s3.bucket");
 
             assertThat(app.getBean(S3Client.class).serviceClientConfiguration().region().id()).isEqualTo(region);
-            assertThat(app.getBean(S3MediaStorageAdapter.class).download("dev/categories/main.webp").url())
-                    .isEqualTo("https://" + bucket + ".s3." + region + ".amazonaws.com/dev/categories/main.webp");
+            assertThat(app.getBean(S3MediaStorageAdapter.class).download("categories/main.webp").url())
+                    .isEqualTo("https://" + bucket + ".s3." + region + ".amazonaws.com/categories/main.webp");
         });
     }
 
@@ -67,7 +67,7 @@ class S3StorageConfigTest {
                     assertThat(environment.getRequiredProperty("spring.jpa.hibernate.ddl-auto")).isEqualTo("create-drop");
                     assertThat(app.getBean(S3Client.class).serviceClientConfiguration().region().id())
                             .isEqualTo(environment.getRequiredProperty("app.storage.s3.region"));
-                    assertThat(app.getBean(S3MediaStorageAdapter.class).download("dev/categories/main.webp").url())
+                    assertThat(app.getBean(S3MediaStorageAdapter.class).download("categories/main.webp").url())
                             .contains("https://" + environment.getRequiredProperty("app.storage.s3.bucket") + ".s3.");
                 });
     }
@@ -116,11 +116,11 @@ class S3StorageConfigTest {
                 assertThat(credentials.accessKeyId()).isEqualTo("neon-access");
                 assertThat(credentials.secretAccessKey()).isEqualTo("neon-secret");
                 var client = app.getBean(S3Client.class);
-                String expected = "https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/prod/categories/alfabet/a/main.webp";
+                String expected = "https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/categories/alfabet/a/main.webp";
                 assertThat(client.serviceClientConfiguration().region().id()).isEqualTo("eu-central-1");
                 // Resolving this URL exercises the actual SDK endpoint + path-style configuration without network access.
                 assertThat(client.utilities().getUrl(request -> request.bucket("openhandslearning-media")
-                        .key("prod/categories/alfabet/a/main.webp")).toExternalForm()).isEqualTo(expected);
+                        .key("categories/alfabet/a/main.webp")).toExternalForm()).isEqualTo(expected);
                 assertThat(app.getBean(MediaServiceImpl.class).download("images", "categories/alfabet/a/main.webp").url())
                         .isEqualTo(expected);
             });

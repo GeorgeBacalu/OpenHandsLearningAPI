@@ -1389,7 +1389,7 @@
               "type": "string",
               "maxLength": 1000
             },
-            "description": "Relative object path including .webp or .mp4, for example categories/alfabet/a/main.webp. The configured dev/prod environment is prepended."
+            "description": "Relative object path including .webp or .mp4, for example categories/alfabet/a/main.webp. Media keys use the bucket root for both AWS and Neon."
           }
         ],
         "security": [],
@@ -1444,7 +1444,7 @@
               "type": "string",
               "maxLength": 1000
             },
-            "description": "Relative object path including .webp or .mp4, for example categories/alfabet/a/main.webp. The configured dev/prod environment is prepended."
+            "description": "Relative object path including .webp or .mp4, for example categories/alfabet/a/main.webp. Media keys use the bucket root for both AWS and Neon."
           }
         ],
         "security": [
@@ -1498,7 +1498,7 @@
             }
           }
         },
-        "description": "Part file must declare image/webp for .webp images or video/mp4 for .mp4 videos. Files must be compressed before upload. Maximum file size 100 MB. Original filenames are ignored. The configured dev/prod environment is prepended; no ACL is sent."
+        "description": "Part file must declare image/webp for .webp images or video/mp4 for .mp4 videos. Files must be compressed before upload. Maximum file size 100 MB. Original filenames are ignored. Media keys use the bucket root for both AWS and Neon. No ACL is sent."
       },
       "delete": {
         "operationId": "deleteMedia",
@@ -1527,7 +1527,7 @@
               "type": "string",
               "maxLength": 1000
             },
-            "description": "Relative object path including .webp or .mp4, for example categories/alfabet/a/main.webp. The configured dev/prod environment is prepended."
+            "description": "Relative object path including .webp or .mp4, for example categories/alfabet/a/main.webp. Media keys use the bucket root for both AWS and Neon."
           }
         ],
         "security": [
@@ -1594,7 +1594,7 @@
             "description": "Permanent public HTTPS image URL in the app's S3 or Neon media storage. Omit on update to keep the current URL.",
             "example": "https://open-hands-learning.s3.us-east-1.amazonaws.com/images/alfabet",
             "examples": [
-              "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/a/main.webp"
+              "https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/a/main.webp"
             ]
           },
           "videoUrl": {
@@ -1605,7 +1605,7 @@
             "maxLength": 2048,
             "pattern": "https://(?:[a-z0-9][a-z0-9.-]+\\.s3\\.[a-z0-9-]+\\.amazonaws\\.com|br-red-base-b9fi1yrl\\.storage\\.c-7\\.eu-central-1\\.aws\\.neon\\.tech/openhandslearning-media)/(dev|prod)/categories/([a-z0-9_]+/)+[a-z0-9_]+\\.mp4",
             "examples": [
-              "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/a/main.mp4"
+              "https://open-hands-learning.s3.us-east-1.amazonaws.com/categories/alfabet/a/main.mp4"
             ]
           }
         },

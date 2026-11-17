@@ -4,7 +4,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const work = path.resolve(__dirname, '..', 'build', 'distribution');
 const api = 'https://openhandslearning-api.onrender.com';
-const media = 'https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/prod/';
+const media = 'https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/';
 
 async function request(route, options = {}) {
     return fetch(api + route, { ...options, signal: AbortSignal.timeout(210000) });

@@ -44,8 +44,8 @@ def main():
             if not category.get(field):
                 continue
             remote_path = urlparse(category[field]).path.lstrip("/")
-            environment, _, key = remote_path.partition("/")
-            if environment not in ("dev", "prod"):
+            key = re.sub(r"^(dev|prod)/", "", remote_path)
+            if not key.startswith("categories/"):
                 raise ValueError(f"Unexpected catalog path: {remote_path}")
             path = PurePosixPath(key)
             candidates = [key]
@@ -57,9 +57,9 @@ def main():
                 source_name = current_paths.get(key)
             if source_name is None:
                 raise ValueError(f"No historical media mapping: {key}")
-            requested["prod/" + key] = (source_name, path.suffix)
+            requested[key] = (source_name, path.suffix)
     for name, key in current_entries:
-        requested.setdefault("prod/" + key, (name, PurePosixPath(key).suffix))
+        requested.setdefault(key, (name, PurePosixPath(key).suffix))
 
     manifest = []
     missing = []
