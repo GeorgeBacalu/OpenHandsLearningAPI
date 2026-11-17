@@ -13,7 +13,6 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -37,9 +36,6 @@ class MediaIntegrationTest extends DatabaseIntegrationTest {
     private int port;
 
     @Autowired
-    private JdbcTemplate database;
-
-    @Autowired
     private PasswordHasher passwords;
 
     @MockitoBean
@@ -52,7 +48,7 @@ class MediaIntegrationTest extends DatabaseIntegrationTest {
     @BeforeEach
     void credentials() {
         token = null;
-        database.update("UPDATE users SET password_hash = ?", passwords.hash("media-test-password"));
+        setFixturePassword(passwords.hash("media-test-password"));
     }
 
     @Test
@@ -158,8 +154,7 @@ class MediaIntegrationTest extends DatabaseIntegrationTest {
         String body = "{\"name\":\"Alphabet\",\"imageUrl\":\"" + updated + "\"}";
 
         assertThat(send("PUT", path, "application/json", body).statusCode()).isEqualTo(200);
-        assertThat(database.queryForObject("SELECT image_url FROM categories WHERE id = ?", String.class,
-                TestIds.CATEGORY_PARENT)).isEqualTo(updated);
+        assertThat(categoryRepository.findById(TestIds.CATEGORY_PARENT).orElseThrow().getImageUrl()).isEqualTo(updated);
 
         String video = "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/demo.mp4";
 

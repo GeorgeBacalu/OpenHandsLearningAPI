@@ -7,11 +7,12 @@ import com.project.ohl.application.port.in.UserService;
 import com.project.ohl.domain.exception.InvalidRequestException;
 import com.project.ohl.domain.model.Role;
 import java.util.UUID;
+import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.DataException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import static com.project.ohl.TestIds.CATEGORY_CHILD;
 import static com.project.ohl.TestIds.CATEGORY_PARENT;
@@ -27,16 +28,14 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
     @Autowired
     UserService users;
 
-    @Autowired
-    JdbcTemplate database;
-
-    private UUID user(String name) { return database.queryForObject("SELECT id FROM users WHERE name = ?", UUID.class, name); }
+    private UUID user(String name) {
+        return userRepository.findAll().stream().filter(user -> user.getName().equals(name))
+                .findFirst().orElseThrow().getId();
+    }
 
     @Test void expressionsCanBecomeChildrenWithoutChangingTheirIdentityOrFavorites() {
-        UUID parentId = UUID.randomUUID();
-
-        database.update("INSERT INTO categories (id, name, parent_id, image_url) VALUES (?, ?, NULL, ?)",
-                parentId, "Expresii", "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/expressions_section.webp");
+        UUID parentId = createCategory("Expresii",
+                "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/expressions_section.webp");
 
         var parent = categories.getCategoryById(parentId);
         var child = categories.getCategoryById(CATEGORY_CHILD);
@@ -57,11 +56,11 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
     }
 
     @Test void favoritesKeepOnlyTheirUserAndCategoryPair() {
-        var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'favorites'", String.class);
+        var columns = nativeValues("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'favorites'", String.class);
 
         assertThat(columns).containsExactlyInAnyOrder("user_id", "category_id");
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'user_favorites'", Long.class)).isZero();
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM favorites", Long.class)).isEqualTo(2L);
+        assertThat(schemaCount("SELECT COUNT(*) FROM information_schema.tables WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'user_favorites'")).isZero();
+        assertThat(favoriteRepository.count()).isEqualTo(2L);
     }
 
     @Test void favoritesAreIndependentAndRepeatedSavesDoNotDuplicateThem() {
@@ -95,25 +94,25 @@ class SchemaNormalizationTest extends DatabaseIntegrationTest {
     }
 
     @Test void categoriesHaveNoSectionReferenceAndRejectCycles() {
-        var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'categories'", String.class);
+        var columns = nativeValues("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'categories'", String.class);
         assertThat(columns).containsExactlyInAnyOrder("id", "name", "parent_id", "image_url", "video_url");
 
         var parent = categories.getCategoryById(CATEGORY_PARENT);
         parent.setParentId(CATEGORY_CHILD);
 
         assertThatThrownBy(() -> categories.updateCategoryById(parent, parent.getId())).isInstanceOf(InvalidRequestException.class);
-        assertThatThrownBy(() -> database.update("UPDATE categories SET parent_id = id WHERE id = ?", CATEGORY_PARENT))
-                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(() -> executeNative("UPDATE categories SET parent_id = id WHERE id = ?1", CATEGORY_PARENT))
+                .isInstanceOf(ConstraintViolationException.class);
     }
 
     @Test void userRolesAreStoredAsConstrainedStrings() {
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM information_schema.tables WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'roles'", Long.class)).isZero();
-        assertThat(database.queryForList("SELECT role FROM users ORDER BY role", String.class))
+        assertThat(schemaCount("SELECT COUNT(*) FROM information_schema.tables WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'roles'")).isZero();
+        assertThat(nativeValues("SELECT role FROM users ORDER BY role", String.class))
                 .containsExactly("ADMIN", "USER");
-        assertThatThrownBy(() -> database.update("UPDATE users SET role = 'OWNER'"))
-                .isInstanceOf(DataIntegrityViolationException.class);
-        assertThatThrownBy(() -> database.update("UPDATE users SET role = NULL"))
-                .isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(() -> executeNative("UPDATE users SET role = 'OWNER'"))
+                .isInstanceOfAny(ConstraintViolationException.class, DataException.class);
+        assertThatThrownBy(() -> executeNative("UPDATE users SET role = NULL"))
+                .isInstanceOf(ConstraintViolationException.class);
     }
 
     @Test void accountEmailsAreNormalizedAndCannotBeDuplicated() {
