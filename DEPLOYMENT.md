@@ -21,6 +21,8 @@ be reviewed separately if the whole AWS account must have zero cost.
 Render builds `Dockerfile`, activates `SPRING_PROFILES_ACTIVE=render`, and checks
 `/openapi.json`. The `render` profile includes `prod` through a Spring profile
 group; it only adds Render's internal port setting.
+The deployment source is the backend repository's `master` branch, also recorded
+in `render.yaml` so future Blueprint deployments use the same branch.
 
 | Profile | Database | Media operations and public URLs |
 | --- | --- | --- |

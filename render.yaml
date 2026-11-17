@@ -1,6 +1,7 @@
 services:
   - type: web
     name: openhandslearning-api
+    branch: master
     runtime: docker
     plan: free
     region: frankfurt
