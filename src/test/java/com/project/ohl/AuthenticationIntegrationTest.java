@@ -1,6 +1,7 @@
 package com.project.ohl;
 
 import com.project.ohl.application.port.out.PasswordHasher;
+import com.project.ohl.domain.model.Role;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -26,9 +26,6 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
     @LocalServerPort
     private int port;
 
-    @Autowired private
-    JdbcTemplate database;
-
     @Autowired
     private PasswordHasher passwords;
 
@@ -40,7 +37,7 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
     void credentials() {
         token = null;
         client = HttpClient.newHttpClient();
-        database.update("UPDATE users SET password_hash = ?", passwords.hash(PASSWORD));
+        setFixturePassword(passwords.hash(PASSWORD));
     }
 
     @Test
@@ -73,7 +70,7 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
         assertThat(account.path("email").asString()).isEqualTo("new@example.test");
         assertThat(account.has("password") || account.has("passwordHash") || account.has("password_hash")).isFalse();
 
-        String hash = database.queryForObject("SELECT password_hash FROM users WHERE email = 'new@example.test'", String.class);
+        String hash = userRepository.findByEmail("new@example.test").orElseThrow().getPasswordHash();
 
         assertThat(hash).startsWith("$2");
         assertThat(passwords.matches(PASSWORD, hash)).isTrue();
@@ -88,10 +85,10 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
         token = json.readTree(loggedIn.body()).path("accessToken").asString();
         assertThat(send("GET", "/api/users", null).statusCode()).isEqualTo(403);
 
-        database.update("UPDATE users SET role = 'ADMIN' WHERE id = ?", TestIds.USER_ANA);
+        updateUser(TestIds.USER_ANA, user -> user.setRole(Role.ADMIN));
         assertThat(send("GET", "/api/users", null).statusCode()).isEqualTo(200);
 
-        database.update("UPDATE users SET role = 'USER' WHERE id = ?", TestIds.USER_ANA);
+        updateUser(TestIds.USER_ANA, user -> user.setRole(Role.USER));
         assertThat(send("GET", "/api/users", null).statusCode()).isEqualTo(403);
     }
 
@@ -105,7 +102,7 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
         request.put("password", PASSWORD).put("schoolId", "00000000-0000-4000-8000-000000000999");
 
         assertThat(send("POST", "/api/auth/register", json.writeValueAsString(request)).statusCode()).isEqualTo(400);
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM users", Long.class)).isEqualTo(2);
+        assertThat(userRepository.count()).isEqualTo(2);
     }
 
     @Test
@@ -126,8 +123,7 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
 
     @Test
     void existingBcryptAccountsCanStillLogin() throws Exception {
-        database.update("UPDATE users SET password_hash = ? WHERE id = ?",
-                new BCryptPasswordEncoder(4).encode(PASSWORD), TestIds.USER_ANA);
+        updateUser(TestIds.USER_ANA, user -> user.setPasswordHash(new BCryptPasswordEncoder(4).encode(PASSWORD)));
 
         assertThat(login("ana@example.test", PASSWORD).statusCode()).isEqualTo(200);
         assertThat(send("GET", "/api/auth/me", null).body()).contains("Ana");
@@ -194,7 +190,7 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
         assertThat(raw("GET", "/api/categories", null, changed).statusCode()).isEqualTo(401);
         assertThat(send("GET", "/api/auth/me", null).body()).contains("Ana");
 
-        database.update("UPDATE users SET name = 'Ana actualizată' WHERE id = ?", TestIds.USER_ANA);
+        updateUser(TestIds.USER_ANA, user -> user.setName("Ana actualizată"));
         assertThat(send("GET", "/api/auth/me", null).body()).contains("Ana actualizată");
     }
 
@@ -241,7 +237,7 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
         assertThat(login("ana@example.test", "parolă-nouă").statusCode()).isEqualTo(200);
         assertThat(login("dan@example.test", PASSWORD).statusCode()).isEqualTo(200);
 
-        String hash = database.queryForObject("SELECT password_hash FROM users WHERE id = ?", String.class, TestIds.USER_ANA);
+        String hash = userRepository.findById(TestIds.USER_ANA).orElseThrow().getPasswordHash();
 
         assertThat(passwords.matches("parolă-nouă", hash)).isTrue();
     }
@@ -258,15 +254,15 @@ class AuthenticationIntegrationTest extends DatabaseIntegrationTest {
         var deletion = json.createObjectNode().put("currentPassword", "wrong");
 
         assertThat(send("DELETE", "/api/auth/me", json.writeValueAsString(deletion)).statusCode()).isEqualTo(400);
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM users", Long.class)).isEqualTo(2);
+        assertThat(userRepository.count()).isEqualTo(2);
 
         deletion.put("currentPassword", PASSWORD).put("userId", TestIds.USER_DAN.toString());
 
         assertThat(send("DELETE", "/api/auth/me", json.writeValueAsString(deletion)).statusCode()).isEqualTo(204);
         assertThat(send("GET", "/api/auth/me", null).statusCode()).isEqualTo(401);
         assertThat(raw("GET", "/api/auth/me", null, firstSession).statusCode()).isEqualTo(401);
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM users WHERE id = ?", Long.class, TestIds.USER_ANA)).isZero();
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM favorites WHERE user_id = ?", Long.class, TestIds.USER_ANA)).isZero();
+        assertThat(userRepository.existsById(TestIds.USER_ANA)).isFalse();
+        assertThat(favoriteRepository.findByUser_IdAndCategory_NameStartingWithIgnoreCase(TestIds.USER_ANA, "")).isEmpty();
         assertThat(login("ana@example.test", PASSWORD).statusCode()).isEqualTo(401);
         assertThat(login("dan@example.test", PASSWORD).statusCode()).isEqualTo(200);
         assertThat(send("GET", "/api/categories/favorites?userId=" + TestIds.USER_DAN, null).body()).contains(CATEGORY_PARENT.toString());

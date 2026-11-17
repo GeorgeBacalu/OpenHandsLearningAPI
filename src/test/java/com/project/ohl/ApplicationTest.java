@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -28,9 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ApplicationTest extends DatabaseIntegrationTest {
     @LocalServerPort
     private int port;
-
-    @Autowired
-    private JdbcTemplate database;
 
     @Autowired
     @Qualifier("requestMappingHandlerMapping")
@@ -47,7 +43,7 @@ class ApplicationTest extends DatabaseIntegrationTest {
 
     @BeforeEach
     void authenticateFixture() throws Exception {
-        database.update("UPDATE users SET password_hash = ?", passwords.hash("correct-test-password"));
+        setFixturePassword(passwords.hash("correct-test-password"));
         client = HttpClient.newHttpClient();
         token = null;
 
@@ -91,7 +87,7 @@ class ApplicationTest extends DatabaseIntegrationTest {
 
     @Test
     void userProfilesContainOnlyTheSupportedFields() throws Exception {
-        var columns = database.queryForList("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'users'", String.class);
+        var columns = nativeValues("SELECT LOWER(column_name) FROM information_schema.columns WHERE LOWER(table_schema) = 'public' AND LOWER(table_name) = 'users'", String.class);
 
         assertThat(columns).containsExactlyInAnyOrder("id", "name", "email", "phone", "password_hash", "role", "school_id");
 
@@ -136,7 +132,7 @@ class ApplicationTest extends DatabaseIntegrationTest {
 
         assertThat(response.statusCode()).isEqualTo(201);
         assertThat(json.readTree(response.body()).path("role").asString()).isEqualTo("ADMIN");
-        assertThat(database.queryForObject("SELECT role FROM users WHERE email = 'admin-profile@example.test'", String.class))
+        assertThat(userRepository.findByEmail("admin-profile@example.test").orElseThrow().getRole().name())
                 .isEqualTo("ADMIN");
         assertThat(send("GET", "/api/roles", null).statusCode()).isEqualTo(404);
         assertThat(send("POST", "/api/roles", "{}").statusCode()).isEqualTo(404);
@@ -158,8 +154,8 @@ class ApplicationTest extends DatabaseIntegrationTest {
             assertThat(user.has("schoolId")).isTrue();
         }
 
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) = 'classrooms'", Long.class)).isZero();
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE LOWER(TABLE_NAME) = 'users' AND LOWER(COLUMN_NAME) = 'classroom_id'", Long.class)).isZero();
+        assertThat(schemaCount("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) = 'classrooms'")).isZero();
+        assertThat(schemaCount("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE LOWER(TABLE_NAME) = 'users' AND LOWER(COLUMN_NAME) = 'classroom_id'")).isZero();
     }
 
     @Test
@@ -225,7 +221,7 @@ class ApplicationTest extends DatabaseIntegrationTest {
 
         assertThat(response.statusCode()).isEqualTo(201);
 
-        String hash = database.queryForObject("SELECT password_hash FROM users WHERE email = 'test@example.test'", String.class);
+        String hash = userRepository.findByEmail("test@example.test").orElseThrow().getPasswordHash();
 
         assertThat(passwords.matches("parolă-test", hash)).isTrue();
     }
@@ -240,7 +236,7 @@ class ApplicationTest extends DatabaseIntegrationTest {
         String contract = send("GET", "/openapi.json", null).body();
 
         assertThat(contract).doesNotContain("/api/feedbacks", "/api/notifications", "FeedbackDto", "FeedbackType", "NotificationDto");
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) IN ('feedbacks', 'notifications')", Long.class)).isZero();
+        assertThat(schemaCount("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE LOWER(TABLE_NAME) IN ('feedbacks', 'notifications')")).isZero();
         assertThat(json.readTree(send("GET", "/api/users", null).body()).size()).isEqualTo(2);
     }
 
@@ -256,7 +252,7 @@ class ApplicationTest extends DatabaseIntegrationTest {
 
     @Test
     void categoryCreationIsUnavailableEvenForAdministrators() throws Exception {
-        Long before = database.queryForObject("SELECT COUNT(*) FROM categories", Long.class);
+        Long before = categoryRepository.count();
         var request = json.createObjectNode().put("name", "Categorie nouă").put("imageUrl", "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/new_category.webp");
 
         assertThat(send("POST", "/api/categories", json.writeValueAsString(request)).statusCode()).isEqualTo(405);
@@ -264,7 +260,7 @@ class ApplicationTest extends DatabaseIntegrationTest {
         request.put("parentId", CATEGORY_PARENT.toString());
 
         assertThat(send("POST", "/api/categories", json.writeValueAsString(request)).statusCode()).isEqualTo(405);
-        assertThat(database.queryForObject("SELECT COUNT(*) FROM categories", Long.class)).isEqualTo(before);
+        assertThat(categoryRepository.count()).isEqualTo(before);
 
         var contract = json.readTree(send("GET", "/openapi.json", null).body());
 
@@ -274,16 +270,14 @@ class ApplicationTest extends DatabaseIntegrationTest {
 
     @Test
     void categoryPagesKeepParentsAndChildrenSeparateAndAlphabetical() throws Exception {
-        database.update("UPDATE categories SET name = ? WHERE id = ?", "Zebră", CATEGORY_PARENT);
-        database.update("UPDATE categories SET name = ? WHERE id = ?", "Șarpe", CATEGORY_CHILD);
+        updateCategory(CATEGORY_PARENT, category -> category.setName("Zebră"));
+        updateCategory(CATEGORY_CHILD, category -> category.setName("Șarpe"));
 
         var request = json.createObjectNode().put("name", "Arici")
                 .put("imageUrl", "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/arici.webp");
 
-        String id = UUID.randomUUID().toString();
-
-        database.update("INSERT INTO categories (id, name, parent_id, image_url) VALUES (?, ?, NULL, ?)",
-                UUID.fromString(id), "Arici", "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/arici.webp");
+        String id = createCategory("Arici",
+                "https://open-hands-learning.s3.us-east-1.amazonaws.com/dev/categories/alfabet/arici.webp").toString();
 
         var roots = json.readTree(send("GET", "/api/categories/filter", null).body());
 
@@ -324,7 +318,7 @@ class ApplicationTest extends DatabaseIntegrationTest {
         assertThat(json.readTree(send("GET", "/api/categories/filter?parentId=" + CATEGORY_CHILD + "&name=%C8%99", null).body()).size()).isZero();
 
         authenticate("ana@example.test");
-        UUID ana = database.queryForObject("SELECT id FROM users WHERE name = 'Ana'", UUID.class);
+        UUID ana = TestIds.USER_ANA;
 
         assertThat(send("PATCH", "/api/categories/favorites/save?userId=" + ana + "&categoryId=" + id, null)
                 .statusCode()).isEqualTo(200);

@@ -1,6 +1,7 @@
 package com.project.ohl.persistence;
 
 import com.project.ohl.DatabaseIntegrationTest;
+import com.project.ohl.adapter.persistence.directory.CountyEntity;
 import com.project.ohl.TestIds;
 import com.project.ohl.application.mapper.CategoryMapper;
 import com.project.ohl.application.model.CategoryDto;
@@ -42,6 +43,27 @@ class PersistenceIntegrationTest extends DatabaseIntegrationTest {
     @Autowired private EntityManagerFactory entityManagerFactory;
     @Autowired private UserService userService;
     @Autowired private PasswordHasher passwords;
+
+    @Test
+    void repositoriesPreserveAssignedIdsAndRecognizeReloadedEntitiesAsExisting() {
+        UUID sourceId = UUID.nameUUIDFromBytes("imported-county".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        var county = new CountyEntity();
+        county.setId(sourceId);
+        county.setName("Imported county");
+        assertThat(county.isNew()).isTrue();
+
+        var saved = countyRepository.saveAndFlush(county);
+        assertThat(saved.getId()).isEqualTo(sourceId);
+        assertThat(saved.isNew()).isFalse();
+
+        var reloaded = countyRepository.findById(sourceId).orElseThrow();
+        assertThat(reloaded.isNew()).isFalse();
+        reloaded.setName("Updated imported county");
+        countyRepository.saveAndFlush(reloaded);
+
+        assertThat(countyRepository.count()).isEqualTo(3);
+        assertThat(countyRepository.findById(sourceId).orElseThrow().getName()).isEqualTo("Updated imported county");
+    }
 
     @Test
     void rejectsSelfParentsAndDescendantParents() {

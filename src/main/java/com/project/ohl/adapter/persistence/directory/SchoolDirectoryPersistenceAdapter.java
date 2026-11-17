@@ -1,44 +1,45 @@
 package com.project.ohl.adapter.persistence.directory;
 
+import com.project.ohl.adapter.persistence.school.SchoolJpaRepository;
+import com.project.ohl.adapter.persistence.user.UserJpaRepository;
 import com.project.ohl.application.port.out.SchoolDirectoryPort;
 import com.project.ohl.domain.model.SchoolDirectory;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import org.springframework.jdbc.core.JdbcTemplate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.project.ohl.domain.model.SchoolDirectory.sourceId;
 
 @Repository
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SchoolDirectoryPersistenceAdapter implements SchoolDirectoryPort {
-    private final JdbcTemplate database;
-
-    public SchoolDirectoryPersistenceAdapter(JdbcTemplate database) {
-        this.database = database;
-    }
+    private final CountyJpaRepository counties;
+    private final CityJpaRepository cities;
+    private final SchoolJpaRepository schools;
+    private final UserJpaRepository users;
+    private final DirectoryJpaImporter importer;
 
     @Override
     public List<SchoolDirectory.County> counties() {
-        return database.query("SELECT id, name FROM counties ORDER BY name, id",
-                (row, index) -> new SchoolDirectory.County(row.getObject(1, UUID.class), row.getString(2)));
+        return counties.findAllByOrderByNameAscIdAsc().stream()
+                .map(row -> new SchoolDirectory.County(row.getId(), row.getName())).toList();
     }
 
     @Override
     public List<SchoolDirectory.City> cities(UUID countyId, String name, int offset, int limit) {
-        return database.query("SELECT id, name, county_id FROM cities WHERE county_id = ? AND lower(name) LIKE ? ESCAPE '!' ORDER BY name, id LIMIT ? OFFSET ?",
-                (row, index) -> new SchoolDirectory.City(row.getObject(1, UUID.class), row.getString(2), row.getObject(3, UUID.class)),
-                countyId, pattern(name), limit, offset);
+        return cities.search(countyId, pattern(name), offset, limit).stream()
+                .map(row -> new SchoolDirectory.City(row.getId(), row.getName(), row.getCounty().getId())).toList();
     }
 
     @Override
     public List<SchoolDirectory.School> schools(UUID cityId, String name, int offset, int limit) {
-        return database.query("SELECT id, name, city_id FROM schools WHERE city_id = ? AND lower(name) LIKE ? ESCAPE '!' ORDER BY name, id LIMIT ? OFFSET ?",
-                (row, index) -> new SchoolDirectory.School(row.getObject(1, UUID.class), row.getString(2), row.getObject(3, UUID.class)),
-                cityId, pattern(name), limit, offset);
+        return schools.search(cityId, pattern(name), offset, limit).stream()
+                .map(row -> new SchoolDirectory.School(row.getId(), row.getName(), row.getCity().getId())).toList();
     }
 
     private static String pattern(String value) {
@@ -48,20 +49,10 @@ public class SchoolDirectoryPersistenceAdapter implements SchoolDirectoryPort {
     @Override
     @Transactional
     public void importDirectory(SchoolDirectory data) {
-        database.execute("SELECT pg_advisory_xact_lock(782134920)");
-        database.batchUpdate("INSERT INTO counties (id, name) VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name WHERE counties.name IS DISTINCT FROM EXCLUDED.name",
-                data.counties().stream().map(row -> new Object[]{row.id(), row.name()}).toList());
-        upsert("cities", "county_id", data.cities().stream().map(row -> new Object[]{row.id(), row.name(), row.countyId()}).toList());
-        upsert("schools", "city_id", data.schools().stream().map(row -> new Object[]{row.id(), row.name(), row.cityId()}).toList());
+        counties.lockImport();
+        importer.importDirectory(data);
         replacePlaceholders();
-        database.execute("ALTER TABLE schools VALIDATE CONSTRAINT schools_city_required");
-    }
-
-    private void upsert(String table, String parent, List<Object[]> rows) {
-        String sql = "INSERT INTO " + table + " (id, name, " + parent + ") VALUES (?, ?, ?) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, "
-                + parent + " = EXCLUDED." + parent + " WHERE " + table + ".name IS DISTINCT FROM EXCLUDED.name OR "
-                + table + "." + parent + " IS DISTINCT FROM EXCLUDED." + parent;
-        for (int start = 0; start < rows.size(); start += 500) database.batchUpdate(sql, rows.subList(start, Math.min(start + 500, rows.size())));
+        counties.validateSchoolCities();
     }
 
     private void replacePlaceholders() {
@@ -70,14 +61,14 @@ public class SchoolDirectoryPersistenceAdapter implements SchoolDirectoryPort {
                 UUID.fromString("d507dc18-15f4-35b8-83ec-548ee8b2ffc6"), new String[]{"Scoala Gimnaziala Nr. 2", "2362101883"},
                 UUID.fromString("e5bfa376-f632-3683-8207-91fc4924cc50"), new String[]{"Scoala Gimnaziala Nr. 3", "2362100534"});
         replacements.forEach((oldId, school) -> {
-            var existing = database.queryForList("SELECT name FROM schools WHERE id = ? FOR UPDATE", String.class, oldId);
+            var existing = schools.findByIdForUpdate(oldId);
             if (existing.isEmpty()) return;
-            if (!school[0].equals(existing.getFirst())) throw new IllegalStateException("Placeholder school has been changed; review its replacement");
+            if (!school[0].equals(existing.orElseThrow().getName())) throw new IllegalStateException("Placeholder school has been changed; review its replacement");
             UUID replacement = sourceId("school", school[1]);
-            if (!Integer.valueOf(1).equals(database.queryForObject("SELECT COUNT(*) FROM schools WHERE id = ?", Integer.class, replacement)))
+            if (!schools.existsById(replacement))
                 throw new IllegalStateException("Replacement school is absent from the government dataset");
-            database.update("UPDATE users SET school_id = ? WHERE school_id = ?", replacement, oldId);
-            database.update("DELETE FROM schools WHERE id = ?", oldId);
+            users.reassignSchool(oldId, schools.getReferenceById(replacement));
+            schools.deleteById(oldId);
         });
     }
 }
