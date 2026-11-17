@@ -17,8 +17,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 public class S3StorageConfig {
     @Bean
     AwsCredentialsProvider s3Credentials(
-            @Value("${AWS_ACCESS_KEY}") String accessKey,
-            @Value("${AWS_SECRET_ACCESS}") String secretKey) {
+            @Value("${AWS_ACCESS_KEY:}") String accessKey,
+            @Value("${AWS_SECRET_ACCESS:}") String secretKey) {
         if (accessKey.isBlank() && secretKey.isBlank()) {
             return DefaultCredentialsProvider.builder().build();
         }
