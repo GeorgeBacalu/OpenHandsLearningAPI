@@ -1,4 +1,6 @@
 FROM eclipse-temurin:25-jdk AS build
+# The wrapper checksum is for the ZIP. Without unzip it switches to a tarball.
+RUN apt-get update && apt-get install -y --no-install-recommends unzip && rm -rf /var/lib/apt/lists/*
 WORKDIR /workspace
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
