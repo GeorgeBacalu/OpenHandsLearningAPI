@@ -5,6 +5,7 @@ import org.springframework.boot.test.context.ConfigDataApplicationContextInitial
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.StandardEnvironment;
+import com.project.ohl.application.service.MediaServiceImpl;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -72,7 +73,7 @@ class S3StorageConfigTest {
     }
 
     @Test
-    void productionConfigurationRejectsPartialCredentials() {
+    void awsConfigurationRejectsPartialCredentials() {
         for (String missing : new String[]{"AWS_ACCESS_KEY", "AWS_SECRET_ACCESS"}) {
             context.withPropertyValues(missing + "=").run(app -> assertThat(app).hasFailed());
         }
@@ -85,5 +86,61 @@ class S3StorageConfigTest {
             assertThat(app.getBean(AwsCredentialsProvider.class)).isInstanceOf(DefaultCredentialsProvider.class);
             assertThat(app.getBean(S3Client.class)).isNotNull();
         });
+    }
+
+    private ApplicationContextRunner production(String profile) {
+        return new ApplicationContextRunner()
+                .withInitializer(app -> {
+                    app.getEnvironment().getPropertySources().remove(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
+                    app.getEnvironment().setActiveProfiles(profile);
+                    new ConfigDataApplicationContextInitializer().initialize(app);
+                })
+                .withPropertyValues("spring.config.location=file:src/main/resources/application.properties",
+                        "DATABASE_JDBC_URL=jdbc:postgresql://neon.example/app",
+                        "NEON_STORAGE_ACCESS_KEY_ID=neon-access", "NEON_STORAGE_SECRET_ACCESS_KEY=neon-secret",
+                        "AWS_ACCESS_KEY=dev-access", "AWS_SECRET_ACCESS=dev-secret")
+                .withBean(PropertySourcesPlaceholderConfigurer.class)
+                .withUserConfiguration(S3StorageConfig.class, S3MediaStorageAdapter.class, MediaServiceImpl.class);
+    }
+
+    @Test
+    void productionAndRenderUseNeonForDatabaseCredentialsClientAndPublicUrls() {
+        for (String profile : new String[]{"prod", "render"}) {
+            production(profile).run(app -> {
+                assertThat(app).hasNotFailed();
+                var environment = app.getEnvironment();
+                assertThat(environment.getActiveProfiles()).contains("prod");
+                assertThat(environment.getRequiredProperty("spring.datasource.url")).isEqualTo("jdbc:postgresql://neon.example/app");
+                assertThat(environment.getRequiredProperty("spring.flyway.enabled")).isEqualTo("true");
+                var credentials = app.getBean(AwsCredentialsProvider.class).resolveCredentials();
+                assertThat(credentials.accessKeyId()).isEqualTo("neon-access");
+                assertThat(credentials.secretAccessKey()).isEqualTo("neon-secret");
+                var client = app.getBean(S3Client.class);
+                String expected = "https://br-red-base-b9fi1yrl.storage.c-7.eu-central-1.aws.neon.tech/openhandslearning-media/prod/categories/alfabet/a/main.webp";
+                assertThat(client.serviceClientConfiguration().region().id()).isEqualTo("eu-central-1");
+                // Resolving this URL exercises the actual SDK endpoint + path-style configuration without network access.
+                assertThat(client.utilities().getUrl(request -> request.bucket("openhandslearning-media")
+                        .key("prod/categories/alfabet/a/main.webp")).toExternalForm()).isEqualTo(expected);
+                assertThat(app.getBean(MediaServiceImpl.class).download("images", "categories/alfabet/a/main.webp").url())
+                        .isEqualTo(expected);
+            });
+        }
+    }
+
+    @Test
+    void productionNeverFallsBackToAwsCredentialsWhenNeonCredentialsAreMissing() {
+        for (String missing : new String[]{"NEON_STORAGE_ACCESS_KEY_ID", "NEON_STORAGE_SECRET_ACCESS_KEY"}) {
+            production("prod").withPropertyValues(missing + "=").run(app -> assertThat(app).hasFailed());
+        }
+        production("render").withPropertyValues("NEON_STORAGE_ACCESS_KEY_ID=", "NEON_STORAGE_SECRET_ACCESS_KEY=")
+                .run(app -> assertThat(app).hasFailed());
+    }
+
+    @Test
+    void customEndpointRejectsInsecureUrlsAndEmbeddedCredentials() {
+        for (String endpoint : new String[]{"http://storage.example", "https://user:password@storage.example", "https://storage.example/?token=value"}) {
+            production("prod").withPropertyValues("app.storage.s3.endpoint=" + endpoint)
+                    .run(app -> assertThat(app).hasFailed());
+        }
     }
 }

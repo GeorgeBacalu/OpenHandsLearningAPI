@@ -4,6 +4,7 @@ import com.project.ohl.application.model.MediaDownload;
 import com.project.ohl.application.port.out.MediaStoragePort;
 import com.project.ohl.domain.exception.MediaStorageException;
 import java.io.InputStream;
+import java.net.URI;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.exception.SdkException;
@@ -16,14 +17,19 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 public class S3MediaStorageAdapter implements MediaStoragePort {
     private final S3Client client;
     private final String bucket;
-    private final String region;
+    private final String publicBaseUrl;
 
     public S3MediaStorageAdapter(S3Client client,
             @Value("${app.storage.s3.bucket}") String bucket,
-            @Value("${app.storage.s3.region}") String region) {
+            @Value("${app.storage.s3.public-base-url}") String publicBaseUrl) {
         this.client = client;
         this.bucket = bucket;
-        this.region = region;
+        URI uri = URI.create(publicBaseUrl);
+        if (!"https".equals(uri.getScheme()) || uri.getHost() == null || uri.getUserInfo() != null
+                || uri.getQuery() != null || uri.getFragment() != null) {
+            throw new IllegalArgumentException("Public media base URL must use HTTPS without credentials, query, or fragment.");
+        }
+        this.publicBaseUrl = publicBaseUrl.replaceAll("/+$", "") + "/";
     }
 
     @Override
@@ -38,8 +44,7 @@ public class S3MediaStorageAdapter implements MediaStoragePort {
 
     @Override
     public MediaDownload download(String key) {
-        return new MediaDownload(key, "https://" + bucket + ".s3." + region
-                + ".amazonaws.com/" + key);
+        return new MediaDownload(key, publicBaseUrl + key);
     }
 
     @Override

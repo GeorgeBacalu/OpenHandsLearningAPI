@@ -19,10 +19,33 @@ be reviewed separately if the whole AWS account must have zero cost.
 ## Runtime configuration
 
 Render builds `Dockerfile`, activates `SPRING_PROFILES_ACTIVE=render`, and checks
-`/openapi.json`. It receives `DATABASE_JDBC_URL`, `POSTGRES_USERNAME`, and
-`POSTGRES_PASSWORD` as private environment variables. Never commit their values.
+`/openapi.json`. The `render` profile includes `prod` through a Spring profile
+group; it only adds Render's internal port setting.
+
+| Profile | Database | Media operations and public URLs |
+| --- | --- | --- |
+| `dev` (default) | Local `open-hands-learning` | AWS S3 `open-hands-learning/dev/` |
+| `prod` | Neon via `DATABASE_JDBC_URL` | Neon `openhandslearning-media/prod/` |
+| `render` | Includes `prod` | Includes `prod` |
+
+The obsolete localhost production database configuration has been removed.
+Production requires these private environment variables:
+
+- `DATABASE_JDBC_URL`, `POSTGRES_USERNAME`, `POSTGRES_PASSWORD`
+- `NEON_STORAGE_ACCESS_KEY_ID`, `NEON_STORAGE_SECRET_ACCESS_KEY`
+
+The Neon storage credential must have `storage:write` scope (which includes
+read). It is used only by the server; never package it in an APK or commit it.
+Production cannot fall back to AWS credentials if the Neon credential is absent.
 The JDBC URL uses the direct Neon endpoint with `sslmode=require`; Flyway runs at
-startup. The application needs no AWS credentials to serve its catalog.
+startup. The deleted local `open-hands-learning-prod` database and AWS S3 `prod/`
+prefix are not used.
+
+Development continues to accept the existing `AWS_ACCESS_KEY` and
+`AWS_SECRET_ACCESS` variables, or the normal AWS credential provider chain when
+both are empty. Production uses an explicit HTTPS endpoint and path-style S3
+requests; development retains AWS's normal endpoint resolution. Both use the
+same streaming storage adapter and administrator-protected upload/delete routes.
 
 The build image installs `unzip` because the Maven wrapper's pinned checksum is
 for the ZIP distribution. Without it, the Unix wrapper chooses a tarball and
@@ -54,8 +77,13 @@ hosted backend.
 
 ```powershell
 .\mvnw.cmd -o package
-.\mvnw.cmd -o '-Dtest=FreeMediaUrlTest,CategoryServiceImplTest,MediaIntegrationTest' test
+.\mvnw.cmd -o '-Dtest=S3StorageConfigTest,MediaIntegrationTest,ProductionMediaIntegrationTest,MediaPathTest' test
 ```
+
+The opt-in `MediaStorageSmokeTest` performs real upload/read/delete round trips
+against both providers when `OHL_MEDIA_STORAGE_SMOKE=true` and both providers'
+credentials are set. It creates only unique `categories/deployment_checks/`
+objects and removes them in cleanup. Ordinary test runs never contact storage.
 
 Check `/openapi.json` and `/api/counties` after deploying, then exercise account
 registration, login, category retrieval, image loading, and MP4 playback using
@@ -67,3 +95,4 @@ Provider limits checked on 2026-11-17:
 - https://render.com/docs/free
 - https://neon.com/pricing
 - https://neon.com/docs/storage/overview
+- https://neon.com/docs/storage/authentication

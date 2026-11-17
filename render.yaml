@@ -14,3 +14,7 @@ services:
         sync: false
       - key: POSTGRES_PASSWORD
         sync: false
+      - key: NEON_STORAGE_ACCESS_KEY_ID
+        sync: false
+      - key: NEON_STORAGE_SECRET_ACCESS_KEY
+        sync: false
