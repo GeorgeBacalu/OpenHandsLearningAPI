@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: openhandslearning-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    healthCheckPath: /openapi.json
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: DATABASE_JDBC_URL
+        sync: false
+      - key: POSTGRES_USERNAME
+        sync: false
+      - key: POSTGRES_PASSWORD
+        sync: false
